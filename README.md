@@ -13,7 +13,7 @@
 It uses typestate to encode the frame of reference and physical units in the type system, so that frame mixups and unit errors become compile-time bugs instead of runtime surprises.  
 
 ## Development
-See `CONTRIBUTING.md` for build, test, and CLI usage commands.
+See `CONTRIBUTING.md` for build, test, and usage.
 
 ## Requirements
 Requirements are documented in `docs/requirements/requirements.md`.

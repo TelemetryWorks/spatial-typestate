@@ -1,0 +1,51 @@
+[package]
+name = "spatial-typestate"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/TelemetryWorks/spatial-typestate"
+homepage = "https://github.com/TelemetryWorks/spatial-typestate"
+description = "A Rust library for type-state enforced 3D coordinate systems, units, and transforms to prevent frame-mixing errors at compile time."
+readme = "README.md"
+keywords = ["typestate", "3d", "spatial", "coordinate-system", "safety"]
+categories = ["science", "aerospace", "mathematics", "embedded"]
+authors = ["TelemetryWorks"]
+exclude = ["/docs", "/.github", "*.png", "*.svg"] # Prevent docs + images bloating crate publish
+
+# Safety-critical posture — avoid accidental features
+[profile.release]
+debug = false
+lto = true
+opt-level = 3
+codegen-units = 1
+panic = "abort"         # Safety-critical expectation: no unwinding in production
+
+[profile.dev]
+panic = "unwind" # easier debugging in development
+
+[features]
+default = ["std"]
+std = []
+no_std = []
+# math backend selection
+nalgebra = ["nalgebra_dep"] 
+glam = ["glam_dep"]
+
+[dependencies]
+# Standard math backends — optional (Allow switching without rewriting library)
+nalgebra_dep = { package = "nalgebra", version = "0.32", optional = true, default-features = false, features = ["alloc"] }
+glam_dep     = { package = "glam",     version = "0.24", optional = true, default-features = false }
+
+# Phantom type state + compile-time utilities (Ideal for typestate + units encoded in type system)
+typenum = "1.17"
+# If we later use const generics for units:
+num-traits = "0.2"
+
+# Error reporting (small footprint)
+thiserror = "1.0"
+
+[dev-dependencies]
+criterion = "0.5"    # Benchmarks (Supports measurable + provable behavior)
+proptest = "1.4"     # Property-based testing (Supports measurable + provable behavior)
+rand = "0.8"
+trybuild = "1.0"

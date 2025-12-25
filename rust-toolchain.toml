@@ -1,0 +1,30 @@
+# ----------------------------------------
+# Rust Toolchain Configuration
+# ----------------------------------------
+# Pins the Rust toolchain version for consistent builds
+# across developer machines and CI (Linux + Windows).
+# ----------------------------------------
+
+[toolchain]
+# Pin a specific Rust release for reproducible CI/dev.
+# You can also use "stable", but pinning a version reduces surprises.
+channel = "1.91.1"
+
+# Common components used in CI and local tooling.
+components = [
+  "rustfmt",
+  "clippy",
+  "rust-src",          # Helpful for some tooling (rust-analyzer, std source)
+  "llvm-tools-preview" # Required for cargo-llvm-cov coverage
+]
+
+# Targets to ensure cross-platform builds are supported.
+# Include Windows MSVC for native Windows GitHub runners.
+targets = [
+  "x86_64-pc-windows-msvc",
+  "x86_64-unknown-linux-gnu",
+  "x86_64-unknown-linux-musl",
+]
+
+# Optional: keep the toolchain minimal and predictable.
+profile = "default"

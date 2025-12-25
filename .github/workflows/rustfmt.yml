@@ -1,0 +1,70 @@
+# ----------------------------------------
+# CI Workflow (RRustfmtust)
+# ----------------------------------------
+# Runs on pull requests to main & develop.
+# Checks:
+# - rustfmt formatting
+# Uses caching to speed up Cargo builds.
+# ----------------------------------------
+name: Rustfmt
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+
+  # Run on PRs targeting main and develop
+  pull_request:
+    branches: [ main, develop ]
+
+  # Run on Pushes targeting main
+  push:
+    branches: [ main ]
+
+  # Weekly scheduled scan (Monday 03:00 UTC)
+  schedule:
+    - cron: '0 3 * * 1'
+
+env:
+  CARGO_TERM_COLOR: always
+  
+jobs:
+  fmt:
+    name: Rustfmt check
+    runs-on: ubuntu-latest
+
+    steps:
+      # ----------------------------------------
+      # Checkout source code
+      # ----------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # ----------------------------------------
+      # Install Rust (rustfmt)
+      # ----------------------------------------
+      - name: Install Rust (rust-toolchain.toml)
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+
+      # ----------------------------------------
+      # Cache Cargo builds
+      # ----------------------------------------
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock', '**/rust-toolchain.toml', '**/rust-toolchain') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      # ----------------------------------------
+      # Run rustfmt
+      # ----------------------------------------
+      - name: cargo fmt --check
+        run: cargo fmt --check

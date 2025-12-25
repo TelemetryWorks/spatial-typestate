@@ -1,0 +1,78 @@
+# ----------------------------------------
+# 🔍 CodeQL Security Scan Workflow
+# ----------------------------------------
+# Runs on every push, pull request, and weekly at 3 AM UTC on Mondays.
+# Scans for security vulnerabilities like:
+# - Unsafe deserialization
+# - Insecure function usage
+# - Insecure file handling
+# ----------------------------------------
+
+name: CodeQL Security Scan
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+
+  # Run on PRs targeting main and develop
+  pull_request:
+    branches: [ main, develop ]
+
+  # Run on Pushes targeting main
+  push:
+    branches: [ main ]
+
+  # Weekly scheduled scan (Monday 03:00 UTC)
+  schedule:
+    - cron: '0 3 * * 1'
+
+jobs:
+  analyze:
+    name: Analyze with CodeQL
+    runs-on: ubuntu-latest
+
+    # ----------------------------------------
+    # 🔐 Set required permissions
+    # ----------------------------------------
+    permissions:
+      security-events: write  # Needed to upload SARIF results to GitHub
+      actions: read           # Read metadata about actions used
+      contents: read          # Required for most scanning workflows
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [rust]  # ✅ Add more languages here if needed (e.g., ['python', 'javascript'])
+
+    steps:
+      # ----------------------------------------
+      # 🧾 Step 1: Checkout source code
+      # ----------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # ----------------------------------------
+      # ⚙️ Step 2: Initialize CodeQL
+      # ----------------------------------------
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+
+          # Optional: Pin a specific CodeQL CLI bundle
+          # tools: https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.21.4/codeql-bundle-linux64.tar.gz
+
+      # ----------------------------------------
+      # 🔄 Step 3 (Optional): Autobuild the project
+      # Uncomment if your project needs to be built before analysis
+      # ----------------------------------------
+      - name: Autobuild project
+        uses: github/codeql-action/autobuild@v4
+
+      # ----------------------------------------
+      # 🧠 Step 4: Run CodeQL Analysis
+      # ----------------------------------------
+      - name: Analyze with CodeQL
+        uses: github/codeql-action/analyze@v4

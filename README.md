@@ -1,13 +1,16 @@
-![Spatial Typestate Banner](https://raw.githubusercontent.com/TelemetryWorks/spatial-typestate/main/images/spatial_typestate_logo.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/TelemetryWorks/spatial-typestate/main/images/spatial_typestate_logo.png" alt="Spatial Typestate Banner" />
+</p>
 
 # Spatial Typestate
-  
-`spatial-typestate` is a Rust library for safety-critical 3D coordinate systems.  
-It uses typestate to encode the frame of reference and physical units in the type system, so that frame mixups and unit errors become compile-time bugs instead of runtime surprises.  
 
 |          |                                                                                                    |
 |----------|----------------------------------------------------------------------------------------------------|
-| Meta     | [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE) |
+| License  | [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)                  |
+
+`spatial-typestate` is a Rust library for safety-critical 3D coordinate systems.  
+  
+It uses typestate to encode the frame of reference and physical units in the type system, so that frame mixups and unit errors become compile-time bugs instead of runtime surprises.  
 
 ## Development
 See `CONTRIBUTING.md` for build, test, and CLI usage commands.

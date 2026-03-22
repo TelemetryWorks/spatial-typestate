@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["typestate", "3d", "spatial", "coordinate-system", "safety"]
 categories = ["science", "aerospace", "mathematics", "embedded"]
 authors = ["TelemetryWorks"]
-exclude = ["/docs", "/.github", "*.png", "*.svg"] # Prevent docs + images bloating crate publish
+exclude = ["/docs", "/.github"] # Prevent docs + workflows bloating crate publish
 
 # Safety-critical posture — avoid accidental features
 [profile.release]

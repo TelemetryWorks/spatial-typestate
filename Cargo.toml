@@ -1,11 +1,11 @@
 [package]
 name = "spatial-typestate"
-version = "0.1.0"
-edition = "2021"
-license = "MIT"
+version = "0.0.1"
+edition = "2024"
 repository = "https://github.com/TelemetryWorks/spatial-typestate"
 homepage = "https://github.com/TelemetryWorks/spatial-typestate"
 description = "A Rust library for type-state enforced 3D coordinate systems, units, and transforms to prevent frame-mixing errors at compile time."
+license = "Apache-2.0"
 readme = "README.md"
 keywords = ["typestate", "3d", "spatial", "coordinate-system", "safety"]
 categories = ["science", "aerospace", "mathematics", "embedded"]

@@ -6,7 +6,7 @@
 
 |          |                                                                                                    |
 |----------|----------------------------------------------------------------------------------------------------|
-| License  | [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)                  |
+| License  | [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)                |
 
 `spatial-typestate` is a Rust library for safety-critical 3D coordinate systems.  
   

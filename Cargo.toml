@@ -1,7 +1,8 @@
 [package]
 name = "spatial-typestate"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2024"
+rust-version = "1.85"
 repository = "https://github.com/TelemetryWorks/spatial-typestate"
 homepage = "https://github.com/TelemetryWorks/spatial-typestate"
 description = "A Rust library for type-state enforced 3D coordinate systems, units, and transforms to prevent frame-mixing errors at compile time."

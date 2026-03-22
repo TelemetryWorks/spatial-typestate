@@ -8,7 +8,8 @@
 
 We have secured this name on `crates.io` while finalizing the initial version.
 
-Please check the [active GitHub repository](https://github.com/TelemetryWorks/spatial-typestate) to see our current progress.
+Please see the GitHub repository for current development status:
+`https://github.com/TelemetryWorks/spatial-typestate`
 
 |          |                                                                                                    |
 |----------|----------------------------------------------------------------------------------------------------|
@@ -16,68 +17,30 @@ Please check the [active GitHub repository](https://github.com/TelemetryWorks/sp
 
 `spatial-typestate` is a Rust library for high-assurance 3D coordinate systems.  
   
-It uses typestate to encode the frame of reference and physical units in the type system, so that frame mixups and unit errors are caught at compile time rather than surfacing later at runtime.  
+It uses typestate to encode frame of reference and physical units in the type system so that frame mixups and unit errors can be caught at compile time instead of surfacing later at runtime.  
 
 > **Warning**
-> This library is designed to support rigorous engineering workflows, but it is not certified for safety-critical, life-critical, or mission-critical use. Users are responsible for independently verifying validation, suitability, and compliance for any deployment context.
+> This library is intended to support rigorous engineering workflows, but it is not certified for safety-critical, life-critical, or mission-critical use. Users are responsible for independently verifying validation, suitability, and compliance for any deployment context.
+
+## Status
+
+This crate is under active development. Initial APIs, module layout, and documentation are still evolving.
 
 ## Development
-See `CONTRIBUTING.md` for build, test, and usage.
+
+See [CONTRIBUTING.md](https://github.com/TelemetryWorks/spatial-typestate/blob/main/CONTRIBUTING.md) for build, test, and contribution guidance.
 
 ## Requirements
-Requirements are documented in `docs/requirements/requirements.md`.
+
+Requirements are documented in [docs/requirements/requirements.md](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/requirements/requirements.md).
 
 ## Limitations & Alternatives
 
-`Spatial Typestate` is currently under heavy development.  More to come in future versions.  
+`spatial-typestate` is currently under heavy development. More details will be added in future versions.
 
-## License
+## Additional Documentation
 
-MIT (See [LICENSE](./LICENSE))
-
-## Project Structure
-```
-spatial-typestate/
-├── Cargo.toml
-├── src/
-│   ├── lib.rs
-│   ├── point.rs
-│   ├── vector.rs
-│   ├── transform.rs
-│   ├── frame.rs
-│   ├── units.rs
-│   ├── quaternion.rs
-│   ├── errors.rs
-│   └── macros.rs        (optional – derive(Frame) etc.)
-├── examples/
-│   ├── basic_usage.rs
-│   ├── aircraft_frames.rs
-│   ├── sensor_alignment.rs
-├── tests/
-│   ├── transform_roundtrip.rs
-│   ├── invariants.rs
-│   ├── fuzz_compat.rs
-├── benches/
-│   ├── transform_bench.rs
-│   ├── point_bench.rs
-├── docs/
-│   ├── SAFETY.md        (why typestate ensures no frame mixups)
-│   ├── DESIGN.md        (formal design notes)
-│   ├── ROADMAP.md
-│   ├── frames.md        (list of built-in frames)
-│   ├── math_conventions.md
-│   ├── coordinate_systems.md
-│   └── diagrams/
-│       ├── axes.svg
-│       ├── transform_sequence.puml
-│       └── oriented_frames.png
-├── .github/
-│   ├── workflows/
-│   │   ├── ci.yml
-│   │   ├── lint.yml
-│   │   ├── fuzz.yml
-│   │   ├── docs.yml
-│   └── ISSUE_TEMPLATE.md
-├── README.md
-└── LICENSE
-```
+- [Project structure](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/PROJECT_STRUCTURE.md)
+- [Safety notes](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/SAFETY.md)
+- [Design notes](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/DESIGN.md)
+- [Roadmap](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/ROADMAP.md)

@@ -1,7 +1,7 @@
 // This file is intentionally incorrect and should FAIL to compile.
 // It is used by trybuild from `tests/type_safety_compile_fail.rs`.
 
-use spatial_typestate::{spatial_frames, Frame, Point3, Transform};
+use spatial_typestate::{spatial_frames, Point3, Transform};
 
 spatial_frames! {
     World,

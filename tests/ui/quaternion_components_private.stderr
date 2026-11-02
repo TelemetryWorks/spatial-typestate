@@ -1,0 +1,23 @@
+error[E0616]: field `x` of struct `UnitQuat` is private
+ --> tests/ui/quaternion_components_private.rs:7:16
+  |
+7 |     quaternion.x = 2.0;
+  |                ^ private field
+
+error[E0616]: field `y` of struct `UnitQuat` is private
+ --> tests/ui/quaternion_components_private.rs:8:16
+  |
+8 |     quaternion.y = 2.0;
+  |                ^ private field
+
+error[E0616]: field `z` of struct `UnitQuat` is private
+ --> tests/ui/quaternion_components_private.rs:9:16
+  |
+9 |     quaternion.z = 2.0;
+  |                ^ private field
+
+error[E0616]: field `w` of struct `UnitQuat` is private
+  --> tests/ui/quaternion_components_private.rs:10:16
+   |
+10 |     quaternion.w = 2.0;
+   |                ^ private field

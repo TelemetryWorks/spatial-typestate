@@ -28,22 +28,6 @@ panic = "unwind" # easier debugging in development
 default = ["std"]
 std = []
 no_std = []
-# math backend selection
-nalgebra = ["nalgebra_dep"] 
-glam = ["glam_dep"]
-
-[dependencies]
-# Standard math backends — optional (Allow switching without rewriting library)
-nalgebra_dep = { package = "nalgebra", version = "0.32", optional = true, default-features = false, features = ["alloc"] }
-glam_dep     = { package = "glam",     version = "0.24", optional = true, default-features = false }
-
-# Phantom type state + compile-time utilities (Ideal for typestate + units encoded in type system)
-typenum = "1.17"
-# If we later use const generics for units:
-num-traits = "0.2"
-
-# Error reporting (small footprint)
-thiserror = "1.0"
 
 [dev-dependencies]
 criterion = "0.5"    # Benchmarks (Supports measurable + provable behavior)

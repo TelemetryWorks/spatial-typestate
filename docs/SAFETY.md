@@ -1,200 +1,80 @@
-# spatial-typestate — Safety and Correctness Notes
+# Safety and correctness notes
 
-This document explains how `spatial-typestate` is designed to support
-safety-critical or high-integrity applications by enforcing key invariants
-at the type level and keeping the implementation auditable.
+This library provides numeric and type-level contracts, not certification,
+physical calibration, or proof of application safety. The authoritative
+[requirements/evidence table](requirements/requirements.md) distinguishes
+implemented checks, unchecked compatibility behavior, and documented limits.
 
-The goal is **not** to claim formal certification, but to make it easier to
-reason about correctness and to integrate this crate into a larger safety case.
+## Frame and unit labels
 
----
+Frame labels constrain function inputs/outputs. Manual traits on Point3,
+Vector3, Transform and UnitQuat do not require derives on marker structs; Debug
+retains phantom labels without storing marker values. Types cannot verify that
+coordinates or transformations describe their claimed physical frames.
+Quantity<U> only adds/subtracts matching units; its value is public. Points,
+vectors, and translations still store raw f64 without dimensional units.
 
-## 1. Scope and Intent
+## Quaternion validity
 
-`spatial-typestate` focuses on three core concerns:
+Private components and removal of unchecked construction preserve the checked
+normalization boundary. All finite nonzero components, including MAX and
+subnormals, are accepted; any non-finite component or signed all-zero input is
+rejected. Max-absolute scaling bounds the squared norm to [1,4]. Normalized
+components are finite, with unit length within rounding error; tiny relative
+components can round to signed zero. Const getters/identity are read-only.
+Equality is component equality, not equivalence under the antipodal q/-q rotation.
 
-1. **Frame correctness**  
-   Prevent using a coordinate expressed in one frame (e.g. body) as though it
-   were expressed in another frame (e.g. world).
+Std builds retain native sqrt. No-std builds use a private eight-step Newton
+helper with no new dependency. See [convergence and tolerances](math_conventions.md).
+Tests compare boundaries/adjacent values, 100,001 dense values and 100,000 sampled
+bit patterns to a test-only native sqrt reference. Error/residual allowances
+are 4*EPSILON and 8*EPSILON relative; complete normalized squared-norm checks
+allow 32*EPSILON. These are regression allowances, not a correctly-rounded sqrt
+claim. Linking std as a test reference does not enable the library's std feature.
 
-2. **Unit correctness (early scaffolding)**  
-   Tag scalar quantities with unit types (e.g. meters, radians) so that
-   incompatible quantities cannot be combined without explicit intent.
+## Rigid workflow and raw compatibility
 
-3. **Rotation correctness**  
-   Represent rotations with a `UnitQuat<F>` type that encodes the frame and
-   enforces the unit-length invariant at construction time.
+Checked rotation/translation construction uses right-handed active Hamilton
+(x,y,z,w) algebra with p_To=R*p_From+t_To. R columns are source basis vectors in
+To, and t is source origin in To. UnitQuat<To> does not label From; the caller
+asserts the physical relationship. A finite target translation is required.
 
-The crate is intended as a **building block** for systems where misinterpreting
-coordinate frames or units could contribute to unsafe behavior.
+Raw matrices remain public/unvalidated. Point application and composition use
+the affine mapping defined by their first three rows and ignore bottom rows;
+there is no perspective division. Composition order is next(first(p)); vectors
+receive no translation. These methods are unchecked and may overflow or yield
+NaN for general inputs. Pure finite translations can overflow to signed infinity
+but cannot yield NaN under ordinary IEEE 754 arithmetic. The compatibility helper
+checks exact per-axis expected sums, including infinity sign (zero signs compare
+numerically equal); it is not a configured or continuous cargo-fuzz setup.
 
----
+Checked inversion rejects all non-finite entries and finite matrices failing
+an affine-row, rotation-row orthonormality, or determinant +1 check, each with
+absolute tolerance 1e-10. Output is R^T,-R^T*t with canonical bottom row;
+non-finite output/intermediate translation overflow returns NonFinite. Scaling,
+shear, reflection and projective inputs are not silently transposed as inverses.
+Proper 180-degree rotations are accepted. Near-rigid inputs within tolerance are
+accepted, so error scales with input magnitude and long-chain drift. No uniform
+absolute roundtrip bound exists. Bounded properties use point range [-100,100],
+translation range [-1000,1000], and absolute 1e-9 roundtrip/composition tolerance.
 
-## 2. Type-Level Invariants
+## Errors, allocation, and unsafe code
 
-### 2.1 Frames
+SpatialError is an exhaustive concrete enum implementing Display/core Error.
+NonRigidTransform is an API addition: downstream exhaustive matches must adapt.
+Constructors/math use stack values, no allocation, boxing, formatting, virtual
+error calls, global state or I/O. Callers may format errors or choose Box<dyn
+Error>; tests exercise both. Source review and #![deny(unsafe_code)] enforce the
+library constraint, not downstream code. No measured speed or timing guarantee
+is claimed. There are no normal dependencies in any runtime feature configuration;
+dev-only testing tools remain separate. No libm or backend switch is retained.
 
-Each coordinate frame is represented by a **zero-sized marker type** that
-implements the `Frame` trait:
+## Validation limits
 
-```rust
-use spatial_typestate::Frame;
-
-pub struct World;
-pub struct Body;
-pub struct Sensor;
-
-impl Frame for World {}
-impl Frame for Body {}
-impl Frame for Sensor {}
-```
-The following types encode the frame in a generic parameter:  
-* `Point3<F>` — point in frame F
-* `Vector3<F>` — vector in frame F
-* `Transform<From, To>` — transform from From to To
-* `UnitQuat<F>` — rotation associated with frame F
-
-This guarantees at compile time:
-* A `Transform<From, To>` can only be applied to `Point3<From>`.
-* The result is always `Point3<To>`.
-* You cannot accidentally pass a `Point3<Body>` where a `Point3<World>` is expected without an explicit, visible conversion.
-
-**Design principle**: frame mixups are prevented by construction, not by runtime checks.
-
-### 2.2 Units
-
-The `units` module introduces a generic scalar type:
-```rust
-Quantity<U>
-```
-where `U` is a marker unit type (e.g. `Meters`, `Radians`, `Degrees`).
-
-Key properties:
-* Only quantities with the **same unit type** can be added or subtracted.
-* The underlying numeric type is `f64`, but it is only accessible via `Quantity::get()`.
-
-At this stage, units are intentionally minimal. The design leaves room for future:
-* Multiplication and division that produce derived units.
-* Explicit conversion functions between related units (e.g. radians/degrees).
-
-### 2.3 Rotations
-`UnitQuat<F>` represents a unit quaternion associated with frame `F`.
-
-Construction is controlled via:
-* `UnitQuat::try_from_components(x, y, z, w)` — normalizes inputs, rejects:
-  * non-finite values (`NaN`/`inf`) → `SpatialError::NonFinite`
-  * zero-norm inputs → `SpatialError::ZeroNormQuaternion`
-* `UnitQuat::identity()` — returns the identity rotation.
-
-This ensures the **unit-length invariant** is enforced at the API boundary.
-
----
-
-## 3. Implementation Constraints
-
-To keep the crate auditable and predictable:
-
-1. **No `unsafe` in the public API**
-The crate is compiled with:
-```rust
-#![deny(unsafe_code)]
-```
-Any future `unsafe` (if ever introduced) must be:
-* isolated in a clearly documented internal module, and
-* justified with an explicit safety contract.
-
-2. **`no_std` support**
-
-The crate is `no_std`-friendly:
-* Controlled by `std` / `no_std` feature flags.
-* Core functionality avoids heap allocations and OS dependencies.
-
-3. **No panics in normal operation**
-* Constructors that can fail (`UnitQuat::try_from_components`) return
-  `Result<_, SpatialError>` rather than panicking.
-* Panics are reserved for programmer errors and test assertions.
-
-4. **Deterministic behavior**
-* All math functions are pure: same inputs → same outputs.
-* No global mutable state, I/O, randomness, or time dependencies.
-
----
-
-## 4. Testing and Verification Strategy
-
-### 4.1 Unit Tests
-
-The `tests/` directory includes:
-* `basic_usage.rs` — smoke tests for the main types.
-* `transform_roundtrip.rs` — checks transform identity and translation behavior.
-* `quaternion_invariants.rs` — validates unit quaternion invariants.
-* `fuzz_compat.rs` — a small harness suitable for fuzzing.
-
-These tests are intended to be easy to read and map directly to documented
-invariants.
-
-### 4.2 Property-Based Tests
-
-Using `proptest`, we test properties that must hold for **all** inputs within a range:
-* `transform_proptest.rs`:
-  * Identity transform preserves any point.
-  * A translation transform adds its offset for any point.
-* `quaternion_proptest.rs`:
-  * `UnitQuat::try_from_components` produces a unit quaternion for any finite, non-degenerate input.
-* `quantity_proptest.rs`:
-  * Addition and subtraction behave as expected for quantities:
-    * `(a + b) - b == a`
-    * `0` is the additive identity.
-
-### 4.3 Compile-Fail Tests
-
-Using `trybuild`, we include **compile-fail** tests to ensure that certain misuses **never compile**:
-* `tests/ui/frame_mismatch.rs`:
-  * Attempts to apply `Transform<World, Body>` to `Point3<Body>`.
-  * The test asserts that this code fails to compile due to a type mismatch.
-
-This verifies the typestate design is enforced by the Rust compiler itself, not just by conventions.
-
-### 4.4 Fuzzing Integration (Planned)
-
-The `fuzz_compat` harness is designed to be reused in `cargo-fuzz` targets.
-The intent is to:
-* Continuously fuzz the transform and quaternion operations.
-* Assert the absence of panics and NaNs for finite inputs.
-* Complement unit/property tests with coverage over “weird” edge cases.
-
----
-
-## 5. Limitations and Non-Goals (Current State)
-
-* The crate does **not** yet provide:
-  * Full physical unit algebra (derived units, conversion graphs, etc.).
-  * A formal proof of correctness or certification under standards such as DO-178C or ISO 26262.
-  * Domain-specific safety logic (e.g., envelope protection, collision detection).
-* The math backend is currently a simple 4×4 matrix representation. Future versions may integrate with crates like nalgebra or glam, but the typestate-based API is intended to remain stable.
-
----
-
-## 6. Roadmap for Stronger Assurance
-
-Planned directions for improving safety and verifiability:
-1. **Backend abstraction**
-  * Wrap a well-tested math library behind a stable trait layer.
-2. **Extended units system**
-  * Derived units (e.g., velocity, acceleration).
-  * Explicit, auditable conversions (e.g., degrees ↔ radians).
-3. **Stronger invariants for transforms**
-  * Checked constructors for rigid transforms (orthonormal rotations).
-4. **Increased property and fuzz coverage**
-  * Composition properties: `(T2 ∘ T1).apply(p) == T2.apply(T1.apply(p))`.
-  * Roundtrip tests with inverses once they are implemented.
-5. **Documentation alignment with safety standards**
-  * Mapping crate guarantees to generic safety concepts:
-    * "Preventing class of misuse by design."
-    * "Type-level encoding of state and invariants."
-  * Example patterns for integrating this crate into a larger safety case.
-
----
-
-`spatial-typestate` is deliberately small and explicit, with most complexity pushed into the type system rather than runtime code. This design is meant to make it easier to review, reason about, and trust in systems where frame and unit mistakes are unacceptable.
-
+See [CONTRIBUTING.md](../CONTRIBUTING.md) for exact checks and CI scope. Independent
+analytic axis/rational rotation oracles, noncommuting composition, invalid raw
+inverse cases, 1,024 bounded workflow samples, extreme quaternions, bare markers,
+and reviewed compile-fail fixtures provide regression evidence, not formal proof.
+Runtime suites exercise std/no-std/all-features on the host. MSRV/pin and target
+checks are compile-only unless explicitly stated; wasm/thumb/MUSL compilation
+does not prove embedded execution, timing, calibration, or certification.

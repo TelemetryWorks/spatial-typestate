@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+ --> tests/ui/vector_frame_mismatch.rs:6:36
+  |
+6 |     let _ = transform.apply_vector(wrong);
+  |                       ------------ ^^^^^ expected `Vector3<Sensor>`, found `Vector3<World>`
+  |                       |
+  |                       arguments to this method are incorrect
+  |
+  = note: expected struct `Vector3<Sensor>`
+             found struct `Vector3<World>`
+note: method defined here
+ --> src/transform.rs
+  |
+  |     pub fn apply_vector(&self, vector: Vector3<From>) -> Vector3<To> {
+  |            ^^^^^^^^^^^^

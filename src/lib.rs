@@ -49,13 +49,17 @@
 //!
 //! # Feature flags
 //!
-//! - `std` (default): enables integration with the Rust standard library.
-//! - `no_std`: builds without `std`. Disable default features and enable this:
+//! - `std` (default): uses native square root for quaternion normalization.
+//! - `no_std`: marker for builds without `std`. Disable default features:
 //!   ```toml
-//!   spatial-typestate = { version = "0.1", default-features = false, features = ["no_std"] }
+//!   spatial-typestate = { version = "0.0.2", default-features = false, features = ["no_std"] }
 //!   ```
-//! - `nalgebra`: (planned) use `nalgebra` as an underlying math backend.
-//! - `glam`: (planned) use `glam` as an underlying math backend.
+//!   The absence of `std` selects a private bounded Newton square root; the
+//!   marker alone does not disable default features. No normal dependencies
+//!   are enabled in any runtime feature configuration.
+//!
+//! These are the only runtime features. Previously unused optional backend
+//! switches were removed; every runtime feature set has no normal dependencies.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(unsafe_code)]

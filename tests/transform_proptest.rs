@@ -5,7 +5,7 @@
 //! - A pure translation adds its offset for any point.
 
 use proptest::prelude::*;
-use spatial_typestate::{spatial_frames, Frame, Point3, Transform};
+use spatial_typestate::{Point3, Transform, spatial_frames};
 
 spatial_frames! {
     World,

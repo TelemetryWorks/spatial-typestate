@@ -1,0 +1,63 @@
+# Contributing
+
+Use a branch and pull request; merge with a merge commit. Preserve others' work.
+Do not publish, bump versions, or release unless assigned. The development pin
+is 1.91.1 and the MSRV is 1.85 (edition 2024); do not silently change them.
+Full runtime/UI snapshots use Rust 1.99.0 to keep diagnostics reproducible.
+
+## Local checks
+
+Use installed toolchains only; local tool/target installation needs permission.
+On this Windows checkout, use the explicit selectors below to avoid accidental
+rustup synchronization. Set two workers and run one heavy build/test at a time.
+
+```powershell
+$env:CARGO_BUILD_JOBS = '2'
+cargo +1.99.0-x86_64-pc-windows-msvc fetch --locked
+cargo +1.99.0-x86_64-pc-windows-msvc fmt --all -- --check
+cargo +1.99.0-x86_64-pc-windows-msvc test --locked --jobs 2 -- --test-threads=2
+cargo +1.99.0-x86_64-pc-windows-msvc test --locked --jobs 2 --no-default-features --features no_std -- --test-threads=2
+cargo +1.99.0-x86_64-pc-windows-msvc test --locked --jobs 2 --all-features -- --test-threads=2
+cargo +1.99.0-x86_64-pc-windows-msvc clippy --locked --all-targets --all-features --jobs 2 -- -D warnings
+cargo +1.99.0-x86_64-pc-windows-msvc clippy --locked --all-targets --no-default-features --features no_std --jobs 2 -- -D warnings
+$env:RUSTDOCFLAGS = '-D warnings'
+cargo +1.99.0-x86_64-pc-windows-msvc doc --locked --no-deps --all-features --jobs 2
+cargo +1.99.0-x86_64-pc-windows-msvc doc --locked --no-deps --no-default-features --features no_std --jobs 2
+cargo +1.99.0-x86_64-pc-windows-msvc run --locked --jobs 2 --example sensor_alignment
+cargo +1.99.0-x86_64-pc-windows-msvc run --locked --jobs 2 --no-default-features --features no_std --example sensor_alignment
+```
+
+Run focused checks during fixes, then the full default/no_std/all-features suites
+once after relevant edits. Repeat only for a new failure or changed code.
+Include release builds and installed target cross-builds for math/no-std changes.
+Explicit installed 1.85.0/1.91.1 library checks use cargo +TOOLCHAIN check --lib
+--locked --jobs 2 with default, --no-default-features, and --all-features.
+Older compiler UI snapshots are not the baseline. Review every trybuild stderr
+for the intended error before adding/updating it; do not bless warning failures.
+
+## CI scope
+
+[ci.yml](.github/workflows/ci.yml) runs Linux/Windows full runtime/UI/doc suites
+and the real example in default/no_std/all-features modes on 1.99.0. Linux jobs
+check formatting, both Clippy/doc configurations with warnings denied, release
+builds, and empty normal dependency graphs. Compatibility jobs compile the library
+on 1.85.0 and 1.91.1 in three feature modes. A runner installs thumbv7em-none-eabihf
+and cross-builds no_std thumb debug/release and MUSL library code; these are compile-only checks, not device runtime validation.
+CI target installation is authorized on the runner, not on the local computer.
+The redundant old Clippy/Rustfmt files were consolidated. Existing CodeQL/Sonar
+service configurations are separate; no new secrets/services were enabled.
+Local PASS does not claim remote CI PASS; wait for the actual GitHub checks.
+
+## Review and maintenance
+
+- Reproduce bugs first and add independent oracles/properties for math changes.
+- Keep [requirements/evidence](docs/requirements/requirements.md) accurate.
+- Update [CHANGELOG.md](CHANGELOG.md) under Unreleased and the canonical
+  [remaining-work roadmap](docs/ROADMAP.md) when relevant; avoid duplicate plans.
+- All runtime features are dependency-free. Backend feature names were removed;
+  do not reintroduce unused dependency switches or silently change no-std policy.
+- Check git diff --check, Markdown links, and final scope. Keep the warning policy.
+- Pull before push (rebase linear unpushed commits, no-rebase if they include a
+  merge). Never force-push, rewrite published history, or discard others' edits.
+- No tool attribution in repository artifacts, commit messages, or PRs. Never
+  commit credentials/.env files. There is no installed hook or release automation.

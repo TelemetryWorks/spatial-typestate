@@ -1,0 +1,8 @@
+error[E0308]: mismatched types
+ --> tests/ui/unit_mismatch.rs:5:22
+  |
+5 |     let _ = length + angle;
+  |                      ^^^^^ expected `Quantity<Meters>`, found `Quantity<Radians>`
+  |
+  = note: expected struct `Quantity<Meters>`
+             found struct `Quantity<Radians>`

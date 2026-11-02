@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/ui/frame_mismatch.rs:17:41
+   |
+17 |     let _bad = t_world_body.apply_point(p_body);
+   |                             ----------- ^^^^^^ expected `Point3<World>`, found `Point3<Body>`
+   |                             |
+   |                             arguments to this method are incorrect
+   |
+   = note: expected struct `Point3<World>`
+              found struct `Point3<Body>`
+note: method defined here
+  --> src/transform.rs
+   |
+   |     pub fn apply_point(&self, p: Point3<From>) -> Point3<To> {
+   |            ^^^^^^^^^^^

@@ -4,9 +4,7 @@
 //! - Ensure the crate compiles and links as an external dependency.
 //! - Exercise the core types: Frame, Point3, Vector3, Transform, Quantity.
 
-use spatial_typestate::{
-    spatial_frames, Frame, Meters, Point3, Quantity, Radians, Transform, Vector3,
-};
+use spatial_typestate::{Meters, Point3, Quantity, Radians, Transform, Vector3, spatial_frames};
 
 spatial_frames! {
     World,

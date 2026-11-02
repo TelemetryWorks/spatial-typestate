@@ -1,6 +1,6 @@
 //! Macros for ergonomic frame definitions.
 //!
-//! The [`spatial_frames!`] macro lets you declare multiple zero-sized frame
+//! The [`spatial_frames!`](crate::spatial_frames) macro lets you declare multiple zero-sized frame
 //! types and implement [`crate::Frame`] for each in one go.
 //!
 //! ```rust
@@ -21,7 +21,7 @@
 //! // etc...
 //! ```
 
-/// Define one or more zero-sized frame types and implement [`Frame`] for them.
+/// Define one or more zero-sized frame types and implement [`Frame`](crate::Frame) for them.
 ///
 /// Each identifier becomes a `pub struct` with `Debug`, `Clone`, `Copy`,
 /// `PartialEq`, and `Eq` derives, plus an implementation of [`crate::Frame`].

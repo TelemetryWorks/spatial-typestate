@@ -1,20 +1,46 @@
 //! Error types for spatial-typestate operations.
 //!
-//! This module currently defines a single [`SpatialError`] enum, which will
-//! grow as more checked operations are added (e.g. for unit quaternions,
-//! normalization failures, invalid inputs, etc.).
+//! [`SpatialError`] supports ordinary formatting and error propagation without
+//! allocating or boxing errors inside the library.
+//!
+//! Callers can propagate the concrete error, or choose their own boxed error:
+//! ```
+//! use spatial_typestate::{UnitQuat, spatial_frames};
+//! spatial_frames! { World }
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     let quaternion = UnitQuat::<World>::try_from_components(0.0, 0.0, 0.0, 2.0)?;
+//!     assert_eq!(quaternion.w(), 1.0);
+//!     Ok(())
+//! }
+//! ```
+
+use core::fmt;
 
 /// Errors that may occur in spatial operations.
 ///
-/// The set of error variants is intentionally small for now, but can be
-/// extended in a backward-compatible way as the library evolves.
+/// This enum is exhaustive. Adding variants can break downstream exhaustive
+/// matches and must be treated as a public API change.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SpatialError {
     /// A value was non-finite (`NaN` or infinite) where a finite number was
     /// required.
     NonFinite,
 
-    /// A quaternion with zero (or effectively zero) norm was provided where
-    /// a unit quaternion was required.
+    /// All four quaternion components were zero (positive or negative zero).
+    /// Finite nonzero components, including subnormals, are accepted.
     ZeroNormQuaternion,
+    /// A finite raw transform failed affine or proper rigid-rotation checks.
+    NonRigidTransform,
 }
+
+impl fmt::Display for SpatialError {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        formatter.write_str(match self {
+            Self::NonFinite => "non-finite component",
+            Self::ZeroNormQuaternion => "all quaternion components are zero",
+            Self::NonRigidTransform => "transform is not a proper rigid affine transform",
+        })
+    }
+}
+
+impl core::error::Error for SpatialError {}

@@ -69,6 +69,7 @@ pub struct Quantity<U: Unit> {
 impl<U: Unit> Quantity<U> {
     /// Construct a new quantity with unit `U`.
     #[inline]
+    #[must_use]
     pub const fn new(value: f64) -> Self {
         Self {
             value,
@@ -78,6 +79,7 @@ impl<U: Unit> Quantity<U> {
 
     /// Access the raw numeric value.
     #[inline]
+    #[must_use]
     pub const fn get(self) -> f64 {
         self.value
     }

@@ -23,7 +23,6 @@ use crate::frame::Frame;
 ///
 /// By encoding the frame in the type parameter `F`, the compiler enforces that
 /// you cannot accidentally mix points from different frames.
-#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Point3<F: Frame> {
     /// X coordinate in frame `F`.
     pub x: f64,
@@ -37,6 +36,7 @@ pub struct Point3<F: Frame> {
 impl<F: Frame> Point3<F> {
     /// Construct a new point in the frame `F`.
     #[inline]
+    #[must_use]
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self {
             x,
@@ -44,5 +44,31 @@ impl<F: Frame> Point3<F> {
             z,
             _frame: PhantomData,
         }
+    }
+}
+
+impl<F: Frame> Copy for Point3<F> {}
+
+impl<F: Frame> Clone for Point3<F> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<F: Frame> core::fmt::Debug for Point3<F> {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        formatter
+            .debug_struct("Point3")
+            .field("x", &self.x)
+            .field("y", &self.y)
+            .field("z", &self.z)
+            .field("_frame", &self._frame)
+            .finish()
+    }
+}
+
+impl<F: Frame> PartialEq for Point3<F> {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
     }
 }

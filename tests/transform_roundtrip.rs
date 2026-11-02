@@ -3,7 +3,7 @@
 //! Focus here is on simple but meaningful properties rather than exhaustive
 //! property-based tests (those can live in separate files).
 
-use spatial_typestate::{spatial_frames, Frame, Point3, Transform};
+use spatial_typestate::{Point3, Transform, spatial_frames};
 
 spatial_frames! {
     World,
@@ -36,4 +36,28 @@ fn simple_translation_on_point() {
     assert!(approx_eq(q.x, 11.0, 1e-12));
     assert!(approx_eq(q.y, 2.0, 1e-12));
     assert!(approx_eq(q.z, 3.0, 1e-12));
+}
+
+#[test]
+fn raw_matrix_uses_rows_and_last_column_translation() {
+    let transform = Transform::<World, Body>::from_matrix([
+        [0.0, -1.0, 0.0, 10.0],
+        [1.0, 0.0, 0.0, 20.0],
+        [0.0, 0.0, 1.0, 30.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ]);
+    let point = Point3::<World>::new(2.0, 3.0, 4.0);
+    let result: Point3<Body> = transform.apply_point(point);
+    assert!(approx_eq(result.x, 7.0, f64::EPSILON));
+    assert!(approx_eq(result.y, 22.0, f64::EPSILON));
+    assert!(approx_eq(result.z, 34.0, f64::EPSILON));
+
+    // Raw inputs are not validated; apply_point ignores the bottom row and
+    // performs no projective division, even when that row is not affine.
+    let mut raw = transform.matrix;
+    raw[3] = [f64::NAN, f64::INFINITY, -2.0, 0.0];
+    let unchecked = Transform::<World, Body>::from_matrix(raw).apply_point(point);
+    assert!(approx_eq(unchecked.x, result.x, f64::EPSILON));
+    assert!(approx_eq(unchecked.y, result.y, f64::EPSILON));
+    assert!(approx_eq(unchecked.z, result.z, f64::EPSILON));
 }

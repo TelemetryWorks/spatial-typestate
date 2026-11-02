@@ -1,0 +1,103 @@
+name: Rust quality gates
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_BUILD_JOBS: 2
+  RUST_TEST_THREADS: 2
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test:
+    name: Tests (${{ matrix.os }}, ${{ matrix.mode.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        mode:
+          - name: default
+            flags: ''
+          - name: no-std
+            flags: --no-default-features --features no_std
+          - name: all-features
+            flags: --all-features
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master, verified
+        with:
+          toolchain: '1.99.0'
+      - name: Runtime, property, UI snapshot, and doc tests
+        run: cargo +1.99.0 test --locked --jobs 2 ${{ matrix.mode.flags }} -- --test-threads=2
+      - name: Execute sensor-aircraft-world example
+        run: cargo +1.99.0 run --locked --jobs 2 ${{ matrix.mode.flags }} --example sensor_alignment
+
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        flags: ['--all-features', '--no-default-features --features no_std']
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master, verified
+        with:
+          toolchain: '1.99.0'
+          components: rustfmt, clippy
+      - run: cargo +1.99.0 fmt --all -- --check
+      - run: cargo +1.99.0 clippy --locked --all-targets --jobs 2 ${{ matrix.flags }} -- -D warnings
+      - run: cargo +1.99.0 doc --locked --no-deps --jobs 2 ${{ matrix.flags }}
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - run: cargo +1.99.0 build --locked --release --jobs 2 ${{ matrix.flags }}
+      - name: No normal dependencies in any runtime feature set
+        run: |
+          test "$(cargo +1.99.0 tree --locked --all-features --edges normal --prefix none --target all | wc -l)" -eq 1
+          test "$(cargo +1.99.0 tree --locked --no-default-features --edges normal --prefix none --target all | wc -l)" -eq 1
+
+  compatibility:
+    name: Library (${{ matrix.rust }}, ${{ matrix.flags }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        rust: ['1.85.0', '1.91.1']
+        flags: ['', '--no-default-features', '--all-features']
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master, verified
+        with:
+          toolchain: ${{ matrix.rust }}
+      - run: cargo +${{ matrix.rust }} check --lib --locked --jobs 2 ${{ matrix.flags }}
+
+  bare-metal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master, verified
+        with:
+          toolchain: '1.99.0'
+          targets: thumbv7em-none-eabihf, x86_64-unknown-linux-musl
+      - run: cargo +1.99.0 build --lib --locked --no-default-features --features no_std --target thumbv7em-none-eabihf --jobs 2
+      - run: cargo +1.99.0 build --lib --release --locked --no-default-features --features no_std --target thumbv7em-none-eabihf --jobs 2
+
+      - name: MUSL library compile-only coverage
+        run: cargo +1.99.0 build --lib --locked --no-default-features --features no_std --target x86_64-unknown-linux-musl --jobs 2

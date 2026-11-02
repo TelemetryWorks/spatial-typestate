@@ -23,7 +23,6 @@ use crate::frame::Frame;
 /// Vectors typically represent directions, velocities, or differences between
 /// points. As with [`crate::point::Point3`], the frame is encoded in the
 /// type parameter.
-#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vector3<F: Frame> {
     /// X component in frame `F`.
     pub x: f64,
@@ -37,6 +36,7 @@ pub struct Vector3<F: Frame> {
 impl<F: Frame> Vector3<F> {
     /// Construct a new vector in the frame `F`.
     #[inline]
+    #[must_use]
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self {
             x,
@@ -44,5 +44,31 @@ impl<F: Frame> Vector3<F> {
             z,
             _frame: PhantomData,
         }
+    }
+}
+
+impl<F: Frame> Copy for Vector3<F> {}
+
+impl<F: Frame> Clone for Vector3<F> {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl<F: Frame> core::fmt::Debug for Vector3<F> {
+    fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        formatter
+            .debug_struct("Vector3")
+            .field("x", &self.x)
+            .field("y", &self.y)
+            .field("z", &self.z)
+            .field("_frame", &self._frame)
+            .finish()
+    }
+}
+
+impl<F: Frame> PartialEq for Vector3<F> {
+    fn eq(&self, other: &Self) -> bool {
+        self.x == other.x && self.y == other.y && self.z == other.z
     }
 }

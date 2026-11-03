@@ -168,3 +168,13 @@ The isolated prototype preserves per-input/output checks and numeric/type
 contracts. Preparation error timing and any batch API remain decisions for
 review; no production API is added. New measurements remain separate from the
 original study, with environment load, variance and codegen limitations recorded.
+
+## Python batches
+
+An unreleased, separate [Python package](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/PYTHON-GUIDE.md)
+provides Rust-owned point/vector batches, immutable runtime frame/unit metadata,
+checked transforms/quaternions, and bytes-backed memoryviews without a Python
+object per row. Python frame/unit errors are runtime checks, not Rust compile-time
+proofs. Import/export copy, the binding requires std/CPython, and custom Rust unit
+markers are not exposed. The core remains dependency-free/no_std-capable.
+No PyPI publication or native performance parity is implied.

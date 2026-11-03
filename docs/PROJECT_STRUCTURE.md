@@ -27,3 +27,15 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for commands and actual CI scope.
   invariants and caller-local comparison; not exported by src/lib.rs.
 - [borrowed_validation.md](borrowed_validation.md): design, separate measurements,
   operation-specific scopes and pending production API/batch decisions.
+
+## Python boundary
+
+- python/native/: separate cdylib/core path dependency and own Cargo.lock; PyO3
+  is absent from the core graph. lib.rs owns metadata/buffers, kernels.rs calls
+  checked core methods in Python-free row loops.
+- python/src/spatial_typestate/: thin re-exports, type stubs and py.typed.
+- python/tests/: installed-wheel stdlib contracts plus optional NumPy interop.
+- python/benchmark.py: bounded release-wheel latency/RSS runner.
+- .github/workflows/python.yml: wheel/source-build/import/runtime gates.
+- docs/PYTHON-GUIDE.md, python_design.md and python/2026-11-03/: contracts, losses
+  and actual host measurement evidence. No public package release is implied.

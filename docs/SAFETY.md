@@ -97,3 +97,16 @@ and reviewed compile-fail fixtures provide regression evidence, not formal proof
 Runtime suites exercise std/no-std/all-features on the host. MSRV/pin and target
 checks are compile-only unless explicitly stated; wasm/thumb/MUSL compilation
 does not prove embedded execution, timing, calibration, or certification.
+
+## Python boundary
+
+The [Python binding](PYTHON-GUIDE.md) replaces compile-time labels with immutable
+runtime identities and a closed unit set. It calls checked core math, but it
+allocates, copies, requires std/CPython and cannot expose Rust generics/lifetimes
+as Python proofs. Import snapshots only while attached; callers must exclude
+external/native writes during copying. Detached loops never read foreign buffers.
+Viewed batches retain both Rust data and cached immutable bytes. Atomic return
+means no partial output publication, not an atomic snapshot of a concurrent
+producer. Earlier nonfinite import rejection, first-error row indices, empty raw
+mapping behavior and all other limitations are specified in the guide. No safety
+certification, OOM recovery guarantee or performance parity follows from FFI.

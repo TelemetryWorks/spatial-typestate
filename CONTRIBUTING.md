@@ -89,3 +89,17 @@ Target it with `--filter '^amortization' --analysis-threads 2` in a fresh named
 study; retain the original evidence. Lifetime/private-state/frame/unit fixtures
 must fail for their intended compiler errors on Windows and Linux. Do not infer
 an approved API or batch failure policy from the fixture loop protocol.
+
+## Python package
+
+The [Python guide](docs/PYTHON-GUIDE.md) defines the separate crate/lock, local
+venv commands, native parity and installed-wheel tests. The core's zero-normal-
+dependency requirement does not apply to the isolated binding; it still applies
+to all core runtime configurations. Only /python was added to the core package
+exclude list; math, features and root lock are unchanged by the binding task.
+[python.yml](.github/workflows/python.yml) builds/tests release abi3 wheels on
+Linux/Windows with CPython 3.11/3.14, SHA-pinned actions and hash-locked build/test
+tools. It tests without optional NumPy first, then with NumPy; Linux 3.11 also
+rebuilds/installs the source distribution using the preinstalled build backend.
+No upload/release job or new external service is introduced. Review all returned
+PR checks, including external status contexts, before merge. Timing is not a gate.

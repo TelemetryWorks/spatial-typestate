@@ -11,7 +11,7 @@ readme = "README.md"
 keywords = ["typestate", "3d", "spatial", "coordinate-system", "safety"]
 categories = ["science", "aerospace", "mathematics", "embedded"]
 authors = ["TelemetryWorks"]
-exclude = ["/docs", "/.github"] # Prevent docs + workflows bloating crate publish
+exclude = ["/docs", "/.github", "/python"] # Keep docs, workflows and the separate Python project out of core archives
 
 # Safety-critical posture — avoid accidental features
 [profile.release]

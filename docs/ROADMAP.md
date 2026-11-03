@@ -12,6 +12,10 @@ These are proposals, not implemented guarantees or promises of a release date.
   current host results are not universal timing guarantees.
 - Expand domain examples and populate diagrams where they explain a concrete workflow.
 - Validate execution and timing on real embedded hardware; CI cross-compilation alone is insufficient.
+- Extend the [Python batch binding](PYTHON-GUIDE.md) only for concrete needs;
+  custom units, broader platforms/free-threaded Python and public wheel publication
+  are not yet supported. Preserve explicit runtime checks, copies and lost-guarantee
+  documentation. [Host observations](python/2026-11-03/README.md) are not native parity.
 - Define release/versioning and compatibility policy before the next published release.
 
 Current behavior is specified in [requirements](requirements/requirements.md).

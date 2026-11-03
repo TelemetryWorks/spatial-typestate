@@ -1,0 +1,6382 @@
+{
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "machine": "AMD64",
+  "wheel_extension_sha256": "ca19c19dfea3d33ac425c3e4a34309ca7226aabed388f3f377a0b8f36ef9f1bc",
+  "timer": "namespace(implementation='QueryPerformanceCounter()', monotonic=True, adjustable=False, resolution=1e-07)",
+  "pid": 23080,
+  "results": [
+    {
+      "stage": "import",
+      "rows": 0,
+      "samples_ns": [
+        432.0068359375,
+        434.9853515625,
+        433.935546875,
+        455.908203125,
+        427.1484375,
+        422.9248046875,
+        437.890625,
+        425.537109375,
+        422.216796875
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1769500,
+        1781700,
+        1777400,
+        1867400,
+        1749600,
+        1732300,
+        1793600,
+        1743000,
+        1729400
+      ],
+      "cold_single_call_ns": 2000,
+      "calibration": [
+        {
+          "iterations": 1000,
+          "total_ns": 494000
+        },
+        {
+          "iterations": 4049,
+          "total_ns": 1858800
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1773800
+        }
+      ],
+      "median_ns": 432.0068359375,
+      "min_ns": 422.216796875,
+      "max_ns": 455.908203125,
+      "peak_rss_before_bytes": 20795392,
+      "peak_rss_after_bytes": 20897792,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "apply",
+      "rows": 0,
+      "samples_ns": [
+        308.837890625,
+        301.025390625,
+        308.0322265625,
+        302.001953125,
+        312.1826171875,
+        310.9375,
+        305.2734375,
+        290.6982421875,
+        287.7197265625
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1265000,
+        1233000,
+        1261700,
+        1237000,
+        1278700,
+        1273600,
+        1250400,
+        1190700,
+        1178500
+      ],
+      "cold_single_call_ns": 12900,
+      "calibration": [
+        {
+          "iterations": 156,
+          "total_ns": 49200
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1227000
+        }
+      ],
+      "median_ns": 305.2734375,
+      "min_ns": 287.7197265625,
+      "max_ns": 312.1826171875,
+      "peak_rss_before_bytes": 20873216,
+      "peak_rss_after_bytes": 20910080,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "convert",
+      "rows": 0,
+      "samples_ns": [
+        295.9716796875,
+        291.50390625,
+        293.603515625,
+        292.5537109375,
+        295.01953125,
+        295.166015625,
+        303.7841796875,
+        302.1728515625,
+        304.1259765625
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1212300,
+        1194000,
+        1202600,
+        1198300,
+        1208400,
+        1209000,
+        1244300,
+        1237700,
+        1245700
+      ],
+      "cold_single_call_ns": 2200,
+      "calibration": [
+        {
+          "iterations": 910,
+          "total_ns": 269200
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1257300
+        }
+      ],
+      "median_ns": 295.166015625,
+      "min_ns": 291.50390625,
+      "max_ns": 304.1259765625,
+      "peak_rss_before_bytes": 20520960,
+      "peak_rss_after_bytes": 20578304,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "export_first",
+      "rows": 0,
+      "samples_ns": [
+        1202.8977272727273,
+        1266.25,
+        1277.3863636363637,
+        1288.8636363636363,
+        1253.125,
+        1250.284090909091,
+        1217.0454545454545,
+        1308.5227272727273,
+        1195.625
+      ],
+      "iterations_per_sample": [
+        1760,
+        1760,
+        1760,
+        1760,
+        1760,
+        1760,
+        1760,
+        1760,
+        1760
+      ],
+      "sample_totals_ns": [
+        2117100,
+        2228600,
+        2248200,
+        2268400,
+        2205500,
+        2200500,
+        2142000,
+        2303000,
+        2104300
+      ],
+      "cold_single_call_ns": 14100,
+      "calibration": [
+        {
+          "iterations": 142,
+          "total_ns": 206300
+        },
+        {
+          "iterations": 1377,
+          "total_ns": 1693800
+        },
+        {
+          "iterations": 1626,
+          "total_ns": 1869400
+        },
+        {
+          "iterations": 1740,
+          "total_ns": 1977400
+        },
+        {
+          "iterations": 1760,
+          "total_ns": 2018200
+        }
+      ],
+      "median_ns": 1253.125,
+      "min_ns": 1195.625,
+      "max_ns": 1308.5227272727273,
+      "peak_rss_before_bytes": 21065728,
+      "peak_rss_after_bytes": 21118976,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3525,
+      "repeat": 1
+    },
+    {
+      "stage": "export_cached",
+      "rows": 0,
+      "samples_ns": [
+        1052.6119402985075,
+        994.0298507462686,
+        1054.3176972281449,
+        1040.724946695096,
+        1067.4840085287847,
+        1047.3880597014925,
+        1044.8827292110875,
+        1070.5756929637528,
+        1036.407249466951
+      ],
+      "iterations_per_sample": [
+        1876,
+        1876,
+        1876,
+        1876,
+        1876,
+        1876,
+        1876,
+        1876,
+        1876
+      ],
+      "sample_totals_ns": [
+        1974700,
+        1864800,
+        1977900,
+        1952400,
+        2002600,
+        1964900,
+        1960200,
+        2008400,
+        1944300
+      ],
+      "cold_single_call_ns": 3300,
+      "calibration": [
+        {
+          "iterations": 607,
+          "total_ns": 678400
+        },
+        {
+          "iterations": 1790,
+          "total_ns": 1910000
+        },
+        {
+          "iterations": 1875,
+          "total_ns": 1999300
+        },
+        {
+          "iterations": 1876,
+          "total_ns": 2012100
+        }
+      ],
+      "median_ns": 1047.3880597014925,
+      "min_ns": 994.0298507462686,
+      "max_ns": 1070.5756929637528,
+      "peak_rss_before_bytes": 20815872,
+      "peak_rss_after_bytes": 20873216,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3493,
+      "repeat": 1
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 0,
+      "samples_ns": [
+        2153.9140022050715,
+        2160.198456449835,
+        2226.4608599779494,
+        2250.1653803748623,
+        2305.733186328556,
+        2251.047409040794,
+        2266.923925027563,
+        2180.154355016538,
+        2175.4134509371556
+      ],
+      "iterations_per_sample": [
+        907,
+        907,
+        907,
+        907,
+        907,
+        907,
+        907,
+        907,
+        907
+      ],
+      "sample_totals_ns": [
+        1953600,
+        1959300,
+        2019400,
+        2040900,
+        2091300,
+        2041700,
+        2056100,
+        1977400,
+        1973100
+      ],
+      "cold_single_call_ns": 28800,
+      "calibration": [
+        {
+          "iterations": 70,
+          "total_ns": 175800
+        },
+        {
+          "iterations": 797,
+          "total_ns": 1785000
+        },
+        {
+          "iterations": 893,
+          "total_ns": 1969200
+        },
+        {
+          "iterations": 907,
+          "total_ns": 2084900
+        }
+      ],
+      "median_ns": 2226.4608599779494,
+      "min_ns": 2153.9140022050715,
+      "max_ns": 2305.733186328556,
+      "peak_rss_before_bytes": 20926464,
+      "peak_rss_after_bytes": 20959232,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3589,
+      "repeat": 1
+    },
+    {
+      "stage": "import",
+      "rows": 1,
+      "samples_ns": [
+        544.4318181818181,
+        577.0738636363636,
+        552.9545454545455,
+        698.0113636363636,
+        600.9375,
+        544.8579545454545,
+        549.0625,
+        559.4886363636364,
+        546.9318181818181
+      ],
+      "iterations_per_sample": [
+        3520,
+        3520,
+        3520,
+        3520,
+        3520,
+        3520,
+        3520,
+        3520,
+        3520
+      ],
+      "sample_totals_ns": [
+        1916400,
+        2031300,
+        1946400,
+        2457000,
+        2115300,
+        1917900,
+        1932700,
+        1969400,
+        1925200
+      ],
+      "cold_single_call_ns": 1700,
+      "calibration": [
+        {
+          "iterations": 1177,
+          "total_ns": 687900
+        },
+        {
+          "iterations": 3423,
+          "total_ns": 1944900
+        },
+        {
+          "iterations": 3520,
+          "total_ns": 2015200
+        }
+      ],
+      "median_ns": 552.9545454545455,
+      "min_ns": 544.4318181818181,
+      "max_ns": 698.0113636363636,
+      "peak_rss_before_bytes": 20738048,
+      "peak_rss_after_bytes": 20774912,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "apply",
+      "rows": 1,
+      "samples_ns": [
+        387.3046875,
+        381.4453125,
+        378.90625,
+        381.0302734375,
+        383.59375,
+        376.0498046875,
+        390.283203125,
+        387.255859375,
+        378.3203125
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1586400,
+        1562400,
+        1552000,
+        1560700,
+        1571200,
+        1540300,
+        1598600,
+        1586200,
+        1549600
+      ],
+      "cold_single_call_ns": 13600,
+      "calibration": [
+        {
+          "iterations": 148,
+          "total_ns": 57100
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1560500
+        }
+      ],
+      "median_ns": 381.4453125,
+      "min_ns": 376.0498046875,
+      "max_ns": 390.283203125,
+      "peak_rss_before_bytes": 20705280,
+      "peak_rss_after_bytes": 20742144,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "convert",
+      "rows": 1,
+      "samples_ns": [
+        380.0048828125,
+        384.27734375,
+        378.125,
+        404.8828125,
+        385.693359375,
+        369.482421875,
+        367.96875,
+        368.115234375,
+        372.0947265625
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1556500,
+        1574000,
+        1548800,
+        1658400,
+        1579800,
+        1513400,
+        1507200,
+        1507800,
+        1524100
+      ],
+      "cold_single_call_ns": 2700,
+      "calibration": [
+        {
+          "iterations": 741,
+          "total_ns": 293600
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1531400
+        }
+      ],
+      "median_ns": 378.125,
+      "min_ns": 367.96875,
+      "max_ns": 404.8828125,
+      "peak_rss_before_bytes": 20570112,
+      "peak_rss_after_bytes": 20627456,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "export_first",
+      "rows": 1,
+      "samples_ns": [
+        1343.0889033095393,
+        1727.579493835172,
+        1326.2167423750811,
+        1281.440622972096,
+        1314.4711226476313,
+        1314.7955872809864,
+        1386.0480207657365,
+        1294.6787800129787,
+        1308.306294613887
+      ],
+      "iterations_per_sample": [
+        1541,
+        1541,
+        1541,
+        1541,
+        1541,
+        1541,
+        1541,
+        1541,
+        1541
+      ],
+      "sample_totals_ns": [
+        2069700,
+        2662200,
+        2043700,
+        1974700,
+        2025600,
+        2026100,
+        2135900,
+        1995100,
+        2016100
+      ],
+      "cold_single_call_ns": 15800,
+      "calibration": [
+        {
+          "iterations": 127,
+          "total_ns": 228500
+        },
+        {
+          "iterations": 1112,
+          "total_ns": 1881900
+        },
+        {
+          "iterations": 1182,
+          "total_ns": 1534900
+        },
+        {
+          "iterations": 1541,
+          "total_ns": 2803100
+        }
+      ],
+      "median_ns": 1314.7955872809864,
+      "min_ns": 1281.440622972096,
+      "max_ns": 1727.579493835172,
+      "peak_rss_before_bytes": 21381120,
+      "peak_rss_after_bytes": 21409792,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 2430,
+      "python_traced_peak_bytes": 3582,
+      "repeat": 1
+    },
+    {
+      "stage": "export_cached",
+      "rows": 1,
+      "samples_ns": [
+        1103.4391534391534,
+        986.984126984127,
+        1100.3174603174602,
+        1070.3703703703704,
+        1036.3492063492063,
+        1037.7777777777778,
+        1053.6507936507937,
+        1038.4656084656085,
+        1075.2380952380952
+      ],
+      "iterations_per_sample": [
+        1890,
+        1890,
+        1890,
+        1890,
+        1890,
+        1890,
+        1890,
+        1890,
+        1890
+      ],
+      "sample_totals_ns": [
+        2085500,
+        1865400,
+        2079600,
+        2023000,
+        1958700,
+        1961400,
+        1991400,
+        1962700,
+        2032200
+      ],
+      "cold_single_call_ns": 3300,
+      "calibration": [
+        {
+          "iterations": 607,
+          "total_ns": 668200
+        },
+        {
+          "iterations": 1817,
+          "total_ns": 1970500
+        },
+        {
+          "iterations": 1845,
+          "total_ns": 1953200
+        },
+        {
+          "iterations": 1890,
+          "total_ns": 2006700
+        }
+      ],
+      "median_ns": 1053.6507936507937,
+      "min_ns": 986.984126984127,
+      "max_ns": 1103.4391534391534,
+      "peak_rss_before_bytes": 20729856,
+      "peak_rss_after_bytes": 20762624,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3557,
+      "repeat": 1
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 1,
+      "samples_ns": [
+        2348.3981693363844,
+        2442.3340961098397,
+        2491.6475972540047,
+        2430.549199084668,
+        2417.0480549199083,
+        2344.508009153318,
+        2359.1533180778033,
+        2404.805491990847,
+        2362.242562929062
+      ],
+      "iterations_per_sample": [
+        874,
+        874,
+        874,
+        874,
+        874,
+        874,
+        874,
+        874,
+        874
+      ],
+      "sample_totals_ns": [
+        2052500,
+        2134600,
+        2177700,
+        2124300,
+        2112500,
+        2049100,
+        2061900,
+        2101800,
+        2064600
+      ],
+      "cold_single_call_ns": 28200,
+      "calibration": [
+        {
+          "iterations": 71,
+          "total_ns": 190100
+        },
+        {
+          "iterations": 747,
+          "total_ns": 1738100
+        },
+        {
+          "iterations": 860,
+          "total_ns": 1969600
+        },
+        {
+          "iterations": 874,
+          "total_ns": 2016000
+        }
+      ],
+      "median_ns": 2404.805491990847,
+      "min_ns": 2344.508009153318,
+      "max_ns": 2491.6475972540047,
+      "peak_rss_before_bytes": 20844544,
+      "peak_rss_after_bytes": 20901888,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 2481,
+      "python_traced_peak_bytes": 3665,
+      "repeat": 1
+    },
+    {
+      "stage": "import",
+      "rows": 64,
+      "samples_ns": [
+        749.9087924115287,
+        753.3381977380518,
+        750.8938343670193,
+        751.0397665085735,
+        752.3166727471726,
+        734.2575702298432,
+        754.3232396935425,
+        733.5279095220723,
+        729.3323604523896
+      ],
+      "iterations_per_sample": [
+        2741,
+        2741,
+        2741,
+        2741,
+        2741,
+        2741,
+        2741,
+        2741,
+        2741
+      ],
+      "sample_totals_ns": [
+        2055500,
+        2064900,
+        2058200,
+        2058600,
+        2062100,
+        2012600,
+        2067600,
+        2010600,
+        1999100
+      ],
+      "cold_single_call_ns": 2400,
+      "calibration": [
+        {
+          "iterations": 834,
+          "total_ns": 815100
+        },
+        {
+          "iterations": 2047,
+          "total_ns": 1771500
+        },
+        {
+          "iterations": 2312,
+          "total_ns": 1734300
+        },
+        {
+          "iterations": 2667,
+          "total_ns": 1946200
+        },
+        {
+          "iterations": 2741,
+          "total_ns": 2007600
+        }
+      ],
+      "median_ns": 750.8938343670193,
+      "min_ns": 729.3323604523896,
+      "max_ns": 754.3232396935425,
+      "peak_rss_before_bytes": 20897792,
+      "peak_rss_after_bytes": 20987904,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "apply",
+      "rows": 64,
+      "samples_ns": [
+        778.7069299264422,
+        797.4835462640341,
+        767.9442508710802,
+        770.1509872241579,
+        766.8602400309718,
+        770.073557878436,
+        768.6411149825784,
+        779.3650793650794,
+        777.5842044134727
+      ],
+      "iterations_per_sample": [
+        2583,
+        2583,
+        2583,
+        2583,
+        2583,
+        2583,
+        2583,
+        2583,
+        2583
+      ],
+      "sample_totals_ns": [
+        2011400,
+        2059900,
+        1983600,
+        1989300,
+        1980800,
+        1989100,
+        1985400,
+        2013100,
+        2008500
+      ],
+      "cold_single_call_ns": 15200,
+      "calibration": [
+        {
+          "iterations": 132,
+          "total_ns": 124400
+        },
+        {
+          "iterations": 2123,
+          "total_ns": 1941000
+        },
+        {
+          "iterations": 2188,
+          "total_ns": 1722800
+        },
+        {
+          "iterations": 2541,
+          "total_ns": 1976100
+        },
+        {
+          "iterations": 2572,
+          "total_ns": 1992100
+        },
+        {
+          "iterations": 2583,
+          "total_ns": 2014300
+        }
+      ],
+      "median_ns": 770.1509872241579,
+      "min_ns": 766.8602400309718,
+      "max_ns": 797.4835462640341,
+      "peak_rss_before_bytes": 20680704,
+      "peak_rss_after_bytes": 20795392,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "convert",
+      "rows": 64,
+      "samples_ns": [
+        680.3517078119716,
+        676.9699019276294,
+        691.748393642205,
+        671.7619208657424,
+        678.6946229286439,
+        676.056814338857,
+        673.4528238079134,
+        665.6070341562395,
+        687.2167737571864
+      ],
+      "iterations_per_sample": [
+        2957,
+        2957,
+        2957,
+        2957,
+        2957,
+        2957,
+        2957,
+        2957,
+        2957
+      ],
+      "sample_totals_ns": [
+        2011800,
+        2001800,
+        2045500,
+        1986400,
+        2006900,
+        1999100,
+        1991400,
+        1968200,
+        2032100
+      ],
+      "cold_single_call_ns": 2900,
+      "calibration": [
+        {
+          "iterations": 690,
+          "total_ns": 565700
+        },
+        {
+          "iterations": 2440,
+          "total_ns": 1871600
+        },
+        {
+          "iterations": 2608,
+          "total_ns": 1764000
+        },
+        {
+          "iterations": 2957,
+          "total_ns": 2000300
+        }
+      ],
+      "median_ns": 676.9699019276294,
+      "min_ns": 665.6070341562395,
+      "max_ns": 691.748393642205,
+      "peak_rss_before_bytes": 20586496,
+      "peak_rss_after_bytes": 20627456,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "export_first",
+      "rows": 64,
+      "samples_ns": [
+        2460.294117647059,
+        2679.901960784314,
+        2951.1029411764707,
+        2831.8627450980393,
+        3480.1470588235293,
+        2788.4803921568628,
+        2461.151960784314,
+        2834.3137254901962,
+        2600.9803921568628
+      ],
+      "iterations_per_sample": [
+        816,
+        816,
+        816,
+        816,
+        816,
+        816,
+        816,
+        816,
+        816
+      ],
+      "sample_totals_ns": [
+        2007600,
+        2186800,
+        2408100,
+        2310800,
+        2839800,
+        2275400,
+        2008300,
+        2312800,
+        2122400
+      ],
+      "cold_single_call_ns": 17300,
+      "calibration": [
+        {
+          "iterations": 116,
+          "total_ns": 350300
+        },
+        {
+          "iterations": 663,
+          "total_ns": 1625800
+        },
+        {
+          "iterations": 816,
+          "total_ns": 2154800
+        }
+      ],
+      "median_ns": 2788.4803921568628,
+      "min_ns": 2460.294117647059,
+      "max_ns": 3480.1470588235293,
+      "peak_rss_before_bytes": 23846912,
+      "peak_rss_after_bytes": 23846912,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 3993,
+      "python_traced_peak_bytes": 5177,
+      "repeat": 1
+    },
+    {
+      "stage": "export_cached",
+      "rows": 64,
+      "samples_ns": [
+        1063.0776794493609,
+        1034.0216322517208,
+        991.1504424778761,
+        1041.8387413962635,
+        1042.9203539823009,
+        1005.9980334316617,
+        1039.9213372664701,
+        1035.7915437561455,
+        1053.5398230088495
+      ],
+      "iterations_per_sample": [
+        2034,
+        2034,
+        2034,
+        2034,
+        2034,
+        2034,
+        2034,
+        2034,
+        2034
+      ],
+      "sample_totals_ns": [
+        2162300,
+        2103200,
+        2016000,
+        2119100,
+        2121300,
+        2046200,
+        2115200,
+        2106800,
+        2142900
+      ],
+      "cold_single_call_ns": 2700,
+      "calibration": [
+        {
+          "iterations": 741,
+          "total_ns": 733900
+        },
+        {
+          "iterations": 2020,
+          "total_ns": 1996700
+        },
+        {
+          "iterations": 2024,
+          "total_ns": 1990600
+        },
+        {
+          "iterations": 2034,
+          "total_ns": 2006700
+        }
+      ],
+      "median_ns": 1039.9213372664701,
+      "min_ns": 991.1504424778761,
+      "max_ns": 1063.0776794493609,
+      "peak_rss_before_bytes": 20561920,
+      "peak_rss_after_bytes": 20676608,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3608,
+      "repeat": 1
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 64,
+      "samples_ns": [
+        3471.4814814814813,
+        3306.6666666666665,
+        3023.5185185185187,
+        3051.6666666666665,
+        3117.222222222222,
+        3040.0,
+        3074.074074074074,
+        3038.3333333333335,
+        3006.4814814814813
+      ],
+      "iterations_per_sample": [
+        540,
+        540,
+        540,
+        540,
+        540,
+        540,
+        540,
+        540,
+        540
+      ],
+      "sample_totals_ns": [
+        1874600,
+        1785600,
+        1632700,
+        1647900,
+        1683300,
+        1641600,
+        1660000,
+        1640700,
+        1623500
+      ],
+      "cold_single_call_ns": 31400,
+      "calibration": [
+        {
+          "iterations": 64,
+          "total_ns": 256500
+        },
+        {
+          "iterations": 500,
+          "total_ns": 1852800
+        },
+        {
+          "iterations": 540,
+          "total_ns": 2081500
+        }
+      ],
+      "median_ns": 3051.6666666666665,
+      "min_ns": 3006.4814814814813,
+      "max_ns": 3471.4814814814813,
+      "peak_rss_before_bytes": 20795392,
+      "peak_rss_after_bytes": 20832256,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 3993,
+      "python_traced_peak_bytes": 5209,
+      "repeat": 1
+    },
+    {
+      "stage": "import",
+      "rows": 4096,
+      "samples_ns": [
+        11050.54945054945,
+        11293.406593406593,
+        11059.34065934066,
+        11058.241758241758,
+        11023.076923076924,
+        11015.934065934065,
+        11059.89010989011,
+        11485.164835164835,
+        11098.901098901099
+      ],
+      "iterations_per_sample": [
+        182,
+        182,
+        182,
+        182,
+        182,
+        182,
+        182,
+        182,
+        182
+      ],
+      "sample_totals_ns": [
+        2011200,
+        2055400,
+        2012800,
+        2012600,
+        2006200,
+        2004900,
+        2012900,
+        2090300,
+        2020000
+      ],
+      "cold_single_call_ns": 61700,
+      "calibration": [
+        {
+          "iterations": 33,
+          "total_ns": 475300
+        },
+        {
+          "iterations": 139,
+          "total_ns": 1533200
+        },
+        {
+          "iterations": 182,
+          "total_ns": 2000800
+        }
+      ],
+      "median_ns": 11059.34065934066,
+      "min_ns": 11015.934065934065,
+      "max_ns": 11485.164835164835,
+      "peak_rss_before_bytes": 21176320,
+      "peak_rss_after_bytes": 21217280,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "apply",
+      "rows": 4096,
+      "samples_ns": [
+        25831.25,
+        25345.0,
+        26490.0,
+        25448.75,
+        25341.25,
+        25337.5,
+        25298.75,
+        26148.75,
+        25405.0
+      ],
+      "iterations_per_sample": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "sample_totals_ns": [
+        2066500,
+        2027600,
+        2119200,
+        2035900,
+        2027300,
+        2027000,
+        2023900,
+        2091900,
+        2032400
+      ],
+      "cold_single_call_ns": 94800,
+      "calibration": [
+        {
+          "iterations": 22,
+          "total_ns": 726000
+        },
+        {
+          "iterations": 61,
+          "total_ns": 1543000
+        },
+        {
+          "iterations": 80,
+          "total_ns": 2016100
+        }
+      ],
+      "median_ns": 25405.0,
+      "min_ns": 25298.75,
+      "max_ns": 26490.0,
+      "peak_rss_before_bytes": 21282816,
+      "peak_rss_after_bytes": 21323776,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "convert",
+      "rows": 4096,
+      "samples_ns": [
+        19140.0,
+        19113.333333333332,
+        19910.47619047619,
+        19211.428571428572,
+        19658.095238095237,
+        19014.285714285714,
+        19217.14285714286,
+        19159.04761904762,
+        19102.85714285714
+      ],
+      "iterations_per_sample": [
+        105,
+        105,
+        105,
+        105,
+        105,
+        105,
+        105,
+        105,
+        105
+      ],
+      "sample_totals_ns": [
+        2009700,
+        2006900,
+        2090600,
+        2017200,
+        2064100,
+        1996500,
+        2017800,
+        2011700,
+        2005800
+      ],
+      "cold_single_call_ns": 143000,
+      "calibration": [
+        {
+          "iterations": 14,
+          "total_ns": 326000
+        },
+        {
+          "iterations": 86,
+          "total_ns": 1647500
+        },
+        {
+          "iterations": 105,
+          "total_ns": 2049800
+        }
+      ],
+      "median_ns": 19159.04761904762,
+      "min_ns": 19014.285714285714,
+      "max_ns": 19910.47619047619,
+      "peak_rss_before_bytes": 21168128,
+      "peak_rss_after_bytes": 21209088,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "export_first",
+      "rows": 4096,
+      "samples_ns": [
+        103425.0,
+        96960.0,
+        96385.0,
+        94520.0,
+        98710.0,
+        108360.0,
+        91500.0,
+        91095.0,
+        91450.0
+      ],
+      "iterations_per_sample": [
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20,
+        20
+      ],
+      "sample_totals_ns": [
+        2068500,
+        1939200,
+        1927700,
+        1890400,
+        1974200,
+        2167200,
+        1830000,
+        1821900,
+        1829000
+      ],
+      "cold_single_call_ns": 138700,
+      "calibration": [
+        {
+          "iterations": 15,
+          "total_ns": 1573000
+        },
+        {
+          "iterations": 20,
+          "total_ns": 2003000
+        }
+      ],
+      "median_ns": 96385.0,
+      "min_ns": 91095.0,
+      "max_ns": 108360.0,
+      "peak_rss_before_bytes": 24629248,
+      "peak_rss_after_bytes": 24629248,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 100761,
+      "python_traced_peak_bytes": 101977,
+      "repeat": 1
+    },
+    {
+      "stage": "export_cached",
+      "rows": 4096,
+      "samples_ns": [
+        1147.746835443038,
+        1087.2911392405063,
+        1038.126582278481,
+        1048.4556962025317,
+        1044.7088607594937,
+        983.5443037974684,
+        1013.367088607595,
+        1009.7215189873418,
+        971.746835443038
+      ],
+      "iterations_per_sample": [
+        1975,
+        1975,
+        1975,
+        1975,
+        1975,
+        1975,
+        1975,
+        1975,
+        1975
+      ],
+      "sample_totals_ns": [
+        2266800,
+        2147400,
+        2050300,
+        2070700,
+        2063300,
+        1942500,
+        2001400,
+        1994200,
+        1919200
+      ],
+      "cold_single_call_ns": 3100,
+      "calibration": [
+        {
+          "iterations": 646,
+          "total_ns": 661400
+        },
+        {
+          "iterations": 1954,
+          "total_ns": 1979300
+        },
+        {
+          "iterations": 1975,
+          "total_ns": 2002500
+        }
+      ],
+      "median_ns": 1038.126582278481,
+      "min_ns": 971.746835443038,
+      "max_ns": 1147.746835443038,
+      "peak_rss_before_bytes": 21020672,
+      "peak_rss_after_bytes": 21078016,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3608,
+      "repeat": 1
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 4096,
+      "samples_ns": [
+        52282.05128205128,
+        53923.07692307692,
+        52548.717948717946,
+        52407.692307692305,
+        52561.53846153846,
+        53076.92307692308,
+        52579.48717948718,
+        52758.97435897436,
+        53264.10256410256
+      ],
+      "iterations_per_sample": [
+        39,
+        39,
+        39,
+        39,
+        39,
+        39,
+        39,
+        39,
+        39
+      ],
+      "sample_totals_ns": [
+        2039000,
+        2103000,
+        2049400,
+        2043900,
+        2049900,
+        2070000,
+        2050600,
+        2057600,
+        2077300
+      ],
+      "cold_single_call_ns": 328500,
+      "calibration": [
+        {
+          "iterations": 7,
+          "total_ns": 481800
+        },
+        {
+          "iterations": 30,
+          "total_ns": 1646400
+        },
+        {
+          "iterations": 37,
+          "total_ns": 1929600
+        },
+        {
+          "iterations": 39,
+          "total_ns": 2011100
+        }
+      ],
+      "median_ns": 52579.48717948718,
+      "min_ns": 52282.05128205128,
+      "max_ns": 53923.07692307692,
+      "peak_rss_before_bytes": 21196800,
+      "peak_rss_after_bytes": 21319680,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 100761,
+      "python_traced_peak_bytes": 101977,
+      "repeat": 1
+    },
+    {
+      "stage": "import",
+      "rows": 65536,
+      "samples_ns": [
+        777650.0,
+        706000.0,
+        658600.0,
+        709900.0,
+        736925.0,
+        693025.0,
+        713475.0,
+        748225.0,
+        749525.0
+      ],
+      "iterations_per_sample": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "sample_totals_ns": [
+        3110600,
+        2824000,
+        2634400,
+        2839600,
+        2947700,
+        2772100,
+        2853900,
+        2992900,
+        2998100
+      ],
+      "cold_single_call_ns": 621900,
+      "calibration": [
+        {
+          "iterations": 4,
+          "total_ns": 2909700
+        }
+      ],
+      "median_ns": 713475.0,
+      "min_ns": 658600.0,
+      "max_ns": 777650.0,
+      "peak_rss_before_bytes": 27115520,
+      "peak_rss_after_bytes": 27115520,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "apply",
+      "rows": 65536,
+      "samples_ns": [
+        816066.6666666666,
+        798066.6666666666,
+        807766.6666666666,
+        817866.6666666666,
+        795633.3333333334,
+        801533.3333333334,
+        775866.6666666666,
+        818066.6666666666,
+        801466.6666666666
+      ],
+      "iterations_per_sample": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "sample_totals_ns": [
+        2448200,
+        2394200,
+        2423300,
+        2453600,
+        2386900,
+        2404600,
+        2327600,
+        2454200,
+        2404400
+      ],
+      "cold_single_call_ns": 745900,
+      "calibration": [
+        {
+          "iterations": 3,
+          "total_ns": 2430900
+        }
+      ],
+      "median_ns": 801533.3333333334,
+      "min_ns": 775866.6666666666,
+      "max_ns": 818066.6666666666,
+      "peak_rss_before_bytes": 26996736,
+      "peak_rss_after_bytes": 26996736,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "convert",
+      "rows": 65536,
+      "samples_ns": [
+        789200.0,
+        783000.0,
+        778266.6666666666,
+        801633.3333333334,
+        784066.6666666666,
+        776666.6666666666,
+        820066.6666666666,
+        792766.6666666666,
+        772366.6666666666
+      ],
+      "iterations_per_sample": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "sample_totals_ns": [
+        2367600,
+        2349000,
+        2334800,
+        2404900,
+        2352200,
+        2330000,
+        2460200,
+        2378300,
+        2317100
+      ],
+      "cold_single_call_ns": 743300,
+      "calibration": [
+        {
+          "iterations": 3,
+          "total_ns": 2233600
+        }
+      ],
+      "median_ns": 784066.6666666666,
+      "min_ns": 772366.6666666666,
+      "max_ns": 820066.6666666666,
+      "peak_rss_before_bytes": 27033600,
+      "peak_rss_after_bytes": 27033600,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 1
+    },
+    {
+      "stage": "export_first",
+      "rows": 65536,
+      "samples_ns": [
+        650350.0,
+        669175.0,
+        681400.0,
+        719725.0,
+        703025.0,
+        667000.0,
+        677075.0,
+        697475.0,
+        705675.0
+      ],
+      "iterations_per_sample": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "sample_totals_ns": [
+        2601400,
+        2676700,
+        2725600,
+        2878900,
+        2812100,
+        2668000,
+        2708300,
+        2789900,
+        2822700
+      ],
+      "cold_single_call_ns": 530300,
+      "calibration": [
+        {
+          "iterations": 4,
+          "total_ns": 2520500
+        }
+      ],
+      "median_ns": 681400.0,
+      "min_ns": 650350.0,
+      "max_ns": 719725.0,
+      "peak_rss_before_bytes": 36409344,
+      "peak_rss_after_bytes": 36409344,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 1575321,
+      "python_traced_peak_bytes": 1576505,
+      "repeat": 1
+    },
+    {
+      "stage": "export_cached",
+      "rows": 65536,
+      "samples_ns": [
+        1094.3634596695822,
+        1048.0563654033042,
+        1026.8707482993198,
+        1057.0456754130223,
+        1038.1438289601556,
+        1014.4314868804664,
+        1072.2546161321673,
+        1074.7813411078716,
+        1082.8960155490768
+      ],
+      "iterations_per_sample": [
+        2058,
+        2058,
+        2058,
+        2058,
+        2058,
+        2058,
+        2058,
+        2058,
+        2058
+      ],
+      "sample_totals_ns": [
+        2252200,
+        2156900,
+        2113300,
+        2175400,
+        2136500,
+        2087700,
+        2206700,
+        2211900,
+        2228600
+      ],
+      "cold_single_call_ns": 3000,
+      "calibration": [
+        {
+          "iterations": 667,
+          "total_ns": 665500
+        },
+        {
+          "iterations": 2005,
+          "total_ns": 1949100
+        },
+        {
+          "iterations": 2058,
+          "total_ns": 2016500
+        }
+      ],
+      "median_ns": 1057.0456754130223,
+      "min_ns": 1014.4314868804664,
+      "max_ns": 1094.3634596695822,
+      "peak_rss_before_bytes": 25358336,
+      "peak_rss_after_bytes": 25407488,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3608,
+      "repeat": 1
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 65536,
+      "samples_ns": [
+        2292100.0,
+        2997000.0,
+        2418800.0,
+        2323000.0,
+        2288600.0,
+        2496000.0,
+        2446400.0,
+        2276600.0,
+        2569000.0
+      ],
+      "iterations_per_sample": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "sample_totals_ns": [
+        2292100,
+        2997000,
+        2418800,
+        2323000,
+        2288600,
+        2496000,
+        2446400,
+        2276600,
+        2569000
+      ],
+      "cold_single_call_ns": 2392300,
+      "calibration": [
+        {
+          "iterations": 1,
+          "total_ns": 2173900
+        }
+      ],
+      "median_ns": 2418800.0,
+      "min_ns": 2276600.0,
+      "max_ns": 2997000.0,
+      "peak_rss_before_bytes": 26718208,
+      "peak_rss_after_bytes": 26861568,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 1575321,
+      "python_traced_peak_bytes": 1576505,
+      "repeat": 1
+    },
+    {
+      "stage": "scalar_calls",
+      "rows": 1,
+      "samples_ns": [
+        3638.819320214669,
+        3660.107334525939,
+        3580.3220035778177,
+        3561.5384615384614,
+        3554.561717352415,
+        3567.4418604651164,
+        3471.7352415026835,
+        3482.6475849731664,
+        3479.7853309481216
+      ],
+      "iterations_per_sample": [
+        559,
+        559,
+        559,
+        559,
+        559,
+        559,
+        559,
+        559,
+        559
+      ],
+      "sample_totals_ns": [
+        2034100,
+        2046000,
+        2001400,
+        1990900,
+        1987000,
+        1994200,
+        1940700,
+        1946800,
+        1945200
+      ],
+      "cold_single_call_ns": 48700,
+      "calibration": [
+        {
+          "iterations": 42,
+          "total_ns": 168100
+        },
+        {
+          "iterations": 500,
+          "total_ns": 1830100
+        },
+        {
+          "iterations": 547,
+          "total_ns": 1973300
+        },
+        {
+          "iterations": 555,
+          "total_ns": 1987200
+        },
+        {
+          "iterations": 559,
+          "total_ns": 2000300
+        }
+      ],
+      "median_ns": 3561.5384615384614,
+      "min_ns": 3471.7352415026835,
+      "max_ns": 3660.107334525939,
+      "peak_rss_before_bytes": 20647936,
+      "peak_rss_after_bytes": 20701184,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2456,
+      "python_traced_peak_bytes": 3928,
+      "repeat": 1
+    },
+    {
+      "stage": "scalar_calls",
+      "rows": 64,
+      "samples_ns": [
+        205109.0909090909,
+        197981.81818181818,
+        194590.9090909091,
+        194990.9090909091,
+        196563.63636363635,
+        222572.72727272726,
+        191354.54545454544,
+        193254.54545454544,
+        193345.45454545456
+      ],
+      "iterations_per_sample": [
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11
+      ],
+      "sample_totals_ns": [
+        2256200,
+        2177800,
+        2140500,
+        2144900,
+        2162200,
+        2448300,
+        2104900,
+        2125800,
+        2126800
+      ],
+      "cold_single_call_ns": 254900,
+      "calibration": [
+        {
+          "iterations": 8,
+          "total_ns": 1580100
+        },
+        {
+          "iterations": 11,
+          "total_ns": 2147300
+        }
+      ],
+      "median_ns": 194990.9090909091,
+      "min_ns": 191354.54545454544,
+      "max_ns": 222572.72727272726,
+      "peak_rss_before_bytes": 20930560,
+      "peak_rss_after_bytes": 21045248,
+      "retained_python_blocks": 75,
+      "python_traced_current_bytes": 7303,
+      "python_traced_peak_bytes": 8775,
+      "repeat": 1
+    },
+    {
+      "stage": "scalar_calls",
+      "rows": 4096,
+      "samples_ns": [
+        12285200.0,
+        12224000.0,
+        12068200.0,
+        11922500.0,
+        11881700.0,
+        11892800.0,
+        11812400.0,
+        11959000.0,
+        11829300.0
+      ],
+      "iterations_per_sample": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "sample_totals_ns": [
+        12285200,
+        12224000,
+        12068200,
+        11922500,
+        11881700,
+        11892800,
+        11812400,
+        11959000,
+        11829300
+      ],
+      "cold_single_call_ns": 12047900,
+      "calibration": [
+        {
+          "iterations": 1,
+          "total_ns": 11861900
+        }
+      ],
+      "median_ns": 11922500.0,
+      "min_ns": 11812400.0,
+      "max_ns": 12285200.0,
+      "peak_rss_before_bytes": 21090304,
+      "peak_rss_after_bytes": 21135360,
+      "retained_python_blocks": 82,
+      "python_traced_current_bytes": 106054,
+      "python_traced_peak_bytes": 107526,
+      "repeat": 1
+    },
+    {
+      "stage": "setup",
+      "rows": 0,
+      "samples_ns": [
+        1101.6230366492146,
+        1110.6806282722514,
+        1075.497382198953,
+        1082.8272251308902,
+        1075.8638743455497,
+        1061.5183246073298,
+        1072.0942408376964,
+        1070.0523560209424,
+        1073.6649214659685
+      ],
+      "iterations_per_sample": [
+        1910,
+        1910,
+        1910,
+        1910,
+        1910,
+        1910,
+        1910,
+        1910,
+        1910
+      ],
+      "sample_totals_ns": [
+        2104100,
+        2121400,
+        2054200,
+        2068200,
+        2054900,
+        2027500,
+        2047700,
+        2043800,
+        2050700
+      ],
+      "cold_single_call_ns": 3800,
+      "calibration": [
+        {
+          "iterations": 527,
+          "total_ns": 558400
+        },
+        {
+          "iterations": 1888,
+          "total_ns": 1986100
+        },
+        {
+          "iterations": 1902,
+          "total_ns": 1992400
+        },
+        {
+          "iterations": 1910,
+          "total_ns": 2013600
+        }
+      ],
+      "median_ns": 1075.497382198953,
+      "min_ns": 1061.5183246073298,
+      "max_ns": 1110.6806282722514,
+      "peak_rss_before_bytes": 20889600,
+      "peak_rss_after_bytes": 20926464,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2152,
+      "python_traced_peak_bytes": 3368,
+      "repeat": 1
+    },
+    {
+      "stage": "memory_unviewed",
+      "rows": 1000000,
+      "peak_rss_before_bytes": 44859392,
+      "peak_rss_after_bytes": 68927488,
+      "python_traced_current_bytes": 72,
+      "python_traced_peak_bytes": 144,
+      "payload_bytes": 24000000,
+      "viewed": false,
+      "repeat": 1
+    },
+    {
+      "stage": "memory_viewed",
+      "rows": 1000000,
+      "peak_rss_before_bytes": 44814336,
+      "peak_rss_after_bytes": 92864512,
+      "python_traced_current_bytes": 24000513,
+      "python_traced_peak_bytes": 24000769,
+      "payload_bytes": 24000000,
+      "viewed": true,
+      "repeat": 1
+    },
+    {
+      "stage": "memory_viewed",
+      "rows": 1000000,
+      "peak_rss_before_bytes": 44806144,
+      "peak_rss_after_bytes": 92856320,
+      "python_traced_current_bytes": 24000513,
+      "python_traced_peak_bytes": 24000769,
+      "payload_bytes": 24000000,
+      "viewed": true,
+      "repeat": 2
+    },
+    {
+      "stage": "memory_unviewed",
+      "rows": 1000000,
+      "peak_rss_before_bytes": 44589056,
+      "peak_rss_after_bytes": 68636672,
+      "python_traced_current_bytes": 72,
+      "python_traced_peak_bytes": 144,
+      "payload_bytes": 24000000,
+      "viewed": false,
+      "repeat": 2
+    },
+    {
+      "stage": "setup",
+      "rows": 0,
+      "samples_ns": [
+        1128.6020353508302,
+        1110.819496518479,
+        1094.9116229244778,
+        1097.9110873058382,
+        1084.7348687734334,
+        1080.824852704874,
+        1109.6946973754686,
+        1080.7177289769684,
+        1088.912694161757
+      ],
+      "iterations_per_sample": [
+        1867,
+        1867,
+        1867,
+        1867,
+        1867,
+        1867,
+        1867,
+        1867,
+        1867
+      ],
+      "sample_totals_ns": [
+        2107100,
+        2073900,
+        2044200,
+        2049800,
+        2025200,
+        2017900,
+        2071800,
+        2017700,
+        2033000
+      ],
+      "cold_single_call_ns": 3800,
+      "calibration": [
+        {
+          "iterations": 527,
+          "total_ns": 571400
+        },
+        {
+          "iterations": 1845,
+          "total_ns": 1981700
+        },
+        {
+          "iterations": 1863,
+          "total_ns": 1996600
+        },
+        {
+          "iterations": 1867,
+          "total_ns": 2014600
+        }
+      ],
+      "median_ns": 1094.9116229244778,
+      "min_ns": 1080.7177289769684,
+      "max_ns": 1128.6020353508302,
+      "peak_rss_before_bytes": 20828160,
+      "peak_rss_after_bytes": 20881408,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2152,
+      "python_traced_peak_bytes": 3368,
+      "repeat": 2
+    },
+    {
+      "stage": "scalar_calls",
+      "rows": 4096,
+      "samples_ns": [
+        12527000.0,
+        12057800.0,
+        11961600.0,
+        12055400.0,
+        11998200.0,
+        12057700.0,
+        12074800.0,
+        12039500.0,
+        12145600.0
+      ],
+      "iterations_per_sample": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "sample_totals_ns": [
+        12527000,
+        12057800,
+        11961600,
+        12055400,
+        11998200,
+        12057700,
+        12074800,
+        12039500,
+        12145600
+      ],
+      "cold_single_call_ns": 12338100,
+      "calibration": [
+        {
+          "iterations": 1,
+          "total_ns": 11742100
+        }
+      ],
+      "median_ns": 12057700.0,
+      "min_ns": 11961600.0,
+      "max_ns": 12527000.0,
+      "peak_rss_before_bytes": 21143552,
+      "peak_rss_after_bytes": 21372928,
+      "retained_python_blocks": 82,
+      "python_traced_current_bytes": 106054,
+      "python_traced_peak_bytes": 107526,
+      "repeat": 2
+    },
+    {
+      "stage": "scalar_calls",
+      "rows": 64,
+      "samples_ns": [
+        203390.9090909091,
+        199790.9090909091,
+        200372.72727272726,
+        197690.9090909091,
+        196245.45454545456,
+        191390.9090909091,
+        190818.18181818182,
+        189381.81818181818,
+        189218.18181818182
+      ],
+      "iterations_per_sample": [
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11
+      ],
+      "sample_totals_ns": [
+        2237300,
+        2197700,
+        2204100,
+        2174600,
+        2158700,
+        2105300,
+        2099000,
+        2083200,
+        2081400
+      ],
+      "cold_single_call_ns": 251500,
+      "calibration": [
+        {
+          "iterations": 8,
+          "total_ns": 1534200
+        },
+        {
+          "iterations": 11,
+          "total_ns": 2088800
+        }
+      ],
+      "median_ns": 196245.45454545456,
+      "min_ns": 189218.18181818182,
+      "max_ns": 203390.9090909091,
+      "peak_rss_before_bytes": 20885504,
+      "peak_rss_after_bytes": 20930560,
+      "retained_python_blocks": 75,
+      "python_traced_current_bytes": 7303,
+      "python_traced_peak_bytes": 8775,
+      "repeat": 2
+    },
+    {
+      "stage": "scalar_calls",
+      "rows": 1,
+      "samples_ns": [
+        3596.785714285714,
+        3640.1785714285716,
+        3719.1071428571427,
+        3597.6785714285716,
+        3602.8571428571427,
+        3560.535714285714,
+        3504.1071428571427,
+        3521.4285714285716,
+        3460.8928571428573
+      ],
+      "iterations_per_sample": [
+        560,
+        560,
+        560,
+        560,
+        560,
+        560,
+        560,
+        560,
+        560
+      ],
+      "sample_totals_ns": [
+        2014200,
+        2038500,
+        2082700,
+        2014700,
+        2017600,
+        1993900,
+        1962300,
+        1972000,
+        1938100
+      ],
+      "cold_single_call_ns": 45500,
+      "calibration": [
+        {
+          "iterations": 44,
+          "total_ns": 184200
+        },
+        {
+          "iterations": 478,
+          "total_ns": 1752600
+        },
+        {
+          "iterations": 546,
+          "total_ns": 1952800
+        },
+        {
+          "iterations": 560,
+          "total_ns": 2000400
+        }
+      ],
+      "median_ns": 3596.785714285714,
+      "min_ns": 3460.8928571428573,
+      "max_ns": 3719.1071428571427,
+      "peak_rss_before_bytes": 20697088,
+      "peak_rss_after_bytes": 20733952,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2456,
+      "python_traced_peak_bytes": 3928,
+      "repeat": 2
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 65536,
+      "samples_ns": [
+        2247800.0,
+        2135000.0,
+        2093800.0,
+        2130400.0,
+        2065800.0,
+        2024000.0,
+        2002500.0,
+        2142100.0,
+        2130300.0
+      ],
+      "iterations_per_sample": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "sample_totals_ns": [
+        2247800,
+        2135000,
+        2093800,
+        2130400,
+        2065800,
+        2024000,
+        2002500,
+        2142100,
+        2130300
+      ],
+      "cold_single_call_ns": 2216600,
+      "calibration": [
+        {
+          "iterations": 1,
+          "total_ns": 2185100
+        }
+      ],
+      "median_ns": 2130300.0,
+      "min_ns": 2002500.0,
+      "max_ns": 2247800.0,
+      "peak_rss_before_bytes": 26722304,
+      "peak_rss_after_bytes": 26865664,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 1575321,
+      "python_traced_peak_bytes": 1576505,
+      "repeat": 2
+    },
+    {
+      "stage": "export_cached",
+      "rows": 65536,
+      "samples_ns": [
+        1268.4981684981685,
+        1184.3101343101343,
+        989.1941391941392,
+        1077.1062271062272,
+        1110.5616605616606,
+        1728.144078144078,
+        1251.037851037851,
+        1204.6398046398047,
+        1020.2075702075703
+      ],
+      "iterations_per_sample": [
+        1638,
+        1638,
+        1638,
+        1638,
+        1638,
+        1638,
+        1638,
+        1638,
+        1638
+      ],
+      "sample_totals_ns": [
+        2077800,
+        1939900,
+        1620300,
+        1764300,
+        1819100,
+        2830700,
+        2049200,
+        1973200,
+        1671100
+      ],
+      "cold_single_call_ns": 3800,
+      "calibration": [
+        {
+          "iterations": 527,
+          "total_ns": 643500
+        },
+        {
+          "iterations": 1638,
+          "total_ns": 2043700
+        }
+      ],
+      "median_ns": 1184.3101343101343,
+      "min_ns": 989.1941391941392,
+      "max_ns": 1728.144078144078,
+      "peak_rss_before_bytes": 25497600,
+      "peak_rss_after_bytes": 25604096,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3608,
+      "repeat": 2
+    },
+    {
+      "stage": "export_first",
+      "rows": 65536,
+      "samples_ns": [
+        859075.0,
+        683750.0,
+        719650.0,
+        662175.0,
+        787525.0,
+        678775.0,
+        687725.0,
+        687075.0,
+        663950.0
+      ],
+      "iterations_per_sample": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "sample_totals_ns": [
+        3436300,
+        2735000,
+        2878600,
+        2648700,
+        3150100,
+        2715100,
+        2750900,
+        2748300,
+        2655800
+      ],
+      "cold_single_call_ns": 737200,
+      "calibration": [
+        {
+          "iterations": 3,
+          "total_ns": 1941900
+        },
+        {
+          "iterations": 4,
+          "total_ns": 2998800
+        }
+      ],
+      "median_ns": 687075.0,
+      "min_ns": 662175.0,
+      "max_ns": 859075.0,
+      "peak_rss_before_bytes": 36192256,
+      "peak_rss_after_bytes": 36192256,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 1575321,
+      "python_traced_peak_bytes": 1576505,
+      "repeat": 2
+    },
+    {
+      "stage": "convert",
+      "rows": 65536,
+      "samples_ns": [
+        748633.3333333334,
+        792833.3333333334,
+        749766.6666666666,
+        765600.0,
+        758233.3333333334,
+        756466.6666666666,
+        708033.3333333334,
+        818833.3333333334,
+        892366.6666666666
+      ],
+      "iterations_per_sample": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "sample_totals_ns": [
+        2245900,
+        2378500,
+        2249300,
+        2296800,
+        2274700,
+        2269400,
+        2124100,
+        2456500,
+        2677100
+      ],
+      "cold_single_call_ns": 713100,
+      "calibration": [
+        {
+          "iterations": 3,
+          "total_ns": 2363200
+        }
+      ],
+      "median_ns": 758233.3333333334,
+      "min_ns": 708033.3333333334,
+      "max_ns": 892366.6666666666,
+      "peak_rss_before_bytes": 26914816,
+      "peak_rss_after_bytes": 26914816,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "apply",
+      "rows": 65536,
+      "samples_ns": [
+        896100.0,
+        853933.3333333334,
+        838866.6666666666,
+        819400.0,
+        828900.0,
+        843466.6666666666,
+        817666.6666666666,
+        881700.0,
+        831466.6666666666
+      ],
+      "iterations_per_sample": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "sample_totals_ns": [
+        2688300,
+        2561800,
+        2516600,
+        2458200,
+        2486700,
+        2530400,
+        2453000,
+        2645100,
+        2494400
+      ],
+      "cold_single_call_ns": 787400,
+      "calibration": [
+        {
+          "iterations": 3,
+          "total_ns": 2550900
+        }
+      ],
+      "median_ns": 838866.6666666666,
+      "min_ns": 817666.6666666666,
+      "max_ns": 896100.0,
+      "peak_rss_before_bytes": 26996736,
+      "peak_rss_after_bytes": 26996736,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "import",
+      "rows": 65536,
+      "samples_ns": [
+        727525.0,
+        694275.0,
+        750725.0,
+        762400.0,
+        751825.0,
+        757075.0,
+        876725.0,
+        1204425.0,
+        695475.0
+      ],
+      "iterations_per_sample": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "sample_totals_ns": [
+        2910100,
+        2777100,
+        3002900,
+        3049600,
+        3007300,
+        3028300,
+        3506900,
+        4817700,
+        2781900
+      ],
+      "cold_single_call_ns": 578300,
+      "calibration": [
+        {
+          "iterations": 4,
+          "total_ns": 2929200
+        }
+      ],
+      "median_ns": 751825.0,
+      "min_ns": 694275.0,
+      "max_ns": 1204425.0,
+      "peak_rss_before_bytes": 26681344,
+      "peak_rss_after_bytes": 26681344,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 4096,
+      "samples_ns": [
+        45412.765957446805,
+        44595.744680851065,
+        44355.31914893617,
+        44063.82978723404,
+        44736.17021276596,
+        43951.063829787236,
+        44000.0,
+        44048.936170212764,
+        44578.72340425532
+      ],
+      "iterations_per_sample": [
+        47,
+        47,
+        47,
+        47,
+        47,
+        47,
+        47,
+        47,
+        47
+      ],
+      "sample_totals_ns": [
+        2134400,
+        2096000,
+        2084700,
+        2071000,
+        2102600,
+        2065700,
+        2068000,
+        2070300,
+        2095200
+      ],
+      "cold_single_call_ns": 268400,
+      "calibration": [
+        {
+          "iterations": 8,
+          "total_ns": 485800
+        },
+        {
+          "iterations": 33,
+          "total_ns": 1433300
+        },
+        {
+          "iterations": 47,
+          "total_ns": 2044800
+        }
+      ],
+      "median_ns": 44355.31914893617,
+      "min_ns": 43951.063829787236,
+      "max_ns": 45412.765957446805,
+      "peak_rss_before_bytes": 21417984,
+      "peak_rss_after_bytes": 21454848,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 100761,
+      "python_traced_peak_bytes": 101945,
+      "repeat": 2
+    },
+    {
+      "stage": "export_cached",
+      "rows": 4096,
+      "samples_ns": [
+        1363.6809815950921,
+        1320.7361963190185,
+        1290.0,
+        1097.484662576687,
+        1053.7423312883436,
+        996.3803680981595,
+        1043.2515337423313,
+        1079.877300613497,
+        1006.4417177914111
+      ],
+      "iterations_per_sample": [
+        1630,
+        1630,
+        1630,
+        1630,
+        1630,
+        1630,
+        1630,
+        1630,
+        1630
+      ],
+      "sample_totals_ns": [
+        2222800,
+        2152800,
+        2102700,
+        1788900,
+        1717600,
+        1624100,
+        1700500,
+        1760200,
+        1640500
+      ],
+      "cold_single_call_ns": 3500,
+      "calibration": [
+        {
+          "iterations": 572,
+          "total_ns": 746900
+        },
+        {
+          "iterations": 1532,
+          "total_ns": 1929200
+        },
+        {
+          "iterations": 1589,
+          "total_ns": 1960300
+        },
+        {
+          "iterations": 1622,
+          "total_ns": 1990300
+        },
+        {
+          "iterations": 1630,
+          "total_ns": 2000200
+        }
+      ],
+      "median_ns": 1079.877300613497,
+      "min_ns": 996.3803680981595,
+      "max_ns": 1363.6809815950921,
+      "peak_rss_before_bytes": 21123072,
+      "peak_rss_after_bytes": 21172224,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3576,
+      "repeat": 2
+    },
+    {
+      "stage": "export_first",
+      "rows": 4096,
+      "samples_ns": [
+        145975.0,
+        100745.83333333333,
+        101137.5,
+        101004.16666666667,
+        90358.33333333333,
+        88200.0,
+        91033.33333333333,
+        86708.33333333333,
+        103287.5
+      ],
+      "iterations_per_sample": [
+        24,
+        24,
+        24,
+        24,
+        24,
+        24,
+        24,
+        24,
+        24
+      ],
+      "sample_totals_ns": [
+        3503400,
+        2417900,
+        2427300,
+        2424100,
+        2168600,
+        2116800,
+        2184800,
+        2081000,
+        2478900
+      ],
+      "cold_single_call_ns": 83900,
+      "calibration": [
+        {
+          "iterations": 24,
+          "total_ns": 2464500
+        }
+      ],
+      "median_ns": 100745.83333333333,
+      "min_ns": 86708.33333333333,
+      "max_ns": 145975.0,
+      "peak_rss_before_bytes": 25657344,
+      "peak_rss_after_bytes": 25657344,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 100761,
+      "python_traced_peak_bytes": 101977,
+      "repeat": 2
+    },
+    {
+      "stage": "convert",
+      "rows": 4096,
+      "samples_ns": [
+        19177.884615384617,
+        25105.76923076923,
+        19091.346153846152,
+        18987.5,
+        18998.076923076922,
+        19096.153846153848,
+        19148.076923076922,
+        19132.69230769231,
+        19058.653846153848
+      ],
+      "iterations_per_sample": [
+        104,
+        104,
+        104,
+        104,
+        104,
+        104,
+        104,
+        104,
+        104
+      ],
+      "sample_totals_ns": [
+        1994500,
+        2611000,
+        1985500,
+        1974700,
+        1975800,
+        1986000,
+        1991400,
+        1989800,
+        1982100
+      ],
+      "cold_single_call_ns": 68300,
+      "calibration": [
+        {
+          "iterations": 30,
+          "total_ns": 786000
+        },
+        {
+          "iterations": 77,
+          "total_ns": 1512200
+        },
+        {
+          "iterations": 102,
+          "total_ns": 1965700
+        },
+        {
+          "iterations": 104,
+          "total_ns": 2170200
+        }
+      ],
+      "median_ns": 19096.153846153848,
+      "min_ns": 18987.5,
+      "max_ns": 25105.76923076923,
+      "peak_rss_before_bytes": 21114880,
+      "peak_rss_after_bytes": 21155840,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "apply",
+      "rows": 4096,
+      "samples_ns": [
+        25421.25,
+        25393.75,
+        25501.25,
+        25926.25,
+        25465.0,
+        25276.25,
+        25230.0,
+        25265.0,
+        25842.5
+      ],
+      "iterations_per_sample": [
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80,
+        80
+      ],
+      "sample_totals_ns": [
+        2033700,
+        2031500,
+        2040100,
+        2074100,
+        2037200,
+        2022100,
+        2018400,
+        2021200,
+        2067400
+      ],
+      "cold_single_call_ns": 143300,
+      "calibration": [
+        {
+          "iterations": 14,
+          "total_ns": 407200
+        },
+        {
+          "iterations": 69,
+          "total_ns": 1743600
+        },
+        {
+          "iterations": 80,
+          "total_ns": 2030900
+        }
+      ],
+      "median_ns": 25421.25,
+      "min_ns": 25230.0,
+      "max_ns": 25926.25,
+      "peak_rss_before_bytes": 21241856,
+      "peak_rss_after_bytes": 21282816,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "import",
+      "rows": 4096,
+      "samples_ns": [
+        11072.527472527472,
+        11056.043956043955,
+        11112.087912087913,
+        11063.186813186812,
+        11286.263736263736,
+        11035.164835164835,
+        11340.10989010989,
+        11087.912087912087,
+        11115.934065934065
+      ],
+      "iterations_per_sample": [
+        182,
+        182,
+        182,
+        182,
+        182,
+        182,
+        182,
+        182,
+        182
+      ],
+      "sample_totals_ns": [
+        2015200,
+        2012200,
+        2022400,
+        2013500,
+        2054100,
+        2008400,
+        2063900,
+        2018000,
+        2023100
+      ],
+      "cold_single_call_ns": 69000,
+      "calibration": [
+        {
+          "iterations": 29,
+          "total_ns": 458900
+        },
+        {
+          "iterations": 127,
+          "total_ns": 1407300
+        },
+        {
+          "iterations": 181,
+          "total_ns": 1995200
+        },
+        {
+          "iterations": 182,
+          "total_ns": 2019200
+        }
+      ],
+      "median_ns": 11087.912087912087,
+      "min_ns": 11035.164835164835,
+      "max_ns": 11340.10989010989,
+      "peak_rss_before_bytes": 21278720,
+      "peak_rss_after_bytes": 21319680,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 64,
+      "samples_ns": [
+        3179.437869822485,
+        3052.810650887574,
+        3132.544378698225,
+        3033.1360946745563,
+        3062.5739644970413,
+        3091.8639053254437,
+        3017.8994082840236,
+        3026.03550295858,
+        3082.6923076923076
+      ],
+      "iterations_per_sample": [
+        676,
+        676,
+        676,
+        676,
+        676,
+        676,
+        676,
+        676,
+        676
+      ],
+      "sample_totals_ns": [
+        2149300,
+        2063700,
+        2117600,
+        2050400,
+        2070300,
+        2090100,
+        2040100,
+        2045600,
+        2083900
+      ],
+      "cold_single_call_ns": 30500,
+      "calibration": [
+        {
+          "iterations": 66,
+          "total_ns": 262700
+        },
+        {
+          "iterations": 503,
+          "total_ns": 1907800
+        },
+        {
+          "iterations": 528,
+          "total_ns": 1918100
+        },
+        {
+          "iterations": 551,
+          "total_ns": 1789200
+        },
+        {
+          "iterations": 616,
+          "total_ns": 1932900
+        },
+        {
+          "iterations": 638,
+          "total_ns": 1989600
+        },
+        {
+          "iterations": 642,
+          "total_ns": 1924500
+        },
+        {
+          "iterations": 668,
+          "total_ns": 1976600
+        }
+      ],
+      "median_ns": 3062.5739644970413,
+      "min_ns": 3017.8994082840236,
+      "max_ns": 3179.437869822485,
+      "peak_rss_before_bytes": 20615168,
+      "peak_rss_after_bytes": 20647936,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 3993,
+      "python_traced_peak_bytes": 5145,
+      "repeat": 2
+    },
+    {
+      "stage": "export_cached",
+      "rows": 64,
+      "samples_ns": [
+        1059.548944337812,
+        1061.852207293666,
+        1004.8464491362764,
+        1062.5239923224567,
+        1090.73896353167,
+        1009.404990403071,
+        1069.6737044145873,
+        1045.7293666026872,
+        1041.0268714011515
+      ],
+      "iterations_per_sample": [
+        2084,
+        2084,
+        2084,
+        2084,
+        2084,
+        2084,
+        2084,
+        2084,
+        2084
+      ],
+      "sample_totals_ns": [
+        2208100,
+        2212900,
+        2094100,
+        2214300,
+        2273100,
+        2103600,
+        2229200,
+        2179300,
+        2169500
+      ],
+      "cold_single_call_ns": 2800,
+      "calibration": [
+        {
+          "iterations": 715,
+          "total_ns": 748600
+        },
+        {
+          "iterations": 1911,
+          "total_ns": 1849300
+        },
+        {
+          "iterations": 2067,
+          "total_ns": 1984600
+        },
+        {
+          "iterations": 2084,
+          "total_ns": 2006800
+        }
+      ],
+      "median_ns": 1059.548944337812,
+      "min_ns": 1004.8464491362764,
+      "max_ns": 1090.73896353167,
+      "peak_rss_before_bytes": 20897792,
+      "peak_rss_after_bytes": 20996096,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3608,
+      "repeat": 2
+    },
+    {
+      "stage": "export_first",
+      "rows": 64,
+      "samples_ns": [
+        2191.4054600606673,
+        2073.3063700707785,
+        2050.6572295247724,
+        2069.969666329626,
+        2071.587462082912,
+        2008.695652173913,
+        2073.407482305359,
+        2030.4347826086957,
+        2010.51567239636
+      ],
+      "iterations_per_sample": [
+        989,
+        989,
+        989,
+        989,
+        989,
+        989,
+        989,
+        989,
+        989
+      ],
+      "sample_totals_ns": [
+        2167300,
+        2050500,
+        2028100,
+        2047200,
+        2048800,
+        1986600,
+        2050600,
+        2008100,
+        1988400
+      ],
+      "cold_single_call_ns": 14200,
+      "calibration": [
+        {
+          "iterations": 141,
+          "total_ns": 382500
+        },
+        {
+          "iterations": 738,
+          "total_ns": 1550700
+        },
+        {
+          "iterations": 952,
+          "total_ns": 1999300
+        },
+        {
+          "iterations": 953,
+          "total_ns": 1947900
+        },
+        {
+          "iterations": 979,
+          "total_ns": 1980200
+        },
+        {
+          "iterations": 989,
+          "total_ns": 2018400
+        }
+      ],
+      "median_ns": 2069.969666329626,
+      "min_ns": 2008.695652173913,
+      "max_ns": 2191.4054600606673,
+      "peak_rss_before_bytes": 24481792,
+      "peak_rss_after_bytes": 24481792,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 3993,
+      "python_traced_peak_bytes": 5177,
+      "repeat": 2
+    },
+    {
+      "stage": "convert",
+      "rows": 64,
+      "samples_ns": [
+        678.1101291638341,
+        678.4160435078178,
+        688.3752549286199,
+        679.7076818490823,
+        682.6988443235894,
+        683.1407205982325,
+        679.1978246091095,
+        686.9476546566962,
+        683.7525492861998
+      ],
+      "iterations_per_sample": [
+        2942,
+        2942,
+        2942,
+        2942,
+        2942,
+        2942,
+        2942,
+        2942,
+        2942
+      ],
+      "sample_totals_ns": [
+        1995000,
+        1995900,
+        2025200,
+        1999700,
+        2008500,
+        2009800,
+        1998200,
+        2021000,
+        2011600
+      ],
+      "cold_single_call_ns": 3000,
+      "calibration": [
+        {
+          "iterations": 667,
+          "total_ns": 578700
+        },
+        {
+          "iterations": 2306,
+          "total_ns": 1834100
+        },
+        {
+          "iterations": 2515,
+          "total_ns": 1753800
+        },
+        {
+          "iterations": 2869,
+          "total_ns": 1954000
+        },
+        {
+          "iterations": 2937,
+          "total_ns": 1996900
+        },
+        {
+          "iterations": 2942,
+          "total_ns": 2022000
+        }
+      ],
+      "median_ns": 682.6988443235894,
+      "min_ns": 678.1101291638341,
+      "max_ns": 688.3752549286199,
+      "peak_rss_before_bytes": 20652032,
+      "peak_rss_after_bytes": 20692992,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "apply",
+      "rows": 64,
+      "samples_ns": [
+        795.6572314850717,
+        757.0763861962001,
+        776.7739433889104,
+        759.6355176424971,
+        759.1702210158976,
+        769.2128732066692,
+        757.735556417216,
+        760.1008142690965,
+        764.7537805350911
+      ],
+      "iterations_per_sample": [
+        2579,
+        2579,
+        2579,
+        2579,
+        2579,
+        2579,
+        2579,
+        2579,
+        2579
+      ],
+      "sample_totals_ns": [
+        2052000,
+        1952500,
+        2003300,
+        1959100,
+        1957900,
+        1983800,
+        1954200,
+        1960300,
+        1972300
+      ],
+      "cold_single_call_ns": 14100,
+      "calibration": [
+        {
+          "iterations": 142,
+          "total_ns": 134800
+        },
+        {
+          "iterations": 2107,
+          "total_ns": 1935400
+        },
+        {
+          "iterations": 2178,
+          "total_ns": 1689100
+        },
+        {
+          "iterations": 2579,
+          "total_ns": 2002400
+        }
+      ],
+      "median_ns": 760.1008142690965,
+      "min_ns": 757.0763861962001,
+      "max_ns": 795.6572314850717,
+      "peak_rss_before_bytes": 20606976,
+      "peak_rss_after_bytes": 20647936,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "import",
+      "rows": 64,
+      "samples_ns": [
+        738.0058866813833,
+        734.3635025754231,
+        728.2928623988226,
+        731.972038263429,
+        727.4098601913172,
+        730.5739514348786,
+        715.2317880794702,
+        716.8138337012509,
+        724.39293598234
+      ],
+      "iterations_per_sample": [
+        2718,
+        2718,
+        2718,
+        2718,
+        2718,
+        2718,
+        2718,
+        2718,
+        2718
+      ],
+      "sample_totals_ns": [
+        2005900,
+        1996000,
+        1979500,
+        1989500,
+        1977100,
+        1985700,
+        1944000,
+        1948300,
+        1968900
+      ],
+      "cold_single_call_ns": 2300,
+      "calibration": [
+        {
+          "iterations": 870,
+          "total_ns": 865900
+        },
+        {
+          "iterations": 2010,
+          "total_ns": 1768300
+        },
+        {
+          "iterations": 2274,
+          "total_ns": 1673300
+        },
+        {
+          "iterations": 2718,
+          "total_ns": 2054200
+        }
+      ],
+      "median_ns": 728.2928623988226,
+      "min_ns": 715.2317880794702,
+      "max_ns": 738.0058866813833,
+      "peak_rss_before_bytes": 20570112,
+      "peak_rss_after_bytes": 20627456,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 1,
+      "samples_ns": [
+        2345.1428571428573,
+        2469.0285714285715,
+        2414.7428571428572,
+        2396.114285714286,
+        2382.4,
+        2369.4857142857145,
+        2464.2285714285713,
+        2394.7428571428572,
+        2359.3142857142857
+      ],
+      "iterations_per_sample": [
+        875,
+        875,
+        875,
+        875,
+        875,
+        875,
+        875,
+        875,
+        875
+      ],
+      "sample_totals_ns": [
+        2052000,
+        2160400,
+        2112900,
+        2096600,
+        2084600,
+        2073300,
+        2156200,
+        2095400,
+        2064400
+      ],
+      "cold_single_call_ns": 28300,
+      "calibration": [
+        {
+          "iterations": 71,
+          "total_ns": 194500
+        },
+        {
+          "iterations": 731,
+          "total_ns": 1763900
+        },
+        {
+          "iterations": 829,
+          "total_ns": 1937400
+        },
+        {
+          "iterations": 856,
+          "total_ns": 1969200
+        },
+        {
+          "iterations": 870,
+          "total_ns": 1988800
+        },
+        {
+          "iterations": 875,
+          "total_ns": 2016400
+        }
+      ],
+      "median_ns": 2394.7428571428572,
+      "min_ns": 2345.1428571428573,
+      "max_ns": 2469.0285714285715,
+      "peak_rss_before_bytes": 20905984,
+      "peak_rss_after_bytes": 20971520,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 2481,
+      "python_traced_peak_bytes": 3697,
+      "repeat": 2
+    },
+    {
+      "stage": "export_cached",
+      "rows": 1,
+      "samples_ns": [
+        1057.7918647649235,
+        1055.5203380876915,
+        1084.2577918647648,
+        1101.4263074484945,
+        1151.4527205493926,
+        1082.8314844162705,
+        1066.2440570522979,
+        1059.3766508188062,
+        1045.958795562599
+      ],
+      "iterations_per_sample": [
+        1893,
+        1893,
+        1893,
+        1893,
+        1893,
+        1893,
+        1893,
+        1893,
+        1893
+      ],
+      "sample_totals_ns": [
+        2002400,
+        1998100,
+        2052500,
+        2085000,
+        2179700,
+        2049800,
+        2018400,
+        2005400,
+        1980000
+      ],
+      "cold_single_call_ns": 2900,
+      "calibration": [
+        {
+          "iterations": 690,
+          "total_ns": 757600
+        },
+        {
+          "iterations": 1822,
+          "total_ns": 1939800
+        },
+        {
+          "iterations": 1879,
+          "total_ns": 1985500
+        },
+        {
+          "iterations": 1893,
+          "total_ns": 2014100
+        }
+      ],
+      "median_ns": 1066.2440570522979,
+      "min_ns": 1045.958795562599,
+      "max_ns": 1151.4527205493926,
+      "peak_rss_before_bytes": 20836352,
+      "peak_rss_after_bytes": 20934656,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3493,
+      "repeat": 2
+    },
+    {
+      "stage": "export_first",
+      "rows": 1,
+      "samples_ns": [
+        1271.930906847625,
+        1262.430598396052,
+        1279.7038864898211,
+        1254.1024059222702,
+        1280.3824799506478,
+        1265.5768044417027,
+        1318.260333127699,
+        1299.5681677976559,
+        1306.7242442936458
+      ],
+      "iterations_per_sample": [
+        1621,
+        1621,
+        1621,
+        1621,
+        1621,
+        1621,
+        1621,
+        1621,
+        1621
+      ],
+      "sample_totals_ns": [
+        2061800,
+        2046400,
+        2074400,
+        2032900,
+        2075500,
+        2051500,
+        2136900,
+        2106600,
+        2118200
+      ],
+      "cold_single_call_ns": 15100,
+      "calibration": [
+        {
+          "iterations": 133,
+          "total_ns": 218300
+        },
+        {
+          "iterations": 1219,
+          "total_ns": 1711800
+        },
+        {
+          "iterations": 1425,
+          "total_ns": 1787600
+        },
+        {
+          "iterations": 1595,
+          "total_ns": 1982800
+        },
+        {
+          "iterations": 1609,
+          "total_ns": 1985900
+        },
+        {
+          "iterations": 1621,
+          "total_ns": 2029800
+        }
+      ],
+      "median_ns": 1279.7038864898211,
+      "min_ns": 1254.1024059222702,
+      "max_ns": 1318.260333127699,
+      "peak_rss_before_bytes": 21680128,
+      "peak_rss_after_bytes": 21708800,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 2481,
+      "python_traced_peak_bytes": 3697,
+      "repeat": 2
+    },
+    {
+      "stage": "convert",
+      "rows": 1,
+      "samples_ns": [
+        373.291015625,
+        370.3125,
+        371.6796875,
+        378.515625,
+        368.7744140625,
+        371.09375,
+        371.2890625,
+        361.4990234375,
+        360.986328125
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1529000,
+        1516800,
+        1522400,
+        1550400,
+        1510500,
+        1520000,
+        1520800,
+        1480700,
+        1478600
+      ],
+      "cold_single_call_ns": 2300,
+      "calibration": [
+        {
+          "iterations": 870,
+          "total_ns": 329700
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1552200
+        }
+      ],
+      "median_ns": 371.09375,
+      "min_ns": 360.986328125,
+      "max_ns": 378.515625,
+      "peak_rss_before_bytes": 20848640,
+      "peak_rss_after_bytes": 20885504,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "apply",
+      "rows": 1,
+      "samples_ns": [
+        385.546875,
+        383.837890625,
+        375.48828125,
+        388.28125,
+        369.775390625,
+        384.6923828125,
+        381.103515625,
+        388.3544921875,
+        381.7138671875
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1579200,
+        1572200,
+        1538000,
+        1590400,
+        1514600,
+        1575700,
+        1561000,
+        1590700,
+        1563500
+      ],
+      "cold_single_call_ns": 13400,
+      "calibration": [
+        {
+          "iterations": 150,
+          "total_ns": 59700
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1566000
+        }
+      ],
+      "median_ns": 383.837890625,
+      "min_ns": 369.775390625,
+      "max_ns": 388.3544921875,
+      "peak_rss_before_bytes": 20848640,
+      "peak_rss_after_bytes": 20926464,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "import",
+      "rows": 1,
+      "samples_ns": [
+        574.3413516609393,
+        572.8808705612829,
+        565.4925544100802,
+        579.0950744558992,
+        563.717067583047,
+        567.7548682703322,
+        566.9816723940435,
+        564.2325315005727,
+        567.0389461626575
+      ],
+      "iterations_per_sample": [
+        3492,
+        3492,
+        3492,
+        3492,
+        3492,
+        3492,
+        3492,
+        3492,
+        3492
+      ],
+      "sample_totals_ns": [
+        2005600,
+        2000500,
+        1974700,
+        2022200,
+        1968500,
+        1982600,
+        1979900,
+        1970300,
+        1980100
+      ],
+      "cold_single_call_ns": 1600,
+      "calibration": [
+        {
+          "iterations": 1250,
+          "total_ns": 724000
+        },
+        {
+          "iterations": 3454,
+          "total_ns": 1978800
+        },
+        {
+          "iterations": 3492,
+          "total_ns": 2079700
+        }
+      ],
+      "median_ns": 567.0389461626575,
+      "min_ns": 563.717067583047,
+      "max_ns": 579.0950744558992,
+      "peak_rss_before_bytes": 20557824,
+      "peak_rss_after_bytes": 20611072,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 0,
+      "samples_ns": [
+        2122.437971952535,
+        2126.321467098166,
+        2189.212513484358,
+        2313.052858683927,
+        2206.7961165048546,
+        2216.1812297734627,
+        2211.2189859762675,
+        2198.813376483279,
+        2209.3851132686086
+      ],
+      "iterations_per_sample": [
+        927,
+        927,
+        927,
+        927,
+        927,
+        927,
+        927,
+        927,
+        927
+      ],
+      "sample_totals_ns": [
+        1967500,
+        1971100,
+        2029400,
+        2144200,
+        2045700,
+        2054400,
+        2049800,
+        2038300,
+        2048100
+      ],
+      "cold_single_call_ns": 27500,
+      "calibration": [
+        {
+          "iterations": 73,
+          "total_ns": 187400
+        },
+        {
+          "iterations": 780,
+          "total_ns": 1698600
+        },
+        {
+          "iterations": 919,
+          "total_ns": 1983200
+        },
+        {
+          "iterations": 927,
+          "total_ns": 2025000
+        }
+      ],
+      "median_ns": 2206.7961165048546,
+      "min_ns": 2122.437971952535,
+      "max_ns": 2313.052858683927,
+      "peak_rss_before_bytes": 20615168,
+      "peak_rss_after_bytes": 20717568,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3589,
+      "repeat": 2
+    },
+    {
+      "stage": "export_cached",
+      "rows": 0,
+      "samples_ns": [
+        1047.5699558173785,
+        1002.1109474717722,
+        1053.06823760432,
+        1004.6637211585665,
+        998.0363279332352,
+        1053.2155130093274,
+        1068.041237113402,
+        1008.7874324987727,
+        1029.3568973981346
+      ],
+      "iterations_per_sample": [
+        2037,
+        2037,
+        2037,
+        2037,
+        2037,
+        2037,
+        2037,
+        2037,
+        2037
+      ],
+      "sample_totals_ns": [
+        2133900,
+        2041300,
+        2145100,
+        2046500,
+        2033000,
+        2145400,
+        2175600,
+        2054900,
+        2096800
+      ],
+      "cold_single_call_ns": 3200,
+      "calibration": [
+        {
+          "iterations": 625,
+          "total_ns": 715400
+        },
+        {
+          "iterations": 1748,
+          "total_ns": 1987700
+        },
+        {
+          "iterations": 1759,
+          "total_ns": 1849400
+        },
+        {
+          "iterations": 1903,
+          "total_ns": 1997600
+        },
+        {
+          "iterations": 1906,
+          "total_ns": 1995500
+        },
+        {
+          "iterations": 1911,
+          "total_ns": 1876700
+        },
+        {
+          "iterations": 2037,
+          "total_ns": 2000200
+        }
+      ],
+      "median_ns": 1029.3568973981346,
+      "min_ns": 998.0363279332352,
+      "max_ns": 1068.041237113402,
+      "peak_rss_before_bytes": 20594688,
+      "peak_rss_after_bytes": 20643840,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3493,
+      "repeat": 2
+    },
+    {
+      "stage": "export_first",
+      "rows": 0,
+      "samples_ns": [
+        1260.7965152457996,
+        1302.4268823895457,
+        1328.4380833851899,
+        1296.701929060361,
+        1298.5065339141256,
+        1298.8799004355942,
+        1303.92034847542,
+        1261.8543870566273,
+        1288.8612321095209
+      ],
+      "iterations_per_sample": [
+        1607,
+        1607,
+        1607,
+        1607,
+        1607,
+        1607,
+        1607,
+        1607,
+        1607
+      ],
+      "sample_totals_ns": [
+        2026100,
+        2093000,
+        2134800,
+        2083800,
+        2086700,
+        2087300,
+        2095400,
+        2027800,
+        2071200
+      ],
+      "cold_single_call_ns": 14300,
+      "calibration": [
+        {
+          "iterations": 140,
+          "total_ns": 212200
+        },
+        {
+          "iterations": 1320,
+          "total_ns": 1672900
+        },
+        {
+          "iterations": 1579,
+          "total_ns": 1966200
+        },
+        {
+          "iterations": 1607,
+          "total_ns": 2041800
+        }
+      ],
+      "median_ns": 1298.5065339141256,
+      "min_ns": 1260.7965152457996,
+      "max_ns": 1328.4380833851899,
+      "peak_rss_before_bytes": 21090304,
+      "peak_rss_after_bytes": 21118976,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3525,
+      "repeat": 2
+    },
+    {
+      "stage": "convert",
+      "rows": 0,
+      "samples_ns": [
+        296.8505859375,
+        293.6767578125,
+        292.9443359375,
+        291.3818359375,
+        297.36328125,
+        288.4033203125,
+        295.2880859375,
+        295.361328125,
+        291.6748046875
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1215900,
+        1202900,
+        1199900,
+        1193500,
+        1218000,
+        1181300,
+        1209500,
+        1209800,
+        1194700
+      ],
+      "cold_single_call_ns": 2000,
+      "calibration": [
+        {
+          "iterations": 1000,
+          "total_ns": 296500
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1213800
+        }
+      ],
+      "median_ns": 293.6767578125,
+      "min_ns": 288.4033203125,
+      "max_ns": 297.36328125,
+      "peak_rss_before_bytes": 20578304,
+      "peak_rss_after_bytes": 20615168,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "apply",
+      "rows": 0,
+      "samples_ns": [
+        300.927734375,
+        311.5966796875,
+        301.611328125,
+        298.53515625,
+        290.4541015625,
+        285.400390625,
+        286.279296875,
+        290.283203125,
+        300.8056640625
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1232600,
+        1276300,
+        1235400,
+        1222800,
+        1189700,
+        1169000,
+        1172600,
+        1189000,
+        1232100
+      ],
+      "cold_single_call_ns": 13300,
+      "calibration": [
+        {
+          "iterations": 151,
+          "total_ns": 47400
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1219300
+        }
+      ],
+      "median_ns": 298.53515625,
+      "min_ns": 285.400390625,
+      "max_ns": 311.5966796875,
+      "peak_rss_before_bytes": 20783104,
+      "peak_rss_after_bytes": 20819968,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 2
+    },
+    {
+      "stage": "import",
+      "rows": 0,
+      "samples_ns": [
+        477.734375,
+        478.7109375,
+        477.3193359375,
+        475.146484375,
+        482.8857421875,
+        476.3671875,
+        472.94921875,
+        472.4609375,
+        467.1875
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1956800,
+        1960800,
+        1955100,
+        1946200,
+        1977900,
+        1951200,
+        1937200,
+        1935200,
+        1913600
+      ],
+      "cold_single_call_ns": 1800,
+      "calibration": [
+        {
+          "iterations": 1112,
+          "total_ns": 520100
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1958700
+        }
+      ],
+      "median_ns": 476.3671875,
+      "min_ns": 467.1875,
+      "max_ns": 482.8857421875,
+      "peak_rss_before_bytes": 20754432,
+      "peak_rss_after_bytes": 20791296,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3208,
+      "repeat": 2
+    },
+    {
+      "stage": "import",
+      "rows": 0,
+      "samples_ns": [
+        457.03125,
+        462.451171875,
+        460.4736328125,
+        459.912109375,
+        460.595703125,
+        464.3310546875,
+        459.08203125,
+        456.34765625,
+        452.734375
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1872000,
+        1894200,
+        1886100,
+        1883800,
+        1886600,
+        1901900,
+        1880400,
+        1869200,
+        1854400
+      ],
+      "cold_single_call_ns": 1700,
+      "calibration": [
+        {
+          "iterations": 1177,
+          "total_ns": 551900
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1909000
+        }
+      ],
+      "median_ns": 459.912109375,
+      "min_ns": 452.734375,
+      "max_ns": 464.3310546875,
+      "peak_rss_before_bytes": 20885504,
+      "peak_rss_after_bytes": 20922368,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3208,
+      "repeat": 3
+    },
+    {
+      "stage": "apply",
+      "rows": 0,
+      "samples_ns": [
+        306.54296875,
+        302.978515625,
+        304.8095703125,
+        305.517578125,
+        300.4150390625,
+        294.2626953125,
+        297.9736328125,
+        293.115234375,
+        294.3115234375
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1255600,
+        1241000,
+        1248500,
+        1251400,
+        1230500,
+        1205300,
+        1220500,
+        1200600,
+        1205500
+      ],
+      "cold_single_call_ns": 12800,
+      "calibration": [
+        {
+          "iterations": 157,
+          "total_ns": 49400
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1225900
+        }
+      ],
+      "median_ns": 300.4150390625,
+      "min_ns": 293.115234375,
+      "max_ns": 306.54296875,
+      "peak_rss_before_bytes": 20815872,
+      "peak_rss_after_bytes": 20852736,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "convert",
+      "rows": 0,
+      "samples_ns": [
+        294.9462890625,
+        295.6787109375,
+        292.2607421875,
+        292.3828125,
+        294.384765625,
+        295.01953125,
+        303.6865234375,
+        293.798828125,
+        295.0439453125
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1208100,
+        1211100,
+        1197100,
+        1197600,
+        1205800,
+        1208400,
+        1243900,
+        1203400,
+        1208500
+      ],
+      "cold_single_call_ns": 2100,
+      "calibration": [
+        {
+          "iterations": 953,
+          "total_ns": 278700
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1238200
+        }
+      ],
+      "median_ns": 294.9462890625,
+      "min_ns": 292.2607421875,
+      "max_ns": 303.6865234375,
+      "peak_rss_before_bytes": 20844544,
+      "peak_rss_after_bytes": 20901888,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "export_first",
+      "rows": 0,
+      "samples_ns": [
+        1247.8287092882993,
+        1279.7346200241254,
+        1299.1556091676719,
+        1290.7117008443909,
+        1301.3872135102533,
+        1232.4487334137516,
+        1202.4728588661037,
+        1298.9746682750301,
+        1201.990349819059
+      ],
+      "iterations_per_sample": [
+        1658,
+        1658,
+        1658,
+        1658,
+        1658,
+        1658,
+        1658,
+        1658,
+        1658
+      ],
+      "sample_totals_ns": [
+        2068900,
+        2121800,
+        2154000,
+        2140000,
+        2157700,
+        2043400,
+        1993700,
+        2153700,
+        1992900
+      ],
+      "cold_single_call_ns": 13900,
+      "calibration": [
+        {
+          "iterations": 144,
+          "total_ns": 214900
+        },
+        {
+          "iterations": 1341,
+          "total_ns": 1676500
+        },
+        {
+          "iterations": 1600,
+          "total_ns": 1951600
+        },
+        {
+          "iterations": 1640,
+          "total_ns": 1990600
+        },
+        {
+          "iterations": 1648,
+          "total_ns": 1988300
+        },
+        {
+          "iterations": 1658,
+          "total_ns": 2087500
+        }
+      ],
+      "median_ns": 1279.7346200241254,
+      "min_ns": 1201.990349819059,
+      "max_ns": 1301.3872135102533,
+      "peak_rss_before_bytes": 21127168,
+      "peak_rss_after_bytes": 21176320,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3608,
+      "repeat": 3
+    },
+    {
+      "stage": "export_cached",
+      "rows": 0,
+      "samples_ns": [
+        1101.978021978022,
+        1063.131868131868,
+        1096.5384615384614,
+        1113.901098901099,
+        1098.5164835164835,
+        1121.2637362637363,
+        1096.3736263736264,
+        1098.7912087912089,
+        1089.065934065934
+      ],
+      "iterations_per_sample": [
+        1820,
+        1820,
+        1820,
+        1820,
+        1820,
+        1820,
+        1820,
+        1820,
+        1820
+      ],
+      "sample_totals_ns": [
+        2005600,
+        1934900,
+        1995700,
+        2027300,
+        1999300,
+        2040700,
+        1995400,
+        1999800,
+        1982100
+      ],
+      "cold_single_call_ns": 3300,
+      "calibration": [
+        {
+          "iterations": 607,
+          "total_ns": 696900
+        },
+        {
+          "iterations": 1743,
+          "total_ns": 1941400
+        },
+        {
+          "iterations": 1796,
+          "total_ns": 1974400
+        },
+        {
+          "iterations": 1820,
+          "total_ns": 2006100
+        }
+      ],
+      "median_ns": 1098.5164835164835,
+      "min_ns": 1063.131868131868,
+      "max_ns": 1121.2637362637363,
+      "peak_rss_before_bytes": 20783104,
+      "peak_rss_after_bytes": 20836352,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3493,
+      "repeat": 3
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 0,
+      "samples_ns": [
+        2183.8992332968237,
+        2165.6078860898137,
+        2255.9693318729464,
+        2217.196056955093,
+        2238.9923329682365,
+        2221.4676889375683,
+        2225.082146768894,
+        2233.2968236582697,
+        2220.591456736035
+      ],
+      "iterations_per_sample": [
+        913,
+        913,
+        913,
+        913,
+        913,
+        913,
+        913,
+        913,
+        913
+      ],
+      "sample_totals_ns": [
+        1993900,
+        1977200,
+        2059700,
+        2024300,
+        2044200,
+        2028200,
+        2031500,
+        2039000,
+        2027400
+      ],
+      "cold_single_call_ns": 27000,
+      "calibration": [
+        {
+          "iterations": 75,
+          "total_ns": 188400
+        },
+        {
+          "iterations": 797,
+          "total_ns": 1766900
+        },
+        {
+          "iterations": 903,
+          "total_ns": 1980700
+        },
+        {
+          "iterations": 912,
+          "total_ns": 1999400
+        },
+        {
+          "iterations": 913,
+          "total_ns": 2047400
+        }
+      ],
+      "median_ns": 2221.4676889375683,
+      "min_ns": 2165.6078860898137,
+      "max_ns": 2255.9693318729464,
+      "peak_rss_before_bytes": 20754432,
+      "peak_rss_after_bytes": 20856832,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3493,
+      "repeat": 3
+    },
+    {
+      "stage": "import",
+      "rows": 1,
+      "samples_ns": [
+        569.2198581560284,
+        554.0141843971631,
+        571.6879432624113,
+        575.9148936170212,
+        565.6170212765958,
+        563.886524822695,
+        572.6241134751773,
+        568.2836879432624,
+        579.9716312056737
+      ],
+      "iterations_per_sample": [
+        3525,
+        3525,
+        3525,
+        3525,
+        3525,
+        3525,
+        3525,
+        3525,
+        3525
+      ],
+      "sample_totals_ns": [
+        2006500,
+        1952900,
+        2015200,
+        2030100,
+        1993800,
+        1987700,
+        2018500,
+        2003200,
+        2044400
+      ],
+      "cold_single_call_ns": 1800,
+      "calibration": [
+        {
+          "iterations": 1112,
+          "total_ns": 631100
+        },
+        {
+          "iterations": 3525,
+          "total_ns": 2011100
+        }
+      ],
+      "median_ns": 569.2198581560284,
+      "min_ns": 554.0141843971631,
+      "max_ns": 579.9716312056737,
+      "peak_rss_before_bytes": 20721664,
+      "peak_rss_after_bytes": 20758528,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3208,
+      "repeat": 3
+    },
+    {
+      "stage": "apply",
+      "rows": 1,
+      "samples_ns": [
+        385.546875,
+        384.033203125,
+        374.7314453125,
+        376.5869140625,
+        372.94921875,
+        375.3662109375,
+        372.509765625,
+        382.666015625,
+        370.556640625
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1579200,
+        1573000,
+        1534900,
+        1542500,
+        1527600,
+        1537500,
+        1525800,
+        1567400,
+        1517800
+      ],
+      "cold_single_call_ns": 14600,
+      "calibration": [
+        {
+          "iterations": 137,
+          "total_ns": 55700
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1582900
+        }
+      ],
+      "median_ns": 375.3662109375,
+      "min_ns": 370.556640625,
+      "max_ns": 385.546875,
+      "peak_rss_before_bytes": 20869120,
+      "peak_rss_after_bytes": 20905984,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "convert",
+      "rows": 1,
+      "samples_ns": [
+        371.4111328125,
+        367.9443359375,
+        368.84765625,
+        386.0107421875,
+        370.8984375,
+        368.6279296875,
+        378.6865234375,
+        375.537109375,
+        375.390625
+      ],
+      "iterations_per_sample": [
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096,
+        4096
+      ],
+      "sample_totals_ns": [
+        1521300,
+        1507100,
+        1510800,
+        1581100,
+        1519200,
+        1509900,
+        1551100,
+        1538200,
+        1537600
+      ],
+      "cold_single_call_ns": 2300,
+      "calibration": [
+        {
+          "iterations": 870,
+          "total_ns": 329700
+        },
+        {
+          "iterations": 4096,
+          "total_ns": 1547900
+        }
+      ],
+      "median_ns": 371.4111328125,
+      "min_ns": 367.9443359375,
+      "max_ns": 386.0107421875,
+      "peak_rss_before_bytes": 20549632,
+      "peak_rss_after_bytes": 20594688,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "export_first",
+      "rows": 1,
+      "samples_ns": [
+        1270.1282834453268,
+        1256.261453879047,
+        1261.9425778863774,
+        1283.1398900427612,
+        1245.6322541233965,
+        1243.860720830788,
+        1256.5058032987172,
+        1241.8448381185094,
+        1288.9431887599267
+      ],
+      "iterations_per_sample": [
+        1637,
+        1637,
+        1637,
+        1637,
+        1637,
+        1637,
+        1637,
+        1637,
+        1637
+      ],
+      "sample_totals_ns": [
+        2079200,
+        2056500,
+        2065800,
+        2100500,
+        2039100,
+        2036200,
+        2056900,
+        2032900,
+        2110000
+      ],
+      "cold_single_call_ns": 14500,
+      "calibration": [
+        {
+          "iterations": 138,
+          "total_ns": 226400
+        },
+        {
+          "iterations": 1220,
+          "total_ns": 1749700
+        },
+        {
+          "iterations": 1395,
+          "total_ns": 1724300
+        },
+        {
+          "iterations": 1619,
+          "total_ns": 1978500
+        },
+        {
+          "iterations": 1637,
+          "total_ns": 2038700
+        }
+      ],
+      "median_ns": 1256.5058032987172,
+      "min_ns": 1241.8448381185094,
+      "max_ns": 1288.9431887599267,
+      "peak_rss_before_bytes": 21262336,
+      "peak_rss_after_bytes": 21291008,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 2481,
+      "python_traced_peak_bytes": 3697,
+      "repeat": 3
+    },
+    {
+      "stage": "export_cached",
+      "rows": 1,
+      "samples_ns": [
+        1008.282208588957,
+        1014.5705521472393,
+        1080.6237218813906,
+        1093.4049079754602,
+        1072.0858895705521,
+        1057.3108384458078,
+        1082.9754601226994,
+        1051.7382413087935,
+        1049.079754601227
+      ],
+      "iterations_per_sample": [
+        1956,
+        1956,
+        1956,
+        1956,
+        1956,
+        1956,
+        1956,
+        1956,
+        1956
+      ],
+      "sample_totals_ns": [
+        1972200,
+        1984500,
+        2113700,
+        2138700,
+        2097000,
+        2068100,
+        2118300,
+        2057200,
+        2052000
+      ],
+      "cold_single_call_ns": 2900,
+      "calibration": [
+        {
+          "iterations": 690,
+          "total_ns": 724800
+        },
+        {
+          "iterations": 1904,
+          "total_ns": 1947100
+        },
+        {
+          "iterations": 1956,
+          "total_ns": 2023200
+        }
+      ],
+      "median_ns": 1057.3108384458078,
+      "min_ns": 1008.282208588957,
+      "max_ns": 1093.4049079754602,
+      "peak_rss_before_bytes": 20779008,
+      "peak_rss_after_bytes": 20819968,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2373,
+      "python_traced_peak_bytes": 3589,
+      "repeat": 3
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 1,
+      "samples_ns": [
+        2403.4642032332563,
+        2437.875288683603,
+        2409.699769053118,
+        2402.886836027714,
+        2401.270207852194,
+        2403.002309468822,
+        2365.011547344111,
+        2346.5357967667437,
+        2335.4503464203235
+      ],
+      "iterations_per_sample": [
+        866,
+        866,
+        866,
+        866,
+        866,
+        866,
+        866,
+        866,
+        866
+      ],
+      "sample_totals_ns": [
+        2081400,
+        2111200,
+        2086800,
+        2080900,
+        2079500,
+        2081000,
+        2048100,
+        2032100,
+        2022500
+      ],
+      "cold_single_call_ns": 28900,
+      "calibration": [
+        {
+          "iterations": 70,
+          "total_ns": 188200
+        },
+        {
+          "iterations": 744,
+          "total_ns": 1718400
+        },
+        {
+          "iterations": 866,
+          "total_ns": 2041100
+        }
+      ],
+      "median_ns": 2402.886836027714,
+      "min_ns": 2335.4503464203235,
+      "max_ns": 2437.875288683603,
+      "peak_rss_before_bytes": 20910080,
+      "peak_rss_after_bytes": 20942848,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 2481,
+      "python_traced_peak_bytes": 3633,
+      "repeat": 3
+    },
+    {
+      "stage": "import",
+      "rows": 64,
+      "samples_ns": [
+        722.9374110953058,
+        728.3783783783783,
+        728.1294452347084,
+        735.1351351351351,
+        732.3613086770981,
+        723.3641536273116,
+        732.0412517780939,
+        734.0682788051209,
+        730.9388335704125
+      ],
+      "iterations_per_sample": [
+        2812,
+        2812,
+        2812,
+        2812,
+        2812,
+        2812,
+        2812,
+        2812,
+        2812
+      ],
+      "sample_totals_ns": [
+        2032900,
+        2048200,
+        2047500,
+        2067200,
+        2059400,
+        2034100,
+        2058500,
+        2064200,
+        2055400
+      ],
+      "cold_single_call_ns": 2300,
+      "calibration": [
+        {
+          "iterations": 870,
+          "total_ns": 853000
+        },
+        {
+          "iterations": 2040,
+          "total_ns": 1779800
+        },
+        {
+          "iterations": 2293,
+          "total_ns": 1631100
+        },
+        {
+          "iterations": 2812,
+          "total_ns": 2004800
+        }
+      ],
+      "median_ns": 730.9388335704125,
+      "min_ns": 722.9374110953058,
+      "max_ns": 735.1351351351351,
+      "peak_rss_before_bytes": 20553728,
+      "peak_rss_after_bytes": 20611072,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "apply",
+      "rows": 64,
+      "samples_ns": [
+        785.0699844479004,
+        808.203732503888,
+        755.5598755832037,
+        769.5567651632971,
+        769.6345256609642,
+        765.8242612752722,
+        767.5738724727838,
+        783.3203732503888,
+        766.6407465007776
+      ],
+      "iterations_per_sample": [
+        2572,
+        2572,
+        2572,
+        2572,
+        2572,
+        2572,
+        2572,
+        2572,
+        2572
+      ],
+      "sample_totals_ns": [
+        2019200,
+        2078700,
+        1943300,
+        1979300,
+        1979500,
+        1969700,
+        1974200,
+        2014700,
+        1971800
+      ],
+      "cold_single_call_ns": 13600,
+      "calibration": [
+        {
+          "iterations": 148,
+          "total_ns": 144100
+        },
+        {
+          "iterations": 2055,
+          "total_ns": 1945900
+        },
+        {
+          "iterations": 2113,
+          "total_ns": 1658200
+        },
+        {
+          "iterations": 2549,
+          "total_ns": 1982600
+        },
+        {
+          "iterations": 2572,
+          "total_ns": 2003900
+        }
+      ],
+      "median_ns": 769.5567651632971,
+      "min_ns": 755.5598755832037,
+      "max_ns": 808.203732503888,
+      "peak_rss_before_bytes": 20787200,
+      "peak_rss_after_bytes": 20844544,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "convert",
+      "rows": 64,
+      "samples_ns": [
+        675.624577987846,
+        674.1390952059419,
+        674.611748818366,
+        682.3767724510466,
+        676.3673193787981,
+        664.0783254557731,
+        666.1377447670493,
+        668.6698176907495,
+        673.5651586765699
+      ],
+      "iterations_per_sample": [
+        2962,
+        2962,
+        2962,
+        2962,
+        2962,
+        2962,
+        2962,
+        2962,
+        2962
+      ],
+      "sample_totals_ns": [
+        2001200,
+        1996800,
+        1998200,
+        2021200,
+        2003400,
+        1967000,
+        1973100,
+        1980600,
+        1995100
+      ],
+      "cold_single_call_ns": 2900,
+      "calibration": [
+        {
+          "iterations": 690,
+          "total_ns": 616200
+        },
+        {
+          "iterations": 2240,
+          "total_ns": 1815100
+        },
+        {
+          "iterations": 2469,
+          "total_ns": 1670000
+        },
+        {
+          "iterations": 2957,
+          "total_ns": 1996900
+        },
+        {
+          "iterations": 2962,
+          "total_ns": 2000800
+        }
+      ],
+      "median_ns": 674.1390952059419,
+      "min_ns": 664.0783254557731,
+      "max_ns": 682.3767724510466,
+      "peak_rss_before_bytes": 20553728,
+      "peak_rss_after_bytes": 20594688,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "export_first",
+      "rows": 64,
+      "samples_ns": [
+        2202.607076350093,
+        2080.633147113594,
+        2081.9366852886405,
+        2037.8957169459964,
+        2053.2588454376164,
+        2061.5456238361267,
+        2052.979515828678,
+        2065.921787709497,
+        2056.145251396648
+      ],
+      "iterations_per_sample": [
+        1074,
+        1074,
+        1074,
+        1074,
+        1074,
+        1074,
+        1074,
+        1074,
+        1074
+      ],
+      "sample_totals_ns": [
+        2365600,
+        2234600,
+        2236000,
+        2188700,
+        2205200,
+        2214100,
+        2204900,
+        2218800,
+        2208300
+      ],
+      "cold_single_call_ns": 14500,
+      "calibration": [
+        {
+          "iterations": 138,
+          "total_ns": 366300
+        },
+        {
+          "iterations": 754,
+          "total_ns": 1888500
+        },
+        {
+          "iterations": 799,
+          "total_ns": 1757100
+        },
+        {
+          "iterations": 910,
+          "total_ns": 1761800
+        },
+        {
+          "iterations": 1034,
+          "total_ns": 1927100
+        },
+        {
+          "iterations": 1074,
+          "total_ns": 2102600
+        }
+      ],
+      "median_ns": 2061.5456238361267,
+      "min_ns": 2037.8957169459964,
+      "max_ns": 2202.607076350093,
+      "peak_rss_before_bytes": 24629248,
+      "peak_rss_after_bytes": 24629248,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 3993,
+      "python_traced_peak_bytes": 5177,
+      "repeat": 3
+    },
+    {
+      "stage": "export_cached",
+      "rows": 64,
+      "samples_ns": [
+        1054.4624746450304,
+        1017.5963488843813,
+        1047.10953346856,
+        1058.5192697768762,
+        1021.4503042596349,
+        1016.683569979716,
+        1066.1257606490872,
+        1080.476673427992,
+        1040.212981744422
+      ],
+      "iterations_per_sample": [
+        1972,
+        1972,
+        1972,
+        1972,
+        1972,
+        1972,
+        1972,
+        1972,
+        1972
+      ],
+      "sample_totals_ns": [
+        2079400,
+        2006700,
+        2064900,
+        2087400,
+        2014300,
+        2004900,
+        2102400,
+        2130700,
+        2051300
+      ],
+      "cold_single_call_ns": 2900,
+      "calibration": [
+        {
+          "iterations": 690,
+          "total_ns": 700700
+        },
+        {
+          "iterations": 1970,
+          "total_ns": 1998300
+        },
+        {
+          "iterations": 1972,
+          "total_ns": 2001400
+        }
+      ],
+      "median_ns": 1047.10953346856,
+      "min_ns": 1016.683569979716,
+      "max_ns": 1080.476673427992,
+      "peak_rss_before_bytes": 20791296,
+      "peak_rss_after_bytes": 20828160,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3608,
+      "repeat": 3
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 64,
+      "samples_ns": [
+        3081.5634218289088,
+        3097.197640117994,
+        3187.905604719764,
+        3042.6253687315634,
+        3075.221238938053,
+        3071.0914454277286,
+        3025.5162241887906,
+        3083.038348082596,
+        3101.9174041297933
+      ],
+      "iterations_per_sample": [
+        678,
+        678,
+        678,
+        678,
+        678,
+        678,
+        678,
+        678,
+        678
+      ],
+      "sample_totals_ns": [
+        2089300,
+        2099900,
+        2161400,
+        2062900,
+        2085000,
+        2082200,
+        2051300,
+        2090300,
+        2103100
+      ],
+      "cold_single_call_ns": 31100,
+      "calibration": [
+        {
+          "iterations": 65,
+          "total_ns": 257000
+        },
+        {
+          "iterations": 506,
+          "total_ns": 1897300
+        },
+        {
+          "iterations": 534,
+          "total_ns": 1966600
+        },
+        {
+          "iterations": 544,
+          "total_ns": 1794100
+        },
+        {
+          "iterations": 607,
+          "total_ns": 1916600
+        },
+        {
+          "iterations": 634,
+          "total_ns": 1998700
+        },
+        {
+          "iterations": 635,
+          "total_ns": 1873500
+        },
+        {
+          "iterations": 678,
+          "total_ns": 2009900
+        }
+      ],
+      "median_ns": 3081.5634218289088,
+      "min_ns": 3025.5162241887906,
+      "max_ns": 3187.905604719764,
+      "peak_rss_before_bytes": 20819968,
+      "peak_rss_after_bytes": 20922368,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 3993,
+      "python_traced_peak_bytes": 5145,
+      "repeat": 3
+    },
+    {
+      "stage": "import",
+      "rows": 4096,
+      "samples_ns": [
+        11389.560439560439,
+        11119.78021978022,
+        11091.208791208792,
+        11652.197802197803,
+        11182.417582417582,
+        11420.329670329671,
+        11101.098901098901,
+        11091.758241758242,
+        11103.846153846154
+      ],
+      "iterations_per_sample": [
+        182,
+        182,
+        182,
+        182,
+        182,
+        182,
+        182,
+        182,
+        182
+      ],
+      "sample_totals_ns": [
+        2072900,
+        2023800,
+        2018600,
+        2120700,
+        2035200,
+        2078500,
+        2020400,
+        2018700,
+        2020900
+      ],
+      "cold_single_call_ns": 115900,
+      "calibration": [
+        {
+          "iterations": 18,
+          "total_ns": 309700
+        },
+        {
+          "iterations": 117,
+          "total_ns": 1301000
+        },
+        {
+          "iterations": 180,
+          "total_ns": 1987900
+        },
+        {
+          "iterations": 182,
+          "total_ns": 2011800
+        }
+      ],
+      "median_ns": 11119.78021978022,
+      "min_ns": 11091.208791208792,
+      "max_ns": 11652.197802197803,
+      "peak_rss_before_bytes": 21237760,
+      "peak_rss_after_bytes": 21278720,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "apply",
+      "rows": 4096,
+      "samples_ns": [
+        24956.79012345679,
+        24900.0,
+        24875.30864197531,
+        25465.432098765432,
+        25064.197530864196,
+        25170.37037037037,
+        26790.123456790123,
+        24888.88888888889,
+        24864.197530864196
+      ],
+      "iterations_per_sample": [
+        81,
+        81,
+        81,
+        81,
+        81,
+        81,
+        81,
+        81,
+        81
+      ],
+      "sample_totals_ns": [
+        2021500,
+        2016900,
+        2014900,
+        2062700,
+        2030200,
+        2038800,
+        2170000,
+        2016000,
+        2014000
+      ],
+      "cold_single_call_ns": 156200,
+      "calibration": [
+        {
+          "iterations": 13,
+          "total_ns": 376500
+        },
+        {
+          "iterations": 70,
+          "total_ns": 1744100
+        },
+        {
+          "iterations": 81,
+          "total_ns": 2012000
+        }
+      ],
+      "median_ns": 24956.79012345679,
+      "min_ns": 24864.197530864196,
+      "max_ns": 26790.123456790123,
+      "peak_rss_before_bytes": 20901888,
+      "peak_rss_after_bytes": 20951040,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "convert",
+      "rows": 4096,
+      "samples_ns": [
+        19137.735849056604,
+        19145.283018867925,
+        19122.64150943396,
+        19069.811320754718,
+        19502.830188679247,
+        19098.11320754717,
+        19088.67924528302,
+        19033.01886792453,
+        19096.22641509434
+      ],
+      "iterations_per_sample": [
+        106,
+        106,
+        106,
+        106,
+        106,
+        106,
+        106,
+        106,
+        106
+      ],
+      "sample_totals_ns": [
+        2028600,
+        2029400,
+        2027000,
+        2021400,
+        2067300,
+        2024400,
+        2023400,
+        2017500,
+        2024200
+      ],
+      "cold_single_call_ns": 139000,
+      "calibration": [
+        {
+          "iterations": 15,
+          "total_ns": 342700
+        },
+        {
+          "iterations": 88,
+          "total_ns": 1675900
+        },
+        {
+          "iterations": 106,
+          "total_ns": 2058600
+        }
+      ],
+      "median_ns": 19098.11320754717,
+      "min_ns": 19033.01886792453,
+      "max_ns": 19502.830188679247,
+      "peak_rss_before_bytes": 21098496,
+      "peak_rss_after_bytes": 21139456,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "export_first",
+      "rows": 4096,
+      "samples_ns": [
+        102209.52380952382,
+        104147.61904761905,
+        110333.33333333333,
+        99833.33333333333,
+        112185.71428571429,
+        95304.76190476191,
+        97476.19047619047,
+        105028.57142857143,
+        98838.09523809524
+      ],
+      "iterations_per_sample": [
+        21,
+        21,
+        21,
+        21,
+        21,
+        21,
+        21,
+        21,
+        21
+      ],
+      "sample_totals_ns": [
+        2146400,
+        2187100,
+        2317000,
+        2096500,
+        2355900,
+        2001400,
+        2047000,
+        2205600,
+        2075600
+      ],
+      "cold_single_call_ns": 125800,
+      "calibration": [
+        {
+          "iterations": 16,
+          "total_ns": 1664300
+        },
+        {
+          "iterations": 20,
+          "total_ns": 1971900
+        },
+        {
+          "iterations": 21,
+          "total_ns": 2060900
+        }
+      ],
+      "median_ns": 102209.52380952382,
+      "min_ns": 95304.76190476191,
+      "max_ns": 112185.71428571429,
+      "peak_rss_before_bytes": 25161728,
+      "peak_rss_after_bytes": 25161728,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 100761,
+      "python_traced_peak_bytes": 101945,
+      "repeat": 3
+    },
+    {
+      "stage": "export_cached",
+      "rows": 4096,
+      "samples_ns": [
+        1105.5420515313563,
+        1061.5945551774428,
+        1043.9961108410307,
+        1075.0121536217794,
+        1100.4375303840545,
+        1029.8006806028197,
+        1098.2498784637821,
+        1012.8342245989305,
+        997.909577053962
+      ],
+      "iterations_per_sample": [
+        2057,
+        2057,
+        2057,
+        2057,
+        2057,
+        2057,
+        2057,
+        2057,
+        2057
+      ],
+      "sample_totals_ns": [
+        2274100,
+        2183700,
+        2147500,
+        2211300,
+        2263600,
+        2118300,
+        2259100,
+        2083400,
+        2052700
+      ],
+      "cold_single_call_ns": 2800,
+      "calibration": [
+        {
+          "iterations": 715,
+          "total_ns": 703000
+        },
+        {
+          "iterations": 2035,
+          "total_ns": 1989700
+        },
+        {
+          "iterations": 2046,
+          "total_ns": 1990100
+        },
+        {
+          "iterations": 2057,
+          "total_ns": 2045900
+        }
+      ],
+      "median_ns": 1061.5945551774428,
+      "min_ns": 997.909577053962,
+      "max_ns": 1105.5420515313563,
+      "peak_rss_before_bytes": 21098496,
+      "peak_rss_after_bytes": 21135360,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3576,
+      "repeat": 3
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 4096,
+      "samples_ns": [
+        44265.217391304344,
+        44226.086956521736,
+        44843.47826086957,
+        43978.260869565216,
+        44297.82608695652,
+        43773.913043478264,
+        43960.86956521739,
+        43769.565217391304,
+        44332.608695652176
+      ],
+      "iterations_per_sample": [
+        46,
+        46,
+        46,
+        46,
+        46,
+        46,
+        46,
+        46,
+        46
+      ],
+      "sample_totals_ns": [
+        2036200,
+        2034400,
+        2062800,
+        2023000,
+        2037700,
+        2013600,
+        2022200,
+        2013400,
+        2039300
+      ],
+      "cold_single_call_ns": 340000,
+      "calibration": [
+        {
+          "iterations": 6,
+          "total_ns": 328400
+        },
+        {
+          "iterations": 37,
+          "total_ns": 1671800
+        },
+        {
+          "iterations": 45,
+          "total_ns": 1959900
+        },
+        {
+          "iterations": 46,
+          "total_ns": 2004100
+        }
+      ],
+      "median_ns": 44226.086956521736,
+      "min_ns": 43769.565217391304,
+      "max_ns": 44843.47826086957,
+      "peak_rss_before_bytes": 21098496,
+      "peak_rss_after_bytes": 21135360,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 100761,
+      "python_traced_peak_bytes": 101977,
+      "repeat": 3
+    },
+    {
+      "stage": "import",
+      "rows": 65536,
+      "samples_ns": [
+        668950.0,
+        661475.0,
+        656675.0,
+        698675.0,
+        661425.0,
+        641950.0,
+        657250.0,
+        639025.0,
+        673525.0
+      ],
+      "iterations_per_sample": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "sample_totals_ns": [
+        2675800,
+        2645900,
+        2626700,
+        2794700,
+        2645700,
+        2567800,
+        2629000,
+        2556100,
+        2694100
+      ],
+      "cold_single_call_ns": 592000,
+      "calibration": [
+        {
+          "iterations": 4,
+          "total_ns": 2852900
+        }
+      ],
+      "median_ns": 661425.0,
+      "min_ns": 639025.0,
+      "max_ns": 698675.0,
+      "peak_rss_before_bytes": 26750976,
+      "peak_rss_after_bytes": 26750976,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "apply",
+      "rows": 65536,
+      "samples_ns": [
+        824233.3333333334,
+        824566.6666666666,
+        845233.3333333334,
+        859666.6666666666,
+        858233.3333333334,
+        844800.0,
+        863533.3333333334,
+        860266.6666666666,
+        873866.6666666666
+      ],
+      "iterations_per_sample": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "sample_totals_ns": [
+        2472700,
+        2473700,
+        2535700,
+        2579000,
+        2574700,
+        2534400,
+        2590600,
+        2580800,
+        2621600
+      ],
+      "cold_single_call_ns": 796300,
+      "calibration": [
+        {
+          "iterations": 3,
+          "total_ns": 2408900
+        }
+      ],
+      "median_ns": 858233.3333333334,
+      "min_ns": 824233.3333333334,
+      "max_ns": 873866.6666666666,
+      "peak_rss_before_bytes": 27049984,
+      "peak_rss_after_bytes": 27049984,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "convert",
+      "rows": 65536,
+      "samples_ns": [
+        770533.3333333334,
+        736133.3333333334,
+        731800.0,
+        713866.6666666666,
+        745033.3333333334,
+        740333.3333333334,
+        712900.0,
+        713066.6666666666,
+        732566.6666666666
+      ],
+      "iterations_per_sample": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "sample_totals_ns": [
+        2311600,
+        2208400,
+        2195400,
+        2141600,
+        2235100,
+        2221000,
+        2138700,
+        2139200,
+        2197700
+      ],
+      "cold_single_call_ns": 699900,
+      "calibration": [
+        {
+          "iterations": 3,
+          "total_ns": 2235500
+        }
+      ],
+      "median_ns": 732566.6666666666,
+      "min_ns": 712900.0,
+      "max_ns": 770533.3333333334,
+      "peak_rss_before_bytes": 26660864,
+      "peak_rss_after_bytes": 26660864,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2056,
+      "python_traced_peak_bytes": 3272,
+      "repeat": 3
+    },
+    {
+      "stage": "export_first",
+      "rows": 65536,
+      "samples_ns": [
+        653700.0,
+        656350.0,
+        667475.0,
+        648650.0,
+        644275.0,
+        647225.0,
+        653750.0,
+        652300.0,
+        650325.0
+      ],
+      "iterations_per_sample": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "sample_totals_ns": [
+        2614800,
+        2625400,
+        2669900,
+        2594600,
+        2577100,
+        2588900,
+        2615000,
+        2609200,
+        2601300
+      ],
+      "cold_single_call_ns": 509000,
+      "calibration": [
+        {
+          "iterations": 4,
+          "total_ns": 2598600
+        }
+      ],
+      "median_ns": 652300.0,
+      "min_ns": 644275.0,
+      "max_ns": 667475.0,
+      "peak_rss_before_bytes": 36188160,
+      "peak_rss_after_bytes": 36188160,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 1575321,
+      "python_traced_peak_bytes": 1576505,
+      "repeat": 3
+    },
+    {
+      "stage": "export_cached",
+      "rows": 65536,
+      "samples_ns": [
+        1073.3428707677635,
+        1064.4253695755842,
+        996.1850262279447,
+        1100.0476871721507,
+        1065.8082975679542,
+        1008.8221268478779,
+        1068.6695278969958,
+        1065.7129232236528,
+        992.2269909394373
+      ],
+      "iterations_per_sample": [
+        2097,
+        2097,
+        2097,
+        2097,
+        2097,
+        2097,
+        2097,
+        2097,
+        2097
+      ],
+      "sample_totals_ns": [
+        2250800,
+        2232100,
+        2089000,
+        2306800,
+        2235000,
+        2115500,
+        2241000,
+        2234800,
+        2080700
+      ],
+      "cold_single_call_ns": 2900,
+      "calibration": [
+        {
+          "iterations": 690,
+          "total_ns": 672300
+        },
+        {
+          "iterations": 2053,
+          "total_ns": 1989300
+        },
+        {
+          "iterations": 2065,
+          "total_ns": 1969500
+        },
+        {
+          "iterations": 2097,
+          "total_ns": 2033900
+        }
+      ],
+      "median_ns": 1065.7129232236528,
+      "min_ns": 992.2269909394373,
+      "max_ns": 1100.0476871721507,
+      "peak_rss_before_bytes": 25530368,
+      "peak_rss_after_bytes": 25587712,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2424,
+      "python_traced_peak_bytes": 3608,
+      "repeat": 3
+    },
+    {
+      "stage": "end_to_end",
+      "rows": 65536,
+      "samples_ns": [
+        2134000.0,
+        2185400.0,
+        2113500.0,
+        2039400.0,
+        2105300.0,
+        2046500.0,
+        2042500.0,
+        2095300.0,
+        2099700.0
+      ],
+      "iterations_per_sample": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "sample_totals_ns": [
+        2134000,
+        2185400,
+        2113500,
+        2039400,
+        2105300,
+        2046500,
+        2042500,
+        2095300,
+        2099700
+      ],
+      "cold_single_call_ns": 2190600,
+      "calibration": [
+        {
+          "iterations": 1,
+          "total_ns": 2128800
+        }
+      ],
+      "median_ns": 2099700.0,
+      "min_ns": 2039400.0,
+      "max_ns": 2185400.0,
+      "peak_rss_before_bytes": 26779648,
+      "peak_rss_after_bytes": 26931200,
+      "retained_python_blocks": 11,
+      "python_traced_current_bytes": 1575321,
+      "python_traced_peak_bytes": 1576505,
+      "repeat": 3
+    },
+    {
+      "stage": "scalar_calls",
+      "rows": 1,
+      "samples_ns": [
+        3577.992957746479,
+        3592.605633802817,
+        3620.4225352112676,
+        3579.7535211267605,
+        3577.288732394366,
+        3543.3098591549297,
+        3548.7676056338028,
+        3532.5704225352115,
+        3532.394366197183
+      ],
+      "iterations_per_sample": [
+        568,
+        568,
+        568,
+        568,
+        568,
+        568,
+        568,
+        568,
+        568
+      ],
+      "sample_totals_ns": [
+        2032300,
+        2040600,
+        2056400,
+        2033300,
+        2031900,
+        2012600,
+        2015700,
+        2006500,
+        2006400
+      ],
+      "cold_single_call_ns": 44700,
+      "calibration": [
+        {
+          "iterations": 45,
+          "total_ns": 186700
+        },
+        {
+          "iterations": 483,
+          "total_ns": 1732300
+        },
+        {
+          "iterations": 558,
+          "total_ns": 1979700
+        },
+        {
+          "iterations": 564,
+          "total_ns": 1988400
+        },
+        {
+          "iterations": 568,
+          "total_ns": 2019500
+        }
+      ],
+      "median_ns": 3577.288732394366,
+      "min_ns": 3532.394366197183,
+      "max_ns": 3620.4225352112676,
+      "peak_rss_before_bytes": 20975616,
+      "peak_rss_after_bytes": 21078016,
+      "retained_python_blocks": 10,
+      "python_traced_current_bytes": 2456,
+      "python_traced_peak_bytes": 3928,
+      "repeat": 3
+    },
+    {
+      "stage": "scalar_calls",
+      "rows": 64,
+      "samples_ns": [
+        199063.63636363635,
+        191281.81818181818,
+        191036.36363636365,
+        191172.72727272726,
+        189163.63636363635,
+        194954.54545454544,
+        191372.72727272726,
+        190927.27272727274,
+        191854.54545454544
+      ],
+      "iterations_per_sample": [
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11,
+        11
+      ],
+      "sample_totals_ns": [
+        2189700,
+        2104100,
+        2101400,
+        2102900,
+        2080800,
+        2144500,
+        2105100,
+        2100200,
+        2110400
+      ],
+      "cold_single_call_ns": 246200,
+      "calibration": [
+        {
+          "iterations": 9,
+          "total_ns": 1719000
+        },
+        {
+          "iterations": 11,
+          "total_ns": 2073700
+        }
+      ],
+      "median_ns": 191281.81818181818,
+      "min_ns": 189163.63636363635,
+      "max_ns": 199063.63636363635,
+      "peak_rss_before_bytes": 20692992,
+      "peak_rss_after_bytes": 20738048,
+      "retained_python_blocks": 75,
+      "python_traced_current_bytes": 7303,
+      "python_traced_peak_bytes": 8775,
+      "repeat": 3
+    },
+    {
+      "stage": "scalar_calls",
+      "rows": 4096,
+      "samples_ns": [
+        12336100.0,
+        12247200.0,
+        11866900.0,
+        12036000.0,
+        11841300.0,
+        11891500.0,
+        11997200.0,
+        11848600.0,
+        11839900.0
+      ],
+      "iterations_per_sample": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "sample_totals_ns": [
+        12336100,
+        12247200,
+        11866900,
+        12036000,
+        11841300,
+        11891500,
+        11997200,
+        11848600,
+        11839900
+      ],
+      "cold_single_call_ns": 12220800,
+      "calibration": [
+        {
+          "iterations": 1,
+          "total_ns": 11911200
+        }
+      ],
+      "median_ns": 11891500.0,
+      "min_ns": 11839900.0,
+      "max_ns": 12336100.0,
+      "peak_rss_before_bytes": 21127168,
+      "peak_rss_after_bytes": 21172224,
+      "retained_python_blocks": 84,
+      "python_traced_current_bytes": 106156,
+      "python_traced_peak_bytes": 107628,
+      "repeat": 3
+    },
+    {
+      "stage": "setup",
+      "rows": 0,
+      "samples_ns": [
+        1144.1835062807208,
+        1135.1174221736755,
+        1123.7028945931186,
+        1135.1174221736755,
+        1135.2812670671765,
+        1124.795193883124,
+        1088.1485527034408,
+        1060.1310759148007,
+        1077.007099945385
+      ],
+      "iterations_per_sample": [
+        1831,
+        1831,
+        1831,
+        1831,
+        1831,
+        1831,
+        1831,
+        1831,
+        1831
+      ],
+      "sample_totals_ns": [
+        2095000,
+        2078400,
+        2057500,
+        2078400,
+        2078700,
+        2059500,
+        1992400,
+        1941100,
+        1972000
+      ],
+      "cold_single_call_ns": 3900,
+      "calibration": [
+        {
+          "iterations": 513,
+          "total_ns": 570500
+        },
+        {
+          "iterations": 1799,
+          "total_ns": 1965900
+        },
+        {
+          "iterations": 1831,
+          "total_ns": 2009100
+        }
+      ],
+      "median_ns": 1124.795193883124,
+      "min_ns": 1060.1310759148007,
+      "max_ns": 1144.1835062807208,
+      "peak_rss_before_bytes": 20807680,
+      "peak_rss_after_bytes": 20865024,
+      "retained_python_blocks": 7,
+      "python_traced_current_bytes": 2152,
+      "python_traced_peak_bytes": 3368,
+      "repeat": 3
+    },
+    {
+      "stage": "memory_unviewed",
+      "rows": 1000000,
+      "peak_rss_before_bytes": 44978176,
+      "peak_rss_after_bytes": 69025792,
+      "python_traced_current_bytes": 72,
+      "python_traced_peak_bytes": 144,
+      "payload_bytes": 24000000,
+      "viewed": false,
+      "repeat": 3
+    },
+    {
+      "stage": "memory_viewed",
+      "rows": 1000000,
+      "peak_rss_before_bytes": 44568576,
+      "peak_rss_after_bytes": 92651520,
+      "python_traced_current_bytes": 24000513,
+      "python_traced_peak_bytes": 24000769,
+      "payload_bytes": 24000000,
+      "viewed": true,
+      "repeat": 3
+    }
+  ]
+}

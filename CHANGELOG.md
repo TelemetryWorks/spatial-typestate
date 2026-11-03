@@ -4,6 +4,16 @@
 
 ### Changed
 
+- **Breaking:** Point3<F,L:LengthUnit>, Transform<From,To,L:LengthUnit>, and
+  Vector3<F,U:Unit> require explicit unit parameters, without defaults. Choose
+  actual units for former raw values. Translation/point/composition lengths
+  match; inverse retains L, quaternion is dimensionless, and vector mapping
+  preserves any U independently of translation. No implicit conversion is added.
+- **Breaking:** SpatialError adds InvalidUnitScale and
+  UnrepresentableUnitConversion. Add downstream exhaustive match arms; NonFinite
+  still reports non-finite numeric inputs/results. See [unit decisions](docs/units.md)
+  for metadata-first error policy and raw/custom-declaration limitations.
+
 - **Breaking:** `Transform::apply_point`, `apply_vector`, and `then` now return
   `Result<_, SpatialError>` under their existing names. Add `?` or explicit error
   handling to callers; no separate `try_` variants or unchecked alternatives are
@@ -25,9 +35,21 @@
 
 ### Added
 
+- Meters/international Feet and Dimensionless tags, open custom markers with
+  opt-in length-only LinearLengthUnit metadata, and shared checked convert_to
+  for Quantity/Point3/length Vector3/Transform. Transform scales translation
+  only, preserves linear bits and canonicalizes bottom. Positive finite factor
+  policy permits rounding/component underflow but rejects zero/infinite ratios,
+  invalid scales and non-finite inputs/output; finite same-unit components keep
+  bits. No extreme-ratio rescue, exact roundtrip, dimensional algebra, angles,
+  offset units, registry, calibration proof or dependency is introduced.
+- Meter/foot equivalent sensor workflow, raw/invalid/extreme conversion tests,
+  finite-bit and bounded properties, length mismatch UI and paired incompatible
+  conversion doctests. Quantity value traits now support bare custom markers.
+
 - Checked rotation/target-translation construction, typed then composition,
   translation-free apply_vector, and checked try_inverse. Existing raw matrix
-  storage/construction and unchecked apply_point remain compatible.
+  storage/construction remain available; apply_point is checked as described above.
 - A complete sensor-aircraft-world example with analytic expected coordinates,
   composition, inverse, and vector verification, also using a no-std library.
 - Hand-written Display/core Error, without allocation or dynamic dispatch in math.

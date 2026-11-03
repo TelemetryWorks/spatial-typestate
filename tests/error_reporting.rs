@@ -15,6 +15,14 @@ fn validation_errors_have_readable_messages() {
         SpatialError::NonRigidTransform.to_string(),
         "transform is not a proper rigid affine transform"
     );
+    assert_eq!(
+        SpatialError::InvalidUnitScale.to_string(),
+        "unit scale must be positive and finite"
+    );
+    assert_eq!(
+        SpatialError::UnrepresentableUnitConversion.to_string(),
+        "unit conversion factor is not representable"
+    );
 }
 
 #[test]
@@ -25,6 +33,8 @@ fn validation_errors_implement_core_error() {
     check_error(SpatialError::NonFinite);
     check_error(SpatialError::ZeroNormQuaternion);
     check_error(SpatialError::NonRigidTransform);
+    check_error(SpatialError::InvalidUnitScale);
+    check_error(SpatialError::UnrepresentableUnitConversion);
 }
 
 #[test]

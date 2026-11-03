@@ -2,7 +2,7 @@
 //! This is not a configured cargo-fuzz target or continuous fuzzing setup.
 
 use proptest::prelude::*;
-use spatial_typestate::{Point3, Transform, spatial_frames};
+use spatial_typestate::{Meters, Point3, Transform, spatial_frames};
 
 spatial_frames! {
     World,
@@ -15,8 +15,8 @@ spatial_frames! {
 /// NonFinite; successful calls match exact finite per-axis sums. Zero signs
 /// may differ due to additions of matrix zeros.
 pub fn fuzz_apply_point_with_translation(x: f64, y: f64, z: f64, tx: f64, ty: f64, tz: f64) {
-    let result =
-        Transform::<World, World>::from_translation(tx, ty, tz).apply_point(Point3::new(x, y, z));
+    let result = Transform::<World, World, Meters>::from_translation(tx, ty, tz)
+        .apply_point(Point3::<_, Meters>::new(x, y, z));
     if !x.is_finite()
         || !y.is_finite()
         || !z.is_finite()

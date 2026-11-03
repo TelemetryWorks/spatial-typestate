@@ -11,8 +11,14 @@ Frame labels constrain function inputs/outputs. Manual traits on Point3,
 Vector3, Transform and UnitQuat do not require derives on marker structs; Debug
 retains phantom labels without storing marker values. Types cannot verify that
 coordinates or transformations describe their claimed physical frames.
-Quantity<U> only adds/subtracts matching units; its value is public. Points,
-vectors, and translations still store raw f64 without dimensional units.
+Point/transform length and vector unit parameters are required, with no default.
+Point mapping, typed translation and composition constrain matching lengths;
+vector mapping preserves any unit without translation. UnitQuat is dimensionless.
+Quantity<U> only adds/subtracts matching units; its value/arithmetic and spatial
+numeric fields remain public/unvalidated. Raw reconstruction can relabel any
+number. Types cannot establish the physical units of raw matrix coefficients
+or verify custom unit declarations. See [unit decisions and limitations](units.md)
+for all conversion policies, trust boundaries and excluded scope.
 
 ## Quaternion validity
 
@@ -69,7 +75,11 @@ translation range [-1000,1000], and absolute 1e-9 roundtrip/composition toleranc
 ## Errors, allocation, and unsafe code
 
 SpatialError is an exhaustive concrete enum implementing Display/core Error.
-NonRigidTransform is an API addition: downstream exhaustive matches must adapt.
+NonRigidTransform, InvalidUnitScale and UnrepresentableUnitConversion are API
+additions: downstream exhaustive matches must adapt. Conversions reject invalid
+metadata/ratios and non-finite values, but allow rounding and component underflow;
+finite same-unit components preserve bits. No alternate extreme-ratio algorithm
+or exact roundtrip is promised.
 Constructors/math use stack values, no allocation, boxing, formatting, virtual
 error calls, global state or I/O. Callers may format errors or choose Box<dyn
 Error>; tests exercise both. Source review and #![deny(unsafe_code)] enforce the

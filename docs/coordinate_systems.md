@@ -7,10 +7,13 @@ the From origin expressed in To. A positive quarter turn about z sends numeric
 +x to +y; a positive quarter turn about x sends +y to +z.
 
 These rules define the constructor's numeric rotation convention, not a global
-choice of aircraft forward/down axes, world origin, units, or active/passive
+choice of aircraft forward/down axes, world origin, or active/passive
 physical interpretation. The application must choose consistent physical frames
 and supply their relationship. Raw matrices may represent other linear maps;
-they are not validated until a checked inverse is requested.
+application/composition check participating finiteness, while checked inverse
+also validates rigidity. Points/translation use an explicit common length tag;
+vectors preserve a separate unit tag. Tags cannot validate measurements, custom
+unit declarations or dimensional correctness of raw coefficients. See [units](units.md).
 
 In the [sensor example](../examples/sensor_alignment.rs), sensor->aircraft uses
 Rz(+90) and target offset (1,2,3); aircraft->world uses Rx(+90) and target offset

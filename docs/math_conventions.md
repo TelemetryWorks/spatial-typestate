@@ -1,8 +1,8 @@
 # Matrix and floating-point conventions
 
 Matrices are stored as `[[f64; 4]; 4]`, indexed `matrix[row][column]`.
-`Transform<From, To>::apply_point` multiplies the first three rows by the column
-vector `[x, y, z, 1]`, returning a `Point3<To>` from a `Point3<From>`:
+`Transform<From,To,L>::apply_point` multiplies the first three rows by the column
+vector `[x, y, z, 1]`, returning a `Point3<To,L>` from a `Point3<From,L>`:
 
 ```text
 x' = matrix[0][0]*x + matrix[0][1]*y + matrix[0][2]*z + matrix[0][3]
@@ -33,7 +33,7 @@ remain caller-defined. Frame semantics/calibration are supplied by the applicati
 
 ## Rigid workflow algebra
 
-`try_from_rotation_translation(UnitQuat<To>, Vector3<To>)` constructs
+`try_from_rotation_translation(UnitQuat<To>, Vector3<To,L>)` constructs
 `p_To = R(q) * p_From + t_To`, with Hamilton components `(x,y,z,w)`:
 
 ```text
@@ -117,3 +117,14 @@ The no-std helper has fixed iteration count but may be slower than native sqrt;
 no benchmark or timing guarantee is claimed. It avoids adding libm. All runtime
 feature configurations have no normal dependencies. Previously advertised unused
 nalgebra/glam switches were removed; no backend implementation existed to replace.
+
+## Units in the affine equations
+
+L is the common length for input/output points and target translation. R is
+numeric dimensionless rotation/linear coefficients; quaternion components have
+no length units. Vector mapping preserves its own U independent of L. A raw
+matrix can violate that physical interpretation even if every entry is finite.
+Explicit transform conversion scales t only, preserves R bits, and canonicalizes
+the bottom row. It checks all first-three-row inputs, not ignored bottom entries.
+See [units](units.md) for the factor-first algorithm, error precedence, custom
+metadata trust, same-unit bits, overflow/underflow and accuracy limitations.

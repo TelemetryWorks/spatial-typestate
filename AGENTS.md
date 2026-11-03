@@ -4,8 +4,9 @@ Canonical shared repository guidance. CLAUDE.md is a thin wrapper. Workspace
 coordinator roles belong in the parent workspace, not this repository file.
 
 This evolving Rust library provides frame-tagged points/vectors/quaternions and
-a complete numeric rigid-transform workflow. Physical calibration, dimensional
-units on coordinates, certification and timing guarantees are not implied.
+a complete numeric rigid-transform workflow with explicit length/vector unit tags.
+Physical calibration, verified custom unit declarations, dimensional algebra,
+certification and timing guarantees are not implied.
 Read [requirements/evidence](docs/requirements/requirements.md) before changing
 contracts and [math conventions](docs/math_conventions.md) before changing math.
 
@@ -58,7 +59,19 @@ MSRV without task authorization. No local system/target installations by inferen
 
 Frame labels are PhantomData, not stored values. Manual value traits preserve
 bare-marker usability and same-frame constraints. Debug retains phantom identity.
-Point3/Vector3 still use raw f64; Quantity<U> is a separate limited scalar unit tag.
+Point3<F,L:LengthUnit> and Transform<From,To,L:LengthUnit> require explicit L;
+Vector3<F,U:Unit> requires U. No default unit exists. Translation, point mapping
+and composition share L; inverse retains it. Rotation is dimensionless; vector
+mapping preserves any U independently of translation L. Quantity shares checked
+linear-length conversion; raw public components and scalar arithmetic remain
+unvalidated. Meters/Feet and Dimensionless are first tags; open custom markers
+need no derives. LinearLengthUnit is opt-in trusted scale metadata, not a proof
+of dimension/calibration. See [unit decisions](docs/units.md) for all limitations.
+Conversion validates metadata then a positive finite factor then finite values/
+results. InvalidUnitScale and UnrepresentableUnitConversion are distinct errors.
+Transform conversion scales only translation, preserves R bits, checks first
+three rows, ignores/canonicalizes bottom. Finite same-unit component bits survive;
+rounding/underflow are allowed, overflow errors, extreme-ratio rescue is excluded.
 
 UnitQuat uses private Hamilton (x,y,z,w) components, checked max-component
 normalization, const identity/getters, and component equality (q != -q).
@@ -67,8 +80,8 @@ subnormals/MAX; tiny relative components may round to signed zero. Native sqrt
 is retained under std; the no-std helper takes eight fixed Newton steps only
 on squared norms in [1,4], with documented convergence/rounding limits.
 
-Transform<From,To> maps p_To=R*p_From+t_To. The checked constructor uses a
-UnitQuat<To> and target translation; the quaternion does not bind From, so the
+Transform<From, To, Meters> maps p_To=R*p_From+t_To. The checked constructor uses a
+UnitQuat<To> and Vector3<To,L> target translation; the quaternion does not bind From, so the
 caller asserts the physical relation. Raw public matrices remain unvalidated.
 Storage is row-major/column-vector, with translation in the last column.
 Application/composition ignore raw bottom rows; then means next(first(p)), emits
@@ -116,6 +129,7 @@ is implied. Releases/version bumps/tags require an assigned task.
 - [design](docs/DESIGN.md), [frames](docs/frames.md),
   [coordinates](docs/coordinate_systems.md), [math](docs/math_conventions.md),
   [safety](docs/SAFETY.md): implemented interpretation and numerical limits.
+- [units](docs/units.md): conversion decisions, migration and trust boundaries.
 - [structure](docs/PROJECT_STRUCTURE.md): actual file roles.
 - [roadmap](docs/ROADMAP.md): remaining proposals, not implemented guarantees.
 - [changelog](CHANGELOG.md): final unreleased change/migration record.

@@ -2,7 +2,7 @@
 
 These are proposals, not implemented guarantees or promises of a release date.
 
-- Design explicit dimensional units/conversions for points, vectors, and translation.
+- Assess additional unit conversions/dimensional algebra only against concrete domain needs; current linear lengths deliberately exclude them.
 - Assess long-chain rotation drift and whether explicit reconditioning is needed.
 - Add useful benchmarks before making any performance claims; current bench files are placeholders.
 - Expand domain examples and populate diagrams where they explain a concrete workflow.

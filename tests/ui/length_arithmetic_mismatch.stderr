@@ -1,0 +1,8 @@
+error[E0308]: mismatched types
+ --> tests/ui/length_arithmetic_mismatch.rs:3:44
+  |
+3 |     let _ = Quantity::<Meters>::new(1.0) + Quantity::<Feet>::new(1.0);
+  |                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Quantity<Meters>`, found `Quantity<Feet>`
+  |
+  = note: expected struct `Quantity<Meters>`
+             found struct `Quantity<Feet>`

@@ -61,3 +61,14 @@ Local PASS does not claim remote CI PASS; wait for the actual GitHub checks.
   merge). Never force-push, rewrite published history, or discard others' edits.
 - No tool attribution in repository artifacts, commit messages, or PRs. Never
   commit credentials/.env files. There is no installed hook or release automation.
+
+## Unit contract changes
+
+Changes to frame/length/vector-unit contracts must update the numbered evidence
+and [unit decisions](docs/units.md), including conversion rounding, invalid
+metadata, representable-factor limits and custom/raw trust boundaries. Keep
+exact reviewed type-mismatch UI baselines; version-sensitive trait-help text is
+covered by strict paired passing/compile-fail public doctests instead. Stable
+rustdoc verifies rejection, not a specific diagnostic code. Migrate examples
+with explicit actual units, not a silent Meters default. No new runtime unit
+conversion dependency or broader dimensional algebra is implied.

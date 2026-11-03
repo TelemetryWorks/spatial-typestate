@@ -1,5 +1,5 @@
 //! Frame markers need no value traits: they are labels, not stored values.
-use spatial_typestate::{Frame, Point3, Transform, UnitQuat, Vector3};
+use spatial_typestate::{Frame, Meters, Point3, Transform, UnitQuat, Vector3};
 
 struct Sensor;
 struct World;
@@ -14,12 +14,12 @@ fn assert_value_traits<T: Copy + Clone + core::fmt::Debug + PartialEq>(value: T)
 
 #[test]
 fn bare_markers_support_value_traits() {
-    assert_value_traits(Point3::<Sensor>::new(1.0, 2.0, 3.0));
-    assert_value_traits(Vector3::<Sensor>::new(1.0, 2.0, 3.0));
-    assert_value_traits(Transform::<Sensor, World>::identity());
+    assert_value_traits(Point3::<Sensor, Meters>::new(1.0, 2.0, 3.0));
+    assert_value_traits(Vector3::<Sensor, Meters>::new(1.0, 2.0, 3.0));
+    assert_value_traits(Transform::<Sensor, World, Meters>::identity());
     assert_value_traits(UnitQuat::<World>::identity());
-    assert!(format!("{:?}", Point3::<Sensor>::new(1.0, 2.0, 3.0)).contains("Sensor"));
-    assert!(format!("{:?}", Transform::<Sensor, World>::identity()).contains("World"));
+    assert!(format!("{:?}", Point3::<Sensor, Meters>::new(1.0, 2.0, 3.0)).contains("Sensor"));
+    assert!(format!("{:?}", Transform::<Sensor, World, Meters>::identity()).contains("World"));
 }
 
 #[test]

@@ -1,20 +1,20 @@
 //! Frame mappings, with checked rigid construction/inversion and raw compatibility.
 //!
-//! [`Transform<From, To>`] represents a rigid transformation from frame
+//! [`Transform<From, To, L>`] represents a rigid transformation from frame
 //! `From` to frame `To` when built through the checked rotation/translation
 //! constructor; raw public matrices are unvalidated. Applying the transform to a [`crate::point::Point3`]
 //! tagged with `From` returns a `Result` whose successful point is tagged with `To`.
 //!
 //! ```rust
-//! use spatial_typestate::{Frame, Point3, Transform};
+//! use spatial_typestate::{Meters, Frame, Point3, Transform};
 //!
 //! struct World;
 //! struct Body;
 //! impl Frame for World {}
 //! impl Frame for Body {}
 //!
-//! let p_body = Point3::<Body>::new(1.0, 0.0, 0.0);
-//! let t_body_world: Transform<Body, World> = Transform::identity();
+//! let p_body = Point3::<Body, Meters>::new(1.0, 0.0, 0.0);
+//! let t_body_world: Transform<Body, World, Meters> = Transform::identity();
 //!
 //! let p_world = t_body_world.apply_point(p_body).unwrap();
 //! ```
@@ -23,6 +23,7 @@ use core::marker::PhantomData;
 
 use crate::frame::Frame;
 use crate::point::Point3;
+use crate::units::{LengthUnit, LinearLengthUnit, Unit, conversion_factor, convert_component};
 use crate::{SpatialError, UnitQuat, Vector3};
 
 // Absolute tolerance for affine row, rotation row dot products, and det(R)=+1.
@@ -34,11 +35,25 @@ const RIGID_TOLERANCE: f64 = 1e-10;
 /// Conceptually, this encodes a rotation and translation that converts
 /// coordinates expressed in `From` into coordinates expressed in `To`.
 ///
-/// The current implementation uses a minimal 4×4 matrix representation.
-/// The exact storage may change in future versions as we integrate with a
-/// math backend, but the **type-level frame parameters** are intended to
-/// remain stable.
-pub struct Transform<From: Frame, To: Frame> {
+/// Length unit `L` is required, with no default: point inputs, point outputs,
+/// translation, and composed transforms share it. Linear coefficients must
+/// be dimensionless; raw matrices cannot enforce that physical interpretation.
+/// Rotation quaternions remain dimensionless and do not acquire a length tag.
+///
+/// Transform translation must have a length unit, not an angle:
+/// ```
+/// use spatial_typestate::{Frame, Meters, Radians, Transform};
+/// struct World;
+/// impl Frame for World {}
+/// let _ = Transform::<World, World, Meters>::identity();
+/// ```
+/// ```compile_fail
+/// use spatial_typestate::{Frame, Meters, Radians, Transform};
+/// struct World;
+/// impl Frame for World {}
+/// let _ = Transform::<World, World, Radians>::identity();
+/// ```
+pub struct Transform<From: Frame, To: Frame, L: LengthUnit> {
     /// Row-major 4×4 matrix, indexed as `matrix[row][column]`.
     ///
     /// Points are column vectors: the first three rows multiply `[x, y, z, 1]`.
@@ -48,9 +63,10 @@ pub struct Transform<From: Frame, To: Frame> {
     pub matrix: [[f64; 4]; 4],
     _from: PhantomData<From>,
     _to: PhantomData<To>,
+    _unit: PhantomData<L>,
 }
 
-impl<From: Frame, To: Frame> Transform<From, To> {
+impl<From: Frame, To: Frame, L: LengthUnit> Transform<From, To, L> {
     /// Construct an identity transform (no rotation, no translation).
     #[inline]
     #[must_use]
@@ -64,6 +80,7 @@ impl<From: Frame, To: Frame> Transform<From, To> {
             ],
             _from: PhantomData,
             _to: PhantomData,
+            _unit: PhantomData,
         }
     }
 
@@ -74,15 +91,15 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     /// orthonormality checks are performed.
     ///
     /// ```
-    /// use spatial_typestate::{Point3, Transform, spatial_frames};
+    /// use spatial_typestate::{Meters, Point3, Transform, spatial_frames};
     /// spatial_frames! { World, Body }
-    /// let transform = Transform::<World, Body>::from_matrix([
+    /// let transform = Transform::<World, Body, Meters>::from_matrix([
     ///     [0.0, -1.0, 0.0, 10.0],
     ///     [1.0,  0.0, 0.0, 20.0],
     ///     [0.0,  0.0, 1.0, 30.0],
     ///     [0.0,  0.0, 0.0,  1.0],
     /// ]);
-    /// let result: Point3<Body> = transform.apply_point(Point3::<World>::new(2.0, 3.0, 4.0)).unwrap();
+    /// let result: Point3<Body, Meters> = transform.apply_point(Point3::<World, Meters>::new(2.0, 3.0, 4.0)).unwrap();
     /// assert_eq!([result.x, result.y, result.z], [7.0, 22.0, 34.0]);
     /// ```
     #[inline]
@@ -92,10 +109,15 @@ impl<From: Frame, To: Frame> Transform<From, To> {
             matrix,
             _from: PhantomData,
             _to: PhantomData,
+            _unit: PhantomData,
         }
     }
 
     /// Construct a pure translation transform (no rotation).
+    ///
+    /// Raw components are asserted to be in target-frame unit `L`, without
+    /// validation, like [`Self::from_matrix`]. Prefer the checked constructor
+    /// with a typed `Vector3<To, L>` when accepting an existing translation.
     #[inline]
     #[must_use]
     pub fn from_translation(tx: f64, ty: f64, tz: f64) -> Self {
@@ -123,13 +145,13 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     /// frame markers cannot verify calibration. The bottom row is canonical.
     ///
     /// ```
-    /// use spatial_typestate::{Point3, Transform, UnitQuat, Vector3, spatial_frames};
+    /// use spatial_typestate::{Meters, Point3, Transform, UnitQuat, Vector3, spatial_frames};
     /// spatial_frames! { Sensor, Aircraft }
-    /// let transform = Transform::<Sensor, Aircraft>::try_from_rotation_translation(
+    /// let transform = Transform::<Sensor, Aircraft, Meters>::try_from_rotation_translation(
     ///     UnitQuat::try_from_components(0.0, 0.0, 1.0, 1.0)?,
-    ///     Vector3::new(1.0, 2.0, 3.0),
+    ///     Vector3::<_, Meters>::new(1.0, 2.0, 3.0),
     /// )?;
-    /// let result = transform.apply_point(Point3::new(2.0, 0.0, 1.0)).unwrap();
+    /// let result = transform.apply_point(Point3::<_, Meters>::new(2.0, 0.0, 1.0)).unwrap();
     /// assert!((result.x - 1.0).abs() < 1e-12);
     /// assert!((result.y - 4.0).abs() < 1e-12);
     /// assert!((result.z - 4.0).abs() < 1e-12);
@@ -138,9 +160,29 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     ///
     /// # Errors
     /// Returns [`SpatialError::NonFinite`] for a non-finite translation.
+    ///
+    /// A vector with a non-length tag cannot be a translation:
+    /// ```
+    /// use spatial_typestate::{Dimensionless, Frame, Meters, Transform, UnitQuat, Vector3};
+    /// struct World;
+    /// impl Frame for World {}
+    /// let _ = Transform::<World, World, Meters>::try_from_rotation_translation(
+    ///     UnitQuat::identity(), Vector3::<World, Meters>::new(1.0, 2.0, 3.0),
+    /// )?;
+    /// # Ok::<(), spatial_typestate::SpatialError>(())
+    /// ```
+    /// ```compile_fail
+    /// use spatial_typestate::{Dimensionless, Frame, Meters, Transform, UnitQuat, Vector3};
+    /// struct World;
+    /// impl Frame for World {}
+    /// let _ = Transform::<World, World, Meters>::try_from_rotation_translation(
+    ///     UnitQuat::identity(), Vector3::<World, Dimensionless>::new(1.0, 2.0, 3.0),
+    /// )?;
+    /// # Ok::<(), spatial_typestate::SpatialError>(())
+    /// ```
     pub fn try_from_rotation_translation(
         rotation: UnitQuat<To>,
-        translation: Vector3<To>,
+        translation: Vector3<To, L>,
     ) -> Result<Self, SpatialError> {
         if !translation.x.is_finite() || !translation.y.is_finite() || !translation.z.is_finite() {
             return Err(SpatialError::NonFinite);
@@ -185,8 +227,8 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     /// bottom rows are not validated.
     pub fn then<Next: Frame>(
         &self,
-        next: Transform<To, Next>,
-    ) -> Result<Transform<From, Next>, SpatialError> {
+        next: Transform<To, Next, L>,
+    ) -> Result<Transform<From, Next, L>, SpatialError> {
         if !self
             .matrix
             .iter()
@@ -222,6 +264,10 @@ impl<From: Frame, To: Frame> Transform<From, To> {
 
     /// Apply only the linear part to a vector, without adding translation.
     ///
+    /// Preserves any vector unit `U`, independently of translation unit `L`.
+    /// Raw linear coefficients must be dimensionless; their physical units
+    /// cannot be verified. No conversion metadata is needed to rotate a vector.
+    ///
     /// Checks only participating values: the vector and linear 3x3 matrix.
     /// Translation and bottom row are ignored, even if they contain NaN/Inf.
     /// Finiteness does not establish rigidity or physical frame correctness.
@@ -230,7 +276,10 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     /// Returns [`SpatialError::NonFinite`] for any non-finite participating input
     /// or computed component, including floating-point overflow.
     #[inline]
-    pub fn apply_vector(&self, vector: Vector3<From>) -> Result<Vector3<To>, SpatialError> {
+    pub fn apply_vector<U: Unit>(
+        &self,
+        vector: Vector3<From, U>,
+    ) -> Result<Vector3<To, U>, SpatialError> {
         if ![vector.x, vector.y, vector.z]
             .into_iter()
             .all(f64::is_finite)
@@ -273,7 +322,7 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     /// Returns [`SpatialError::NonFinite`] for any non-finite input or output
     /// (including overflow in inverse translation), or [`SpatialError::NonRigidTransform`]
     /// if finite input fails the rigidity/affine checks.
-    pub fn try_inverse(&self) -> Result<Transform<To, From>, SpatialError> {
+    pub fn try_inverse(&self) -> Result<Transform<To, From, L>, SpatialError> {
         let matrix = &self.matrix;
         if !matrix.iter().flatten().all(|entry| entry.is_finite()) {
             return Err(SpatialError::NonFinite);
@@ -329,7 +378,7 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     /// or computed component, including floating-point overflow. Ignored bottom
     /// row values are not validated.
     #[inline]
-    pub fn apply_point(&self, p: Point3<From>) -> Result<Point3<To>, SpatialError> {
+    pub fn apply_point(&self, p: Point3<From, L>) -> Result<Point3<To, L>, SpatialError> {
         if ![p.x, p.y, p.z].into_iter().all(f64::is_finite)
             || !self
                 .matrix
@@ -352,31 +401,64 @@ impl<From: Frame, To: Frame> Transform<From, To> {
         if ![xp, yp, zp].into_iter().all(f64::is_finite) {
             return Err(SpatialError::NonFinite);
         }
-        Ok(Point3::<To>::new(xp, yp, zp))
+        Ok(Point3::<To, L>::new(xp, yp, zp))
     }
 }
 
-impl<From: Frame, To: Frame> Copy for Transform<From, To> {}
+impl<From: Frame, To: Frame, L: LengthUnit> Copy for Transform<From, To, L> {}
 
-impl<From: Frame, To: Frame> Clone for Transform<From, To> {
+impl<From: Frame, To: Frame, L: LengthUnit> Clone for Transform<From, To, L> {
     fn clone(&self) -> Self {
         *self
     }
 }
 
-impl<From: Frame, To: Frame> core::fmt::Debug for Transform<From, To> {
+impl<From: Frame, To: Frame, L: LengthUnit> core::fmt::Debug for Transform<From, To, L> {
     fn fmt(&self, formatter: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         formatter
             .debug_struct("Transform")
             .field("matrix", &self.matrix)
             .field("_from", &self._from)
             .field("_to", &self._to)
+            .field("_unit", &self._unit)
             .finish()
     }
 }
 
-impl<From: Frame, To: Frame> PartialEq for Transform<From, To> {
+impl<From: Frame, To: Frame, L: LengthUnit> PartialEq for Transform<From, To, L> {
     fn eq(&self, other: &Self) -> bool {
         self.matrix == other.matrix
+    }
+}
+
+impl<From: Frame, To: Frame, L: LinearLengthUnit> Transform<From, To, L> {
+    /// Convert translation units without changing the frame mapping's linear part.
+    ///
+    /// Linear coefficients must be dimensionless. They are copied bit-for-bit;
+    /// only translation is scaled. The raw bottom row is ignored and replaced
+    /// by `[0, 0, 0, 1]`. No rigidity or physical-calibration check is implied.
+    ///
+    /// # Errors
+    /// All first-three-row inputs must be finite. Length metadata/factor and
+    /// translation outputs use [`crate::Quantity::convert_to`] checks. This
+    /// conservative policy rejects an unrepresentable ratio even for zero
+    /// translation; no alternate multiplication/division ordering is attempted.
+    pub fn convert_to<V: LinearLengthUnit>(&self) -> Result<Transform<From, To, V>, SpatialError> {
+        let factor = conversion_factor::<L, V>()?;
+        if !self
+            .matrix
+            .iter()
+            .take(3)
+            .flatten()
+            .all(|entry| entry.is_finite())
+        {
+            return Err(SpatialError::NonFinite);
+        }
+        let mut matrix = self.matrix;
+        for row in matrix.iter_mut().take(3) {
+            row[3] = convert_component(row[3], factor)?;
+        }
+        matrix[3] = [0.0, 0.0, 0.0, 1.0];
+        Ok(Transform::from_matrix(matrix))
     }
 }

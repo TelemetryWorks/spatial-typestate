@@ -14,8 +14,8 @@ spatial_frames! {
 
 #[test]
 fn point_and_vector_construction() {
-    let p_world: Point3<World> = Point3::new(1.0, 2.0, 3.0);
-    let v_body: Vector3<Body> = Vector3::new(0.0, 1.0, 0.0);
+    let p_world: Point3<World, Meters> = Point3::<_, Meters>::new(1.0, 2.0, 3.0);
+    let v_body: Vector3<Body, Meters> = Vector3::<_, Meters>::new(0.0, 1.0, 0.0);
 
     assert_eq!(p_world.x, 1.0);
     assert_eq!(p_world.y, 2.0);
@@ -28,8 +28,8 @@ fn point_and_vector_construction() {
 
 #[test]
 fn identity_transform_preserves_point() {
-    let p_body: Point3<Body> = Point3::new(1.0, 0.0, -2.0);
-    let t_body_world: Transform<Body, World> = Transform::identity();
+    let p_body: Point3<Body, Meters> = Point3::<_, Meters>::new(1.0, 0.0, -2.0);
+    let t_body_world: Transform<Body, World, Meters> = Transform::identity();
 
     let p_world = t_body_world.apply_point(p_body).unwrap();
 

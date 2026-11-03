@@ -2,12 +2,12 @@ error[E0308]: mismatched types
  --> tests/ui/composition_frame_mismatch.rs:6:24
   |
 6 |     let _ = first.then(wrong);
-  |                   ---- ^^^^^ expected `Transform<Aircraft, _>`, found `Transform<World, World>`
+  |                   ---- ^^^^^ expected `Transform<Aircraft, _, Meters>`, found `Transform<World, World, Meters>`
   |                   |
   |                   arguments to this method are incorrect
   |
-  = note: expected struct `Transform<Aircraft, _>`
-             found struct `Transform<World, World>`
+  = note: expected struct `Transform<Aircraft, _, Meters>`
+             found struct `Transform<World, World, Meters>`
 note: method defined here
  --> src/transform.rs
   |

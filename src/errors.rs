@@ -31,6 +31,10 @@ pub enum SpatialError {
     ZeroNormQuaternion,
     /// A finite raw transform failed affine or proper rigid-rotation checks.
     NonRigidTransform,
+    /// A declared meters-per-unit scale was nonpositive or non-finite.
+    InvalidUnitScale,
+    /// Valid length scales had a ratio that rounded to zero or infinity.
+    UnrepresentableUnitConversion,
 }
 
 impl fmt::Display for SpatialError {
@@ -39,6 +43,8 @@ impl fmt::Display for SpatialError {
             Self::NonFinite => "non-finite component",
             Self::ZeroNormQuaternion => "all quaternion components are zero",
             Self::NonRigidTransform => "transform is not a proper rigid affine transform",
+            Self::InvalidUnitScale => "unit scale must be positive and finite",
+            Self::UnrepresentableUnitConversion => "unit conversion factor is not representable",
         })
     }
 }

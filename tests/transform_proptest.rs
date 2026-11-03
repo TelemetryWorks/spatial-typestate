@@ -5,7 +5,7 @@
 //! - A pure translation adds its offset for any point.
 
 use proptest::prelude::*;
-use spatial_typestate::{Point3, Transform, spatial_frames};
+use spatial_typestate::{Meters, Point3, Transform, spatial_frames};
 
 spatial_frames! {
     World,
@@ -20,8 +20,8 @@ proptest! {
     fn identity_preserves_random_world_points(x in -1e6_f64..1e6_f64,
                                               y in -1e6_f64..1e6_f64,
                                               z in -1e6_f64..1e6_f64) {
-        let p: Point3<World> = Point3::new(x, y, z);
-        let id: Transform<World, World> = Transform::identity();
+        let p: Point3<World, Meters> = Point3::<_, Meters>::new(x, y, z);
+        let id: Transform<World, World, Meters> = Transform::identity();
         let q = id.apply_point(p).unwrap();
 
         prop_assert!(approx_eq(q.x, x, 1e-9));
@@ -38,8 +38,8 @@ proptest! {
         ty in -1e3_f64..1e3_f64,
         tz in -1e3_f64..1e3_f64,
     ) {
-        let p: Point3<World> = Point3::new(x, y, z);
-        let t: Transform<World, World> = Transform::from_translation(tx, ty, tz);
+        let p: Point3<World, Meters> = Point3::<_, Meters>::new(x, y, z);
+        let t: Transform<World, World, Meters> = Transform::from_translation(tx, ty, tz);
 
         let q = t.apply_point(p).unwrap();
 

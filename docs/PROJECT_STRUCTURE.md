@@ -16,3 +16,5 @@
   and direct CI use Rust 1.99.0 for stable diagnostics.
 
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for commands and actual CI scope.
+
+- [units.md](units.md): explicit unit/conversion decisions and documented limitations.

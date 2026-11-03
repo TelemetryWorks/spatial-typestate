@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+ --> tests/ui/point_length_mismatch.rs:7:29
+  |
+7 |     let _ = map.apply_point(point);
+  |                 ----------- ^^^^^ expected `Point3<World, Feet>`, found `Point3<World, Meters>`
+  |                 |
+  |                 arguments to this method are incorrect
+  |
+  = note: expected struct `Point3<World, Feet>`
+             found struct `Point3<World, Meters>`
+note: method defined here
+ --> src/transform.rs
+  |
+  |     pub fn apply_point(&self, p: Point3<From, L>) -> Result<Point3<To, L>, SpatialError> {
+  |            ^^^^^^^^^^^

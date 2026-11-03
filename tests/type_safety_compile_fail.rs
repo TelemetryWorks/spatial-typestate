@@ -22,3 +22,12 @@ fn workflow_frame_mismatches_do_not_compile() {
     t.compile_fail("tests/ui/vector_frame_mismatch.rs");
     t.compile_fail("tests/ui/unit_mismatch.rs");
 }
+
+#[test]
+fn length_contract_mismatches_do_not_compile() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/ui/point_length_mismatch.rs");
+    t.compile_fail("tests/ui/translation_length_mismatch.rs");
+    t.compile_fail("tests/ui/composition_length_mismatch.rs");
+    t.compile_fail("tests/ui/length_arithmetic_mismatch.rs");
+}

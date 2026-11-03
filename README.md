@@ -3,32 +3,37 @@
 A small Rust library for frame-tagged 3D points, vectors, unit quaternions, and
 rigid transforms. APIs are evolving. The crate is not certified for safety-,
 life-, or mission-critical use; applications must independently validate their
-physical frame definitions, calibration, units, and numerical requirements.
+physical frame definitions, calibration, unit declarations, and numerical requirements.
 
 ## Sensor -> aircraft -> world
 
 ```rust
-use spatial_typestate::{Point3, Transform, UnitQuat, Vector3, spatial_frames};
+use spatial_typestate::{Dimensionless, Feet, Meters, Point3, Transform, UnitQuat, Vector3, spatial_frames};
 spatial_frames! { Sensor, Aircraft, World }
 fn main() -> Result<(), spatial_typestate::SpatialError> {
-    let sensor_aircraft = Transform::<Sensor, Aircraft>::try_from_rotation_translation(
+    let sensor_aircraft = Transform::<Sensor, Aircraft, Meters>::try_from_rotation_translation(
         UnitQuat::try_from_components(0.0, 0.0, 1.0, 1.0)?, // Rz(+90 degrees)
-        Vector3::new(1.0, 2.0, 3.0), // source origin in target coordinates
+        Vector3::<_, Meters>::new(1.0, 2.0, 3.0), // source origin in target coordinates
     )?;
-    let aircraft_world = Transform::<Aircraft, World>::try_from_rotation_translation(
+    let aircraft_world = Transform::<Aircraft, World, Meters>::try_from_rotation_translation(
         UnitQuat::try_from_components(1.0, 0.0, 0.0, 1.0)?, // Rx(+90 degrees)
-        Vector3::new(10.0, 20.0, 30.0),
+        Vector3::<_, Meters>::new(10.0, 20.0, 30.0),
     )?;
     let sensor_world = sensor_aircraft.then(aircraft_world)?;
-    let point = Point3::<Sensor>::new(2.0, 0.0, 1.0);
+    let point = Point3::<Sensor, Meters>::new(2.0, 0.0, 1.0);
     let world = sensor_world.apply_point(point)?;
     assert!((world.x - 11.0).abs() < 1e-9);
     assert!((world.y - 16.0).abs() < 1e-9);
     assert!((world.z - 34.0).abs() < 1e-9);
     let restored = sensor_world.try_inverse()?.apply_point(world)?;
     assert!((restored.x - point.x).abs() < 1e-9);
-    let vector = sensor_world.apply_vector(Vector3::new(2.0, 0.0, 1.0))?;
+    let vector = sensor_world.apply_vector(Vector3::<_, Dimensionless>::new(2.0, 0.0, 1.0))?;
     assert!((vector.y + 1.0).abs() < 1e-9); // translation is not applied
+    // Explicit conversion: both point and translation must use the same length.
+    let feet_map = sensor_world.convert_to::<Feet>()?;
+    let feet_point = point.convert_to::<Feet>()?;
+    let feet_world = feet_map.apply_point(feet_point)?.convert_to::<Meters>()?;
+    assert!((feet_world.z - world.z).abs() < 1e-9);
     Ok(())
 }
 ```
@@ -53,7 +58,7 @@ numeric relationships, not a sensor calibration performed by the library.
 - The checked transform constructor uses Hamilton (x,y,z,w), right-handed active
   algebra and column vectors: p_To=R(q)*p_From+t_To. Columns of R are source basis
   vectors in To; t is the source origin in To. UnitQuat<To> alone does not encode
-  the source label. Application axes and numeric units remain caller choices.
+  the source label. Application axes and physical frame relationships remain caller choices.
 - `first.then(next)` means next(first(point)). `apply_vector` uses only R.
   Row storage is matrix[row][column], with last-column translation. Raw bottom
   rows are ignored by point application/composition, and composition emits a
@@ -72,15 +77,45 @@ numeric relationships, not a sensor calibration performed by the library.
   rejects non-finite/all-zero input, and has private fields with const getters.
   Unit length is approximate; tiny relative components may round to signed zero.
   Equality compares components, so q and -q are unequal despite equivalent rotation.
-- Quantity<U> is a scalar unit tag. Spatial coordinates/translations are raw f64;
-  full dimensional algebra and implicit unit conversions are not implemented.
+- Points/transforms require an explicit length tag; vectors require an explicit
+  unit tag. There is no default unit. Translation, point mapping and composition
+  require matching lengths. Generic vector mapping preserves its unit independently
+  of translation. UnitQuat remains dimensionless.
+- Explicit checked `convert_to::<Feet>()`/`convert_to::<Meters>()` is shared with
+  Quantity; it preserves frames and changes only transform translation. No
+  automatic mixing, dimensional algebra or angle conversion is implemented.
+  Raw constructors/public components still assert units without validating them.
 - SpatialError implements Display/core Error. Constructors return its concrete
   exhaustive enum without allocation/dynamic dispatch; callers may choose boxed
-  propagation. NonRigidTransform is a new variant requiring downstream match updates.
+  propagation. New variants require downstream exhaustive-match updates.
 
 See [requirements and evidence](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/requirements/requirements.md),
 [math conventions](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/math_conventions.md), [design](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/DESIGN.md),
 [frames](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/frames.md), and [safety notes](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/SAFETY.md).
+
+## Unit migration and limitations
+
+Replace old `Point3<F>`, `Vector3<F>`, and `Transform<From,To>` annotations with
+`Point3<F,L>`, `Vector3<F,U>`, and `Transform<From,To,L>`. Choose the actual units;
+old numbers are not automatically meters. Use Dimensionless for direction vectors,
+not positions or translation. Existing method names and checked Result handling
+remain. Meters and international Feet are the first convertible length tags.
+
+Custom Unit/LengthUnit markers remain open. Optional `LinearLengthUnit` metadata
+provides meters-per-unit for length conversions only; opaque vectors can rotate
+without metadata. Custom declarations are trusted, not dimensionally inferred.
+Nonpositive/non-finite scales return `InvalidUnitScale`; a ratio rounded to zero
+or infinity returns `UnrepresentableUnitConversion`. Add these variants to
+exhaustive SpatialError matches. Non-finite inputs/results return `NonFinite`.
+
+Conversion computes a representable scale ratio then multiplies components.
+Rounding and component underflow to signed zero are allowed; overflow is an error.
+Some extreme ratios are rejected even when rearranging arithmetic could work.
+Finite same-unit component bits are preserved. No exact roundtrip or universal
+accuracy guarantee is made. Raw matrix coefficients must be dimensionless for
+these unit semantics; tags cannot verify calibration, raw data, or custom claims.
+See [unit decisions and all limitations](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/units.md)
+for the conservative algorithm, raw escape hatches and deliberately excluded scope.
 
 ## Features, development, and verification
 

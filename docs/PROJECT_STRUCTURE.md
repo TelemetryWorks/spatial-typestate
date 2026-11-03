@@ -22,3 +22,8 @@
 See [CONTRIBUTING.md](../CONTRIBUTING.md) for commands and actual CI scope.
 
 - [units.md](units.md): explicit unit/conversion decisions and documented limitations.
+
+- benches/support/borrowed.rs and tests/borrowed_validation.rs: isolated borrowed
+  invariants and caller-local comparison; not exported by src/lib.rs.
+- [borrowed_validation.md](borrowed_validation.md): design, separate measurements,
+  operation-specific scopes and pending production API/batch decisions.

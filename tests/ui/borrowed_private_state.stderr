@@ -1,0 +1,5 @@
+error[E0616]: field `map` of struct `BorrowedPoint` is private
+  --> tests/ui/borrowed_private_state.rs:10:22
+   |
+10 |     let _ = prepared.map;
+   |                      ^^^ private field

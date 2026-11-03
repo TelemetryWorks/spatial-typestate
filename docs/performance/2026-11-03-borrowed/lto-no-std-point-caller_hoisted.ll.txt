@@ -1,0 +1,271 @@
+define internal fastcc void @_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations1_00EB10_(ptr noalias nofree noundef nonnull align 8 captures(none) dereferenceable(56) initializes((48, 49)) %self, ptr noalias nofree noundef nonnull readonly align 8 captures(none) dead_on_return dereferenceable(24) %routine) unnamed_addr #0 personality ptr @__CxxFrameHandler3 !guid !8870 {
+start:
+  %_7.i.i = alloca [8 x i8], align 8
+  %_5.i.i = alloca [8 x i8], align 8
+  %e.i.i = alloca [1 x i8], align 1
+  %_9.i = alloca [16 x i8], align 8
+  %_5.i = alloca [40 x i8], align 8
+  %0 = getelementptr inbounds nuw i8, ptr %self, i64 48
+  store i8 1, ptr %0, align 8
+; call <std::time::Instant>::now
+  %1 = tail call fastcc { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant3now()
+; call <std::time::Instant>::now
+  %2 = tail call fastcc { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant3now()
+  %3 = getelementptr inbounds nuw i8, ptr %self, i64 40
+  %iter1 = load i64, ptr %3, align 8, !noundef !8089
+  %_163.not = icmp eq i64 %iter1, 0
+  br i1 %_163.not, label %bb16, label %bb15.lr.ph
+
+bb15.lr.ph:                                       ; preds = %start
+  %_10.i = load ptr, ptr %routine, align 8, !alias.scope !8871, !nonnull !8089, !align !8095, !noundef !8089
+  %4 = getelementptr inbounds nuw i8, ptr %routine, i64 8
+  %_11.i = load ptr, ptr %4, align 8, !alias.scope !8871, !nonnull !8089, !align !8095, !noundef !8089
+  %5 = getelementptr inbounds nuw i8, ptr %_11.i, i64 8
+  %6 = getelementptr inbounds nuw i8, ptr %_11.i, i64 16
+  %7 = getelementptr inbounds nuw i8, ptr %routine, i64 16
+  %_12.i = load ptr, ptr %7, align 8, !alias.scope !8871, !nonnull !8089, !align !8095, !noundef !8089
+  %8 = getelementptr inbounds nuw i8, ptr %_12.i, i64 8
+  %9 = getelementptr inbounds nuw i8, ptr %_12.i, i64 16
+  %_6.sroa.4.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 8
+  %_6.sroa.5.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 16
+  %_6.sroa.6.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 24
+  %_6.sroa.7.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 32
+  %10 = getelementptr inbounds nuw i8, ptr %_9.i, i64 8
+  br label %bb15
+
+bb16:                                             ; preds = %_RNCNCNvCs7NUHba9K0DZ_7spatial12amortizations1_00B5_.exit, %start
+  %11 = extractvalue { i64, i32 } %1, 1
+  %12 = extractvalue { i64, i32 } %1, 0
+  %start.1 = extractvalue { i64, i32 } %2, 1
+  %start.0 = extractvalue { i64, i32 } %2, 0
+; call <std::time::Instant>::elapsed
+  %13 = call fastcc { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant7elapsed(i64 range(i64 0, 18446744074) %start.0, i32 range(i32 0, 1000000000) %start.1)
+  %_9.0 = extractvalue { i64, i32 } %13, 0
+  %_9.1 = extractvalue { i64, i32 } %13, 1
+  store i64 %_9.0, ptr %self, align 8
+  %14 = getelementptr inbounds nuw i8, ptr %self, i64 8
+  store i32 %_9.1, ptr %14, align 8
+; call <std::time::Instant>::elapsed
+  %15 = call fastcc { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant7elapsed(i64 %12, i32 %11)
+  %_11.0 = extractvalue { i64, i32 } %15, 0
+  %_11.1 = extractvalue { i64, i32 } %15, 1
+  %16 = getelementptr inbounds nuw i8, ptr %self, i64 16
+  store i64 %_11.0, ptr %16, align 8
+  %17 = getelementptr inbounds nuw i8, ptr %self, i64 24
+  store i32 %_11.1, ptr %17, align 8
+  ret void
+
+bb15:                                             ; preds = %bb15.lr.ph, %_RNCNCNvCs7NUHba9K0DZ_7spatial12amortizations1_00B5_.exit
+  %iter.sroa.0.04 = phi i64 [ 0, %bb15.lr.ph ], [ %_17, %_RNCNCNvCs7NUHba9K0DZ_7spatial12amortizations1_00B5_.exit ]
+  %_17 = add nuw i64 %iter.sroa.0.04, 1
+  call void @llvm.experimental.noalias.scope.decl(metadata !8871)
+  call void @llvm.lifetime.start.p0(ptr nonnull %_5.i), !noalias !8871
+  %_17.i = load ptr, ptr %5, align 8, !noalias !8871, !nonnull !8089, !noundef !8089
+  %_16.i = load i64, ptr %6, align 8, !noalias !8871, !noundef !8089
+  %_22.i = load ptr, ptr %8, align 8, !noalias !8871, !nonnull !8089, !noundef !8089
+  %_21.i = load i64, ptr %9, align 8, !noalias !8871, !noundef !8089
+  store ptr %_10.i, ptr %_5.i, align 8, !noalias !8871
+  store ptr %_17.i, ptr %_6.sroa.4.0._5.sroa_idx.i, align 8, !noalias !8871
+  store i64 %_16.i, ptr %_6.sroa.5.0._5.sroa_idx.i, align 8, !noalias !8871
+  store ptr %_22.i, ptr %_6.sroa.6.0._5.sroa_idx.i, align 8, !noalias !8871
+  store i64 %_21.i, ptr %_6.sroa.7.0._5.sroa_idx.i, align 8, !noalias !8871
+  call void asm sideeffect "", "r,~{memory}"(ptr nonnull %_5.i) #89, !noalias !8871, !srcloc !8097
+  %map.i = load ptr, ptr %_5.i, align 8, !noalias !8871, !nonnull !8089, !align !8095, !noundef !8089
+  %input.0.i = load ptr, ptr %_6.sroa.4.0._5.sroa_idx.i, align 8, !noalias !8871, !nonnull !8089, !align !8095, !noundef !8089
+  %input.1.i = load i64, ptr %_6.sroa.5.0._5.sroa_idx.i, align 8, !noalias !8871, !noundef !8089
+  %output.0.i = load ptr, ptr %_6.sroa.6.0._5.sroa_idx.i, align 8, !noalias !8871, !nonnull !8089, !align !8095, !noundef !8089
+  %output.1.i = load i64, ptr %_6.sroa.7.0._5.sroa_idx.i, align 8, !noalias !8871, !noundef !8089
+  call void @llvm.lifetime.end.p0(ptr nonnull %_5.i), !noalias !8871
+  call void @llvm.experimental.noalias.scope.decl(metadata !8874)
+  call void @llvm.experimental.noalias.scope.decl(metadata !8877)
+  call void @llvm.experimental.noalias.scope.decl(metadata !8879)
+  call void @llvm.lifetime.start.p0(ptr nonnull %_7.i.i), !noalias !8871
+  call void @llvm.lifetime.start.p0(ptr nonnull %_5.i.i), !noalias !8881
+  store i64 %input.1.i, ptr %_5.i.i, align 8, !noalias !8881
+  store i64 %output.1.i, ptr %_7.i.i, align 8, !noalias !8881
+  %_8.i.i = icmp eq i64 %input.1.i, %output.1.i
+  br i1 %_8.i.i, label %bb1.i.i, label %bb2.i1.i, !prof !8842
+
+bb2.i1.i:                                         ; preds = %bb15
+; call core::panicking::assert_failed::<usize, usize>
+  call fastcc void @_RINvNtCs9rw95XCWuke_4core9panicking13assert_failedjjEB4_(i8 noundef 0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(8) %_5.i.i, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(8) %_7.i.i, ptr noundef null, ptr undef, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @alloc_14d3d6ec182979218394d62386df37f6) #131, !noalias !8881
+  unreachable
+
+bb1.i.i:                                          ; preds = %bb15
+  call void @llvm.lifetime.end.p0(ptr nonnull %_5.i.i), !noalias !8881
+  %.val.i.i.i.i.i.i.i.i.i.i.i = load double, ptr %map.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.i.i.i.i.i.i.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.i.i.i.i.i.i.i.i.i)
+  %_0.i.i.i.i.i.i.i.i.i.i.i.i.i.i = fcmp ueq double %_4.i.i.i.i.i.i.i.i.i.i.i.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.i.i.i.i.i.i.i.i.i, label %bb2.i.i, label %bb1.i.i.1.i.i.i.i.i.i.i.i.i
+
+bb1.i.i.1.i.i.i.i.i.i.i.i.i:                      ; preds = %bb1.i.i
+  %_16.i.i.i.ptr.i.i.i.i.i.i.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 8
+  %.val.i.i.1.i.i.i.i.i.i.i.i.i = load double, ptr %_16.i.i.i.ptr.i.i.i.i.i.i.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.1.i.i.i.i.i.i.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.1.i.i.i.i.i.i.i.i.i)
+  %_0.i.i.i.i.i.1.i.i.i.i.i.i.i.i.i = fcmp ueq double %_4.i.i.i.i.i.1.i.i.i.i.i.i.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.1.i.i.i.i.i.i.i.i.i, label %bb2.i.i, label %bb1.i.i.2.i.i.i.i.i.i.i.i.i
+
+bb1.i.i.2.i.i.i.i.i.i.i.i.i:                      ; preds = %bb1.i.i.1.i.i.i.i.i.i.i.i.i
+  %_16.i.i.i.ptr.1.i.i.i.i.i.i.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 16
+  %.val.i.i.2.i.i.i.i.i.i.i.i.i = load double, ptr %_16.i.i.i.ptr.1.i.i.i.i.i.i.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.2.i.i.i.i.i.i.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.2.i.i.i.i.i.i.i.i.i)
+  %_0.i.i.i.i.i.2.i.i.i.i.i.i.i.i.i = fcmp ueq double %_4.i.i.i.i.i.2.i.i.i.i.i.i.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.2.i.i.i.i.i.i.i.i.i, label %bb2.i.i, label %bb1.i.i.3.i.i.i.i.i.i.i.i.i
+
+bb1.i.i.3.i.i.i.i.i.i.i.i.i:                      ; preds = %bb1.i.i.2.i.i.i.i.i.i.i.i.i
+  %_16.i.i.i.ptr.2.i.i.i.i.i.i.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 24
+  %.val.i.i.3.i.i.i.i.i.i.i.i.i = load double, ptr %_16.i.i.i.ptr.2.i.i.i.i.i.i.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.3.i.i.i.i.i.i.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.3.i.i.i.i.i.i.i.i.i)
+  %_0.i.i.i.i.i.3.i.i.i.i.i.i.i.i.i = fcmp ueq double %_4.i.i.i.i.i.3.i.i.i.i.i.i.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.3.i.i.i.i.i.i.i.i.i, label %bb2.i.i, label %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_matrix_finiteNtB4B_5WorldB5r_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.thread.i.i.i.i.i.i.i.i
+
+_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_matrix_finiteNtB4B_5WorldB5r_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.thread.i.i.i.i.i.i.i.i: ; preds = %bb1.i.i.3.i.i.i.i.i.i.i.i.i
+  %ptr.i7.i.i.i.i.ptr.1.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 32
+  %.val.i.i.i.i.i.i.i.i.1.i.i.i = load double, ptr %ptr.i7.i.i.i.i.ptr.1.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.i.i.i.i.i.i.1.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.i.i.i.i.i.i.1.i.i.i)
+  %_0.i.i.i.i.i.i.i.i.i.i.i.1.i.i.i = fcmp ueq double %_4.i.i.i.i.i.i.i.i.i.i.i.1.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.i.i.i.i.i.i.1.i.i.i, label %bb2.i.i, label %bb1.i.i.1.i.i.i.i.i.i.1.i.i.i
+
+bb1.i.i.1.i.i.i.i.i.i.1.i.i.i:                    ; preds = %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_matrix_finiteNtB4B_5WorldB5r_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.thread.i.i.i.i.i.i.i.i
+  %_16.i.i.i.ptr.i.i.i.i.i.i.1.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 40
+  %.val.i.i.1.i.i.i.i.i.i.1.i.i.i = load double, ptr %_16.i.i.i.ptr.i.i.i.i.i.i.1.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.1.i.i.i.i.i.i.1.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.1.i.i.i.i.i.i.1.i.i.i)
+  %_0.i.i.i.i.i.1.i.i.i.i.i.i.1.i.i.i = fcmp ueq double %_4.i.i.i.i.i.1.i.i.i.i.i.i.1.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.1.i.i.i.i.i.i.1.i.i.i, label %bb2.i.i, label %bb1.i.i.2.i.i.i.i.i.i.1.i.i.i
+
+bb1.i.i.2.i.i.i.i.i.i.1.i.i.i:                    ; preds = %bb1.i.i.1.i.i.i.i.i.i.1.i.i.i
+  %_16.i.i.i.ptr.1.i.i.i.i.i.i.1.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 48
+  %.val.i.i.2.i.i.i.i.i.i.1.i.i.i = load double, ptr %_16.i.i.i.ptr.1.i.i.i.i.i.i.1.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.2.i.i.i.i.i.i.1.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.2.i.i.i.i.i.i.1.i.i.i)
+  %_0.i.i.i.i.i.2.i.i.i.i.i.i.1.i.i.i = fcmp ueq double %_4.i.i.i.i.i.2.i.i.i.i.i.i.1.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.2.i.i.i.i.i.i.1.i.i.i, label %bb2.i.i, label %bb1.i.i.3.i.i.i.i.i.i.1.i.i.i
+
+bb1.i.i.3.i.i.i.i.i.i.1.i.i.i:                    ; preds = %bb1.i.i.2.i.i.i.i.i.i.1.i.i.i
+  %_16.i.i.i.ptr.2.i.i.i.i.i.i.1.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 56
+  %.val.i.i.3.i.i.i.i.i.i.1.i.i.i = load double, ptr %_16.i.i.i.ptr.2.i.i.i.i.i.i.1.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.3.i.i.i.i.i.i.1.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.3.i.i.i.i.i.i.1.i.i.i)
+  %_0.i.i.i.i.i.3.i.i.i.i.i.i.1.i.i.i = fcmp ueq double %_4.i.i.i.i.i.3.i.i.i.i.i.i.1.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.3.i.i.i.i.i.i.1.i.i.i, label %bb2.i.i, label %bb3.i.i.i.i.2.i.i.i
+
+bb3.i.i.i.i.2.i.i.i:                              ; preds = %bb1.i.i.3.i.i.i.i.i.i.1.i.i.i
+  %ptr.i7.i.i.i.i.ptr.2.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 64
+  %.val.i.i.i.i.i.i.i.i.2.i.i.i = load double, ptr %ptr.i7.i.i.i.i.ptr.2.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.i.i.i.i.i.i.2.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.i.i.i.i.i.i.2.i.i.i)
+  %_0.i.i.i.i.i.i.i.i.i.i.i.2.i.i.i = fcmp ueq double %_4.i.i.i.i.i.i.i.i.i.i.i.2.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.i.i.i.i.i.i.2.i.i.i, label %bb2.i.i, label %bb1.i.i.1.i.i.i.i.i.i.2.i.i.i
+
+bb1.i.i.1.i.i.i.i.i.i.2.i.i.i:                    ; preds = %bb3.i.i.i.i.2.i.i.i
+  %_16.i.i.i.ptr.i.i.i.i.i.i.2.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 72
+  %.val.i.i.1.i.i.i.i.i.i.2.i.i.i = load double, ptr %_16.i.i.i.ptr.i.i.i.i.i.i.2.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.1.i.i.i.i.i.i.2.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.1.i.i.i.i.i.i.2.i.i.i)
+  %_0.i.i.i.i.i.1.i.i.i.i.i.i.2.i.i.i = fcmp ueq double %_4.i.i.i.i.i.1.i.i.i.i.i.i.2.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.1.i.i.i.i.i.i.2.i.i.i, label %bb2.i.i, label %bb1.i.i.2.i.i.i.i.i.i.2.i.i.i
+
+bb1.i.i.2.i.i.i.i.i.i.2.i.i.i:                    ; preds = %bb1.i.i.1.i.i.i.i.i.i.2.i.i.i
+  %_16.i.i.i.ptr.1.i.i.i.i.i.i.2.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 80
+  %.val.i.i.2.i.i.i.i.i.i.2.i.i.i = load double, ptr %_16.i.i.i.ptr.1.i.i.i.i.i.i.2.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.2.i.i.i.i.i.i.2.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.2.i.i.i.i.i.i.2.i.i.i)
+  %_0.i.i.i.i.i.2.i.i.i.i.i.i.2.i.i.i = fcmp ueq double %_4.i.i.i.i.i.2.i.i.i.i.i.i.2.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.2.i.i.i.i.i.i.2.i.i.i, label %bb2.i.i, label %bb1.i.i.3.i.i.i.i.i.i.2.i.i.i
+
+bb1.i.i.3.i.i.i.i.i.i.2.i.i.i:                    ; preds = %bb1.i.i.2.i.i.i.i.i.i.2.i.i.i
+  %_16.i.i.i.ptr.2.i.i.i.i.i.i.2.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 88
+  %.val.i.i.3.i.i.i.i.i.i.2.i.i.i = load double, ptr %_16.i.i.i.ptr.2.i.i.i.i.i.i.2.i.i.i, align 8, !alias.scope !8882, !noalias !8889, !noundef !8089
+  %_4.i.i.i.i.i.3.i.i.i.i.i.i.2.i.i.i = call double @llvm.fabs.f64(double %.val.i.i.3.i.i.i.i.i.i.2.i.i.i)
+  %_0.i.i.i.i.i.3.i.i.i.i.i.i.2.i.i.i = fcmp ueq double %_4.i.i.i.i.i.3.i.i.i.i.i.i.2.i.i.i, +inf
+  br i1 %_0.i.i.i.i.i.3.i.i.i.i.i.i.2.i.i.i, label %bb2.i.i, label %bb4.i.i
+
+bb4.i.i:                                          ; preds = %bb1.i.i.3.i.i.i.i.i.i.2.i.i.i
+  %_2.i8.not.i.i = icmp eq i64 %input.1.i, 0
+  br i1 %_2.i8.not.i.i, label %_RNCNCNvCs7NUHba9K0DZ_7spatial12amortizations1_00B5_.exit, label %bb9.i.i
+
+bb9.i.i:                                          ; preds = %bb4.i.i, %_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i
+  %_19.sroa.8.013.i.i = phi double [ %_19.sroa.8.1.i.i, %_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i ], [ undef, %bb4.i.i ]
+  %_19.sroa.7.012.i.i = phi double [ %_19.sroa.7.1.i.i, %_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i ], [ undef, %bb4.i.i ]
+  %_19.sroa.62.011.i.i = phi double [ %_19.sroa.62.1.i.i, %_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i ], [ undef, %bb4.i.i ]
+  %iter.sroa.8.09.i.i = phi i64 [ %18, %_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i ], [ 0, %bb4.i.i ]
+  %18 = add nuw nsw i64 %iter.sroa.8.09.i.i, 1
+  %_3.i.i.i.i = getelementptr inbounds nuw [32 x i8], ptr %output.0.i, i64 %iter.sroa.8.09.i.i
+  %_3.i1.i.i.i = getelementptr inbounds nuw [24 x i8], ptr %input.0.i, i64 %iter.sroa.8.09.i.i
+  %_21.sroa.0.0.copyload.i.i = load double, ptr %_3.i1.i.i.i, align 8, !alias.scope !8877, !noalias !8904
+  %_21.sroa.4.0..sroa_idx.i.i = getelementptr inbounds nuw i8, ptr %_3.i1.i.i.i, i64 8
+  %_21.sroa.4.0.copyload.i.i = load double, ptr %_21.sroa.4.0..sroa_idx.i.i, align 8, !alias.scope !8877, !noalias !8904
+  %_21.sroa.5.0..sroa_idx.i.i = getelementptr inbounds nuw i8, ptr %_3.i1.i.i.i, i64 16
+  %_21.sroa.5.0.copyload.i.i = load double, ptr %_21.sroa.5.0..sroa_idx.i.i, align 8, !alias.scope !8877, !noalias !8904
+  %_2.i.i.i.i.i.i.i.i = call double @llvm.fabs.f64(double %_21.sroa.0.0.copyload.i.i)
+  %_0.i.i.i.i.i.i.i.i = fcmp ueq double %_2.i.i.i.i.i.i.i.i, +inf
+  %_2.i.i.i.i.i.1.i.i.i = call double @llvm.fabs.f64(double %_21.sroa.4.0.copyload.i.i)
+  %_0.i.i.i.i.i.1.i.i.i = fcmp ueq double %_2.i.i.i.i.i.1.i.i.i, +inf
+  %or.cond.i.i.i = or i1 %_0.i.i.i.i.i.i.i.i, %_0.i.i.i.i.i.1.i.i.i
+  %_2.i.i.i.i.i.2.i.i.i = call double @llvm.fabs.f64(double %_21.sroa.5.0.copyload.i.i)
+  %_0.i.i.i.i.i.2.i.i.i = fcmp ueq double %_2.i.i.i.i.i.2.i.i.i, +inf
+  %or.cond26.i.i.i = or i1 %or.cond.i.i.i, %_0.i.i.i.i.i.2.i.i.i
+  br i1 %or.cond26.i.i.i, label %_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i, label %bb1.i.2.i.i.i
+
+bb1.i.2.i.i.i:                                    ; preds = %bb9.i.i
+  %_12.i.i.i = fmul nnan double %.val.i.i.i.i.i.i.i.i.i.i.i, %_21.sroa.0.0.copyload.i.i
+  %_14.i.i.i = fmul nnan double %.val.i.i.1.i.i.i.i.i.i.i.i.i, %_21.sroa.4.0.copyload.i.i
+  %_11.i.i.i = fadd double %_12.i.i.i, %_14.i.i.i
+  %_16.i.i.i = fmul nnan double %.val.i.i.2.i.i.i.i.i.i.i.i.i, %_21.sroa.5.0.copyload.i.i
+  %_10.i1.i.i = fadd double %_11.i.i.i, %_16.i.i.i
+  %xp.i.i.i = fadd double %.val.i.i.3.i.i.i.i.i.i.i.i.i, %_10.i1.i.i
+  %_22.i.i.i = fmul nnan double %.val.i.i.i.i.i.i.i.i.1.i.i.i, %_21.sroa.0.0.copyload.i.i
+  %_24.i.i.i = fmul nnan double %.val.i.i.1.i.i.i.i.i.i.1.i.i.i, %_21.sroa.4.0.copyload.i.i
+  %_21.i.i.i = fadd double %_22.i.i.i, %_24.i.i.i
+  %_26.i.i.i = fmul nnan double %.val.i.i.2.i.i.i.i.i.i.1.i.i.i, %_21.sroa.5.0.copyload.i.i
+  %_20.i.i.i = fadd double %_21.i.i.i, %_26.i.i.i
+  %yp.i.i.i = fadd double %.val.i.i.3.i.i.i.i.i.i.1.i.i.i, %_20.i.i.i
+  %_32.i.i.i = fmul nnan double %.val.i.i.i.i.i.i.i.i.2.i.i.i, %_21.sroa.0.0.copyload.i.i
+  %_34.i.i.i = fmul nnan double %.val.i.i.1.i.i.i.i.i.i.2.i.i.i, %_21.sroa.4.0.copyload.i.i
+  %_31.i.i.i = fadd double %_32.i.i.i, %_34.i.i.i
+  %_36.i.i.i = fmul nnan double %.val.i.i.2.i.i.i.i.i.i.2.i.i.i, %_21.sroa.5.0.copyload.i.i
+  %_30.i.i.i = fadd double %_31.i.i.i, %_36.i.i.i
+  %zp.i.i.i = fadd double %.val.i.i.3.i.i.i.i.i.i.2.i.i.i, %_30.i.i.i
+  %_2.i.i.i.i.i14.i.i.i = call double @llvm.fabs.f64(double %xp.i.i.i)
+  %_0.i.i.i.i.i15.i.i.i = fcmp ueq double %_2.i.i.i.i.i14.i.i.i, +inf
+  %_2.i.i.i.i.i14.1.i.i.i = call double @llvm.fabs.f64(double %yp.i.i.i)
+  %_0.i.i.i.i.i15.1.i.i.i = fcmp ueq double %_2.i.i.i.i.i14.1.i.i.i, +inf
+  %or.cond27.i.i.i = or i1 %_0.i.i.i.i.i15.i.i.i, %_0.i.i.i.i.i15.1.i.i.i
+  %_2.i.i.i.i.i14.2.i.i.i = call double @llvm.fabs.f64(double %zp.i.i.i)
+  %_0.i.i.i.i.i15.2.i.i.i = fcmp ueq double %_2.i.i.i.i.i14.2.i.i.i, +inf
+  %or.cond28.i.i.i = or i1 %_0.i.i.i.i.i15.2.i.i.i, %or.cond27.i.i.i
+  br i1 %or.cond28.i.i.i, label %bb6.i.i.i, label %_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i
+
+bb6.i.i.i:                                        ; preds = %bb1.i.2.i.i.i
+  br label %_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i
+
+_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i: ; preds = %bb6.i.i.i, %bb1.i.2.i.i.i, %bb9.i.i
+  %_19.sroa.62.1.i.i = phi double [ %_19.sroa.62.011.i.i, %bb9.i.i ], [ %_19.sroa.62.011.i.i, %bb6.i.i.i ], [ %xp.i.i.i, %bb1.i.2.i.i.i ]
+  %_19.sroa.7.1.i.i = phi double [ %_19.sroa.7.012.i.i, %bb9.i.i ], [ %_19.sroa.7.012.i.i, %bb6.i.i.i ], [ %yp.i.i.i, %bb1.i.2.i.i.i ]
+  %_19.sroa.8.1.i.i = phi double [ %_19.sroa.8.013.i.i, %bb9.i.i ], [ %_19.sroa.8.013.i.i, %bb6.i.i.i ], [ %zp.i.i.i, %bb1.i.2.i.i.i ]
+  %.sink.i.i.i = phi i8 [ 1, %bb9.i.i ], [ 1, %bb6.i.i.i ], [ 0, %bb1.i.2.i.i.i ]
+  store i8 %.sink.i.i.i, ptr %_3.i.i.i.i, align 8, !alias.scope !8879, !noalias !8905
+  %_19.sroa.4.0..sroa_idx.i.i = getelementptr inbounds nuw i8, ptr %_3.i.i.i.i, i64 1
+  store i8 0, ptr %_19.sroa.4.0..sroa_idx.i.i, align 1, !alias.scope !8879, !noalias !8905
+  %_19.sroa.62.0..sroa_idx.i.i = getelementptr inbounds nuw i8, ptr %_3.i.i.i.i, i64 8
+  store double %_19.sroa.62.1.i.i, ptr %_19.sroa.62.0..sroa_idx.i.i, align 8, !alias.scope !8879, !noalias !8905
+  %_19.sroa.7.0..sroa_idx.i.i = getelementptr inbounds nuw i8, ptr %_3.i.i.i.i, i64 16
+  store double %_19.sroa.7.1.i.i, ptr %_19.sroa.7.0..sroa_idx.i.i, align 8, !alias.scope !8879, !noalias !8905
+  %_19.sroa.8.0..sroa_idx.i.i = getelementptr inbounds nuw i8, ptr %_3.i.i.i.i, i64 24
+  store double %_19.sroa.8.1.i.i, ptr %_19.sroa.8.0..sroa_idx.i.i, align 8, !alias.scope !8879, !noalias !8905
+  %exitcond.not.i.i = icmp eq i64 %18, %input.1.i
+  br i1 %exitcond.not.i.i, label %_RNCNCNvCs7NUHba9K0DZ_7spatial12amortizations1_00B5_.exit, label %bb9.i.i
+
+bb2.i.i:                                          ; preds = %bb1.i.i.3.i.i.i.i.i.i.2.i.i.i, %bb1.i.i.2.i.i.i.i.i.i.2.i.i.i, %bb1.i.i.1.i.i.i.i.i.i.2.i.i.i, %bb3.i.i.i.i.2.i.i.i, %bb1.i.i.3.i.i.i.i.i.i.1.i.i.i, %bb1.i.i.2.i.i.i.i.i.i.1.i.i.i, %bb1.i.i.1.i.i.i.i.i.i.1.i.i.i, %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_matrix_finiteNtB4B_5WorldB5r_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.thread.i.i.i.i.i.i.i.i, %bb1.i.i.3.i.i.i.i.i.i.i.i.i, %bb1.i.i.2.i.i.i.i.i.i.i.i.i, %bb1.i.i.1.i.i.i.i.i.i.i.i.i, %bb1.i.i
+  call void @llvm.lifetime.end.p0(ptr nonnull %_7.i.i), !noalias !8871
+  call void @llvm.lifetime.start.p0(ptr nonnull %e.i.i), !noalias !8906
+  store i8 0, ptr %e.i.i, align 1, !noalias !8906
+; call core::result::unwrap_failed
+  call fastcc void @_RNvNtCs9rw95XCWuke_4core6result13unwrap_failed(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) @anon.502c043d099bb493ffa33a1e448556de.80, i64 noundef 43, ptr noundef nonnull %e.i.i, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) @vtable.16, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @alloc_79f0acbd800c2d2429a66e39f584fabe) #131, !noalias !8871
+  unreachable
+
+_RNCNCNvCs7NUHba9K0DZ_7spatial12amortizations1_00B5_.exit: ; preds = %_RINvNtCs7NUHba9K0DZ_7spatial8borrowed19point_checked_valueNtB4_5WorldBU_NtNtCsgM5WEhIyrjj_17spatial_typestate5units6MetersEB4_.exit.i.i, %bb4.i.i
+  call void @llvm.lifetime.end.p0(ptr nonnull %_7.i.i), !noalias !8871
+  call void @llvm.lifetime.start.p0(ptr nonnull %_9.i), !noalias !8871
+  store ptr %output.0.i, ptr %_9.i, align 8, !noalias !8871
+  store i64 %input.1.i, ptr %10, align 8, !noalias !8871
+  call void asm sideeffect "", "r,~{memory}"(ptr nonnull %_9.i) #89, !noalias !8871, !srcloc !8097
+  call void @llvm.lifetime.end.p0(ptr nonnull %_9.i), !noalias !8871
+  %exitcond.not = icmp eq i64 %_17, %iter1
+  br i1 %exitcond.not, label %bb16, label %bb15
+}

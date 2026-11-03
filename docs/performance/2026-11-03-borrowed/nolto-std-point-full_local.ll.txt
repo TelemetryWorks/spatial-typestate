@@ -1,0 +1,303 @@
+define hidden void @_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00EB10_(ptr noalias nofree noundef align 8 captures(none) dereferenceable(56) initializes((48, 49)) %self, ptr noalias nofree noundef readonly align 8 captures(none) dead_on_return dereferenceable(24) %routine) unnamed_addr #0 personality ptr @__CxxFrameHandler3 !guid !797 {
+start:
+  %_23.i = alloca [16 x i8], align 8
+  %_10.i = alloca [8 x i8], align 8
+  %_8.i = alloca [8 x i8], align 8
+  %_5.i = alloca [40 x i8], align 8
+  %time_start = alloca [16 x i8], align 8
+  %0 = getelementptr inbounds nuw i8, ptr %self, i64 48
+  store i8 1, ptr %0, align 8
+  call void @llvm.lifetime.start.p0(ptr nonnull %time_start)
+; call <std::time::Instant>::now
+  %1 = tail call { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant3now()
+  %2 = extractvalue { i64, i32 } %1, 0
+  %3 = extractvalue { i64, i32 } %1, 1
+  store i64 %2, ptr %time_start, align 8
+  %4 = getelementptr inbounds nuw i8, ptr %time_start, i64 8
+  store i32 %3, ptr %4, align 8
+  %5 = getelementptr inbounds nuw i8, ptr %self, i64 32
+  %_13 = load ptr, ptr %5, align 8, !nonnull !50, !noundef !50
+; call <criterion::measurement::WallTime as criterion::measurement::Measurement>::start
+  %6 = tail call { i64, i32 } @_RNvXs0_NtCsepw49DxxxIC_9criterion11measurementNtB5_8WallTimeNtB5_11Measurement5start(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) %_13)
+  %7 = getelementptr inbounds nuw i8, ptr %self, i64 40
+  %iter1 = load i64, ptr %7, align 8, !noundef !50
+  %_1613.not = icmp eq i64 %iter1, 0
+  br i1 %_1613.not, label %bb16, label %bb15.lr.ph
+
+bb15.lr.ph:                                       ; preds = %start
+  %_24.i = load ptr, ptr %routine, align 8, !alias.scope !798, !nonnull !50, !align !56, !noundef !50
+  %8 = getelementptr inbounds nuw i8, ptr %routine, i64 8
+  %_25.i = load ptr, ptr %8, align 8, !alias.scope !798, !nonnull !50, !align !56, !noundef !50
+  %9 = getelementptr inbounds nuw i8, ptr %_25.i, i64 8
+  %10 = getelementptr inbounds nuw i8, ptr %_25.i, i64 16
+  %11 = getelementptr inbounds nuw i8, ptr %routine, i64 16
+  %_26.i = load ptr, ptr %11, align 8, !alias.scope !798, !nonnull !50, !align !56, !noundef !50
+  %12 = getelementptr inbounds nuw i8, ptr %_26.i, i64 8
+  %13 = getelementptr inbounds nuw i8, ptr %_26.i, i64 16
+  %_6.sroa.4.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 8
+  %_6.sroa.5.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 16
+  %_6.sroa.6.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 24
+  %_6.sroa.7.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 32
+  %14 = getelementptr inbounds nuw i8, ptr %_23.i, i64 8
+  br label %bb15
+
+bb16:                                             ; preds = %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00B5_.exit, %start
+  %start.1 = extractvalue { i64, i32 } %6, 1
+  %start.0 = extractvalue { i64, i32 } %6, 0
+; call <criterion::measurement::WallTime as criterion::measurement::Measurement>::end
+  %15 = call { i64, i32 } @_RNvXs0_NtCsepw49DxxxIC_9criterion11measurementNtB5_8WallTimeNtB5_11Measurement3end(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) %_13, i64 noundef %start.0, i32 noundef %start.1)
+  %_9.0 = extractvalue { i64, i32 } %15, 0
+  %_9.1 = extractvalue { i64, i32 } %15, 1
+  store i64 %_9.0, ptr %self, align 8
+  %16 = getelementptr inbounds nuw i8, ptr %self, i64 8
+  store i32 %_9.1, ptr %16, align 8
+; call <std::time::Instant>::elapsed
+  %17 = call { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant7elapsed(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %time_start)
+  %_11.0 = extractvalue { i64, i32 } %17, 0
+  %_11.1 = extractvalue { i64, i32 } %17, 1
+  %18 = getelementptr inbounds nuw i8, ptr %self, i64 16
+  store i64 %_11.0, ptr %18, align 8
+  %19 = getelementptr inbounds nuw i8, ptr %self, i64 24
+  store i32 %_11.1, ptr %19, align 8
+  call void @llvm.lifetime.end.p0(ptr nonnull %time_start)
+  ret void
+
+bb15:                                             ; preds = %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00B5_.exit, %bb15.lr.ph
+  %iter.sroa.0.018 = phi i64 [ 0, %bb15.lr.ph ], [ %_17, %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00B5_.exit ]
+  %_21.i.sroa.8.017 = phi double [ undef, %bb15.lr.ph ], [ %_21.i.sroa.8.2, %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00B5_.exit ]
+  %20 = phi <2 x double> [ undef, %bb15.lr.ph ], [ %51, %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00B5_.exit ]
+  %_17 = add nuw i64 %iter.sroa.0.018, 1
+  call void @llvm.experimental.noalias.scope.decl(metadata !798)
+  call void @llvm.lifetime.start.p0(ptr nonnull %_10.i)
+  call void @llvm.lifetime.start.p0(ptr nonnull %_5.i), !noalias !798
+  %_31.i = load ptr, ptr %9, align 8, !noalias !798, !nonnull !50, !noundef !50
+  %_30.i = load i64, ptr %10, align 8, !noalias !798, !noundef !50
+  %_36.i = load ptr, ptr %12, align 8, !noalias !798, !nonnull !50, !noundef !50
+  %_35.i = load i64, ptr %13, align 8, !noalias !798, !noundef !50
+  store ptr %_24.i, ptr %_5.i, align 8, !noalias !798
+  store ptr %_31.i, ptr %_6.sroa.4.0._5.sroa_idx.i, align 8, !noalias !798
+  store i64 %_30.i, ptr %_6.sroa.5.0._5.sroa_idx.i, align 8, !noalias !798
+  store ptr %_36.i, ptr %_6.sroa.6.0._5.sroa_idx.i, align 8, !noalias !798
+  store i64 %_35.i, ptr %_6.sroa.7.0._5.sroa_idx.i, align 8, !noalias !798
+  call void asm sideeffect "", "r,~{memory}"(ptr nonnull %_5.i) #14, !noalias !798, !srcloc !58
+  %map.i = load ptr, ptr %_5.i, align 8, !noalias !798, !nonnull !50, !align !56, !noundef !50
+  %input.0.i = load ptr, ptr %_6.sroa.4.0._5.sroa_idx.i, align 8, !noalias !798, !nonnull !50, !align !56, !noundef !50
+  %input.1.i = load i64, ptr %_6.sroa.5.0._5.sroa_idx.i, align 8, !noalias !798, !noundef !50
+  %output.0.i = load ptr, ptr %_6.sroa.6.0._5.sroa_idx.i, align 8, !noalias !798, !nonnull !50, !align !56, !noundef !50
+  %output.1.i = load i64, ptr %_6.sroa.7.0._5.sroa_idx.i, align 8, !noalias !798, !noundef !50
+  call void @llvm.lifetime.end.p0(ptr nonnull %_5.i), !noalias !798
+  call void @llvm.lifetime.start.p0(ptr nonnull %_8.i), !noalias !798
+  store i64 %input.1.i, ptr %_8.i, align 8, !noalias !798
+  store i64 %output.1.i, ptr %_10.i, align 8, !noalias !798
+  %_11.i = icmp eq i64 %input.1.i, %output.1.i
+  br i1 %_11.i, label %bb1.i, label %bb2.i, !prof !801
+
+bb2.i:                                            ; preds = %bb15
+; call core::panicking::assert_failed::<usize, usize>
+  call void @_RINvNtCs9rw95XCWuke_4core9panicking13assert_failedjjEB4_(i8 noundef 0, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(8) %_8.i, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(8) %_10.i, ptr noundef null, ptr undef, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @alloc_007ddca066ee6a927af021bc92af7455) #13, !noalias !798
+  unreachable
+
+bb1.i:                                            ; preds = %bb15
+  call void @llvm.lifetime.end.p0(ptr nonnull %_8.i), !noalias !798
+  %_2.i7.i.not = icmp eq i64 %input.1.i, 0
+  br i1 %_2.i7.i.not, label %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00B5_.exit, label %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.lr.ph.i
+
+_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.lr.ph.i: ; preds = %bb1.i
+  %21 = getelementptr inbounds nuw i8, ptr %map.i, i64 64
+  %22 = getelementptr inbounds nuw i8, ptr %map.i, i64 80
+  %23 = getelementptr inbounds nuw i8, ptr %map.i, i64 88
+  %_16.i.i.i.ptr.i.i.i.i.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 8
+  %_16.i.i.i.ptr.1.i.i.i.i.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 16
+  %_16.i.i.i.ptr.2.i.i.i.i.i.i.i = getelementptr inbounds nuw i8, ptr %map.i, i64 24
+  %_16.i6.i.i.i.i.ptr.i11.1 = getelementptr inbounds nuw i8, ptr %map.i, i64 32
+  %_16.i.i.i.ptr.i.i.i.i.i.i.i.1 = getelementptr inbounds nuw i8, ptr %map.i, i64 40
+  %_16.i.i.i.ptr.1.i.i.i.i.i.i.i.1 = getelementptr inbounds nuw i8, ptr %map.i, i64 48
+  %_16.i.i.i.ptr.2.i.i.i.i.i.i.i.1 = getelementptr inbounds nuw i8, ptr %map.i, i64 56
+  %_16.i6.i.i.i.i.ptr.i11.2 = getelementptr inbounds nuw i8, ptr %map.i, i64 64
+  %_16.i.i.i.ptr.i.i.i.i.i.i.i.2 = getelementptr inbounds nuw i8, ptr %map.i, i64 72
+  %_16.i.i.i.ptr.1.i.i.i.i.i.i.i.2 = getelementptr inbounds nuw i8, ptr %map.i, i64 80
+  %_16.i.i.i.ptr.2.i.i.i.i.i.i.i.2 = getelementptr inbounds nuw i8, ptr %map.i, i64 88
+  %_16.i6.i.i.i.i.ptr.i11.3 = getelementptr inbounds nuw i8, ptr %map.i, i64 96
+  %_16.i.i.i.ptr.i.i.i.i.i.i.i.3 = getelementptr inbounds nuw i8, ptr %map.i, i64 104
+  %_16.i.i.i.ptr.1.i.i.i.i.i.i.i.3 = getelementptr inbounds nuw i8, ptr %map.i, i64 112
+  %_16.i.i.i.ptr.2.i.i.i.i.i.i.i.3 = getelementptr inbounds nuw i8, ptr %map.i, i64 120
+  br label %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.i
+
+_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.i: ; preds = %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit, %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.lr.ph.i
+  %_21.i.sroa.8.1 = phi double [ %_21.i.sroa.8.017, %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.lr.ph.i ], [ %_21.i.sroa.8.3, %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit ]
+  %iter.sroa.52.08.i = phi i64 [ 0, %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.lr.ph.i ], [ %25, %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit ]
+  %24 = phi <2 x double> [ %20, %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.lr.ph.i ], [ %50, %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit ]
+  %_3.i.i.i = getelementptr inbounds nuw [32 x i8], ptr %output.0.i, i64 %iter.sroa.52.08.i
+  %_3.i1.i.i = getelementptr inbounds nuw [24 x i8], ptr %input.0.i, i64 %iter.sroa.52.08.i
+  %25 = add nuw i64 %iter.sroa.52.08.i, 1
+  %26 = load <2 x double>, ptr %_3.i1.i.i, align 8, !noalias !798
+  %_22.i.sroa.5.0._3.i1.i.i.sroa_idx = getelementptr inbounds nuw i8, ptr %_3.i1.i.i, i64 16
+  %_22.i.sroa.5.0.copyload = load double, ptr %_22.i.sroa.5.0._3.i1.i.i.sroa_idx, align 8, !noalias !798
+  %27 = extractelement <2 x double> %26, i64 0
+  %_2.i.i.i.i.i.i = call double @llvm.fabs.f64(double %27)
+  %_0.i.i.i.i.i.i = fcmp ueq double %_2.i.i.i.i.i.i, +inf
+  %28 = extractelement <2 x double> %26, i64 1
+  %_2.i.i.i.i.i.1.i = call double @llvm.fabs.f64(double %28)
+  %_0.i.i.i.i.i.1.i = fcmp ueq double %_2.i.i.i.i.i.1.i, +inf
+  %or.cond.i = or i1 %_0.i.i.i.i.i.i, %_0.i.i.i.i.i.1.i
+  %_2.i.i.i.i.i.2.i = call double @llvm.fabs.f64(double %_22.i.sroa.5.0.copyload)
+  %_0.i.i.i.i.i.2.i = fcmp ueq double %_2.i.i.i.i.i.2.i, +inf
+  %or.cond30.i = or i1 %or.cond.i, %_0.i.i.i.i.i.2.i
+  br i1 %or.cond30.i, label %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit, label %bb3.i.i.i.i.i
+
+bb1.i.i.i.i.i:                                    ; preds = %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i
+  %.val.i.1 = load double, ptr %_16.i6.i.i.i.i.ptr.i11.1, align 8, !alias.scope !802, !noalias !805, !noundef !50
+  %_4.i.i.i.1 = call double @llvm.fabs.f64(double %.val.i.1)
+  %_0.i.i.i.1 = fcmp ueq double %_4.i.i.i.1, +inf
+  br i1 %_0.i.i.i.1, label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1, label %bb1.i.i.1.i.i.i.i.i.i.i.1
+
+bb1.i.i.1.i.i.i.i.i.i.i.1:                        ; preds = %bb1.i.i.i.i.i
+  %.val.i1.1 = load double, ptr %_16.i.i.i.ptr.i.i.i.i.i.i.i.1, align 8, !alias.scope !826, !noalias !805, !noundef !50
+  %_4.i.i.i2.1 = call double @llvm.fabs.f64(double %.val.i1.1)
+  %_0.i.i.i3.1 = fcmp ueq double %_4.i.i.i2.1, +inf
+  br i1 %_0.i.i.i3.1, label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1, label %bb1.i.i.2.i.i.i.i.i.i.i.1
+
+bb1.i.i.2.i.i.i.i.i.i.i.1:                        ; preds = %bb1.i.i.1.i.i.i.i.i.i.i.1
+  %.val.i4.1 = load double, ptr %_16.i.i.i.ptr.1.i.i.i.i.i.i.i.1, align 8, !alias.scope !829, !noalias !805, !noundef !50
+  %_4.i.i.i5.1 = call double @llvm.fabs.f64(double %.val.i4.1)
+  %_0.i.i.i6.1 = fcmp ueq double %_4.i.i.i5.1, +inf
+  br i1 %_0.i.i.i6.1, label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1, label %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i.1
+
+_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i.1: ; preds = %bb1.i.i.2.i.i.i.i.i.i.i.1
+  %.val.i7.1 = load double, ptr %_16.i.i.i.ptr.2.i.i.i.i.i.i.i.1, align 8, !alias.scope !832, !noalias !805, !noundef !50
+  %_4.i.i.i8.1 = call double @llvm.fabs.f64(double %.val.i7.1)
+  %_0.i.i.i9.1 = fcmp ueq double %_4.i.i.i8.1, +inf
+  %spec.select4.i.i.i.i.i.i.1 = select i1 %_0.i.i.i9.1, i8 1, i8 2
+  br label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1
+
+_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1: ; preds = %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i.1, %bb1.i.i.2.i.i.i.i.i.i.i.1, %bb1.i.i.1.i.i.i.i.i.i.i.1, %bb1.i.i.i.i.i
+  %29 = phi i8 [ %spec.select4.i.i.i.i.i.i.1, %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i.1 ], [ 1, %bb1.i.i.2.i.i.i.i.i.i.i.1 ], [ 1, %bb1.i.i.1.i.i.i.i.i.i.i.1 ], [ 1, %bb1.i.i.i.i.i ]
+  %cond = icmp eq i8 %29, 2
+  br i1 %cond, label %bb1.i.i.i.i.i.1, label %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit
+
+bb1.i.i.i.i.i.1:                                  ; preds = %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1
+  %.val.i.2 = load double, ptr %_16.i6.i.i.i.i.ptr.i11.2, align 8, !alias.scope !802, !noalias !805, !noundef !50
+  %_4.i.i.i.2 = call double @llvm.fabs.f64(double %.val.i.2)
+  %_0.i.i.i.2 = fcmp ueq double %_4.i.i.i.2, +inf
+  br i1 %_0.i.i.i.2, label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2, label %bb1.i.i.1.i.i.i.i.i.i.i.2
+
+bb1.i.i.1.i.i.i.i.i.i.i.2:                        ; preds = %bb1.i.i.i.i.i.1
+  %.val.i1.2 = load double, ptr %_16.i.i.i.ptr.i.i.i.i.i.i.i.2, align 8, !alias.scope !826, !noalias !805, !noundef !50
+  %_4.i.i.i2.2 = call double @llvm.fabs.f64(double %.val.i1.2)
+  %_0.i.i.i3.2 = fcmp ueq double %_4.i.i.i2.2, +inf
+  br i1 %_0.i.i.i3.2, label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2, label %bb1.i.i.2.i.i.i.i.i.i.i.2
+
+bb1.i.i.2.i.i.i.i.i.i.i.2:                        ; preds = %bb1.i.i.1.i.i.i.i.i.i.i.2
+  %.val.i4.2 = load double, ptr %_16.i.i.i.ptr.1.i.i.i.i.i.i.i.2, align 8, !alias.scope !829, !noalias !805, !noundef !50
+  %_4.i.i.i5.2 = call double @llvm.fabs.f64(double %.val.i4.2)
+  %_0.i.i.i6.2 = fcmp ueq double %_4.i.i.i5.2, +inf
+  br i1 %_0.i.i.i6.2, label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2, label %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i.2
+
+_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i.2: ; preds = %bb1.i.i.2.i.i.i.i.i.i.i.2
+  %.val.i7.2 = load double, ptr %_16.i.i.i.ptr.2.i.i.i.i.i.i.i.2, align 8, !alias.scope !832, !noalias !805, !noundef !50
+  %_4.i.i.i8.2 = call double @llvm.fabs.f64(double %.val.i7.2)
+  %_0.i.i.i9.2 = fcmp ueq double %_4.i.i.i8.2, +inf
+  %spec.select.i.i.i.i.i.i.2 = zext i1 %_0.i.i.i9.2 to i8
+  br label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2
+
+_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2: ; preds = %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i.2, %bb1.i.i.2.i.i.i.i.i.i.i.2, %bb1.i.i.1.i.i.i.i.i.i.i.2, %bb1.i.i.i.i.i.1
+  %30 = phi i8 [ %spec.select.i.i.i.i.i.i.2, %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i.2 ], [ 1, %bb1.i.i.2.i.i.i.i.i.i.i.2 ], [ 1, %bb1.i.i.1.i.i.i.i.i.i.i.2 ], [ 1, %bb1.i.i.i.i.i.1 ]
+  %cond13 = icmp eq i8 %30, 0
+  br i1 %cond13, label %bb5.i, label %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit
+
+bb3.i.i.i.i.i:                                    ; preds = %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.i
+  %.val.i = load double, ptr %map.i, align 8, !alias.scope !802, !noalias !805, !noundef !50
+  %_4.i.i.i = call double @llvm.fabs.f64(double %.val.i)
+  %_0.i.i.i = fcmp ueq double %_4.i.i.i, +inf
+  br i1 %_0.i.i.i, label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i, label %bb1.i.i.1.i.i.i.i.i.i.i
+
+bb1.i.i.1.i.i.i.i.i.i.i:                          ; preds = %bb3.i.i.i.i.i
+  %.val.i1 = load double, ptr %_16.i.i.i.ptr.i.i.i.i.i.i.i, align 8, !alias.scope !826, !noalias !805, !noundef !50
+  %_4.i.i.i2 = call double @llvm.fabs.f64(double %.val.i1)
+  %_0.i.i.i3 = fcmp ueq double %_4.i.i.i2, +inf
+  br i1 %_0.i.i.i3, label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i, label %bb1.i.i.2.i.i.i.i.i.i.i
+
+bb1.i.i.2.i.i.i.i.i.i.i:                          ; preds = %bb1.i.i.1.i.i.i.i.i.i.i
+  %.val.i4 = load double, ptr %_16.i.i.i.ptr.1.i.i.i.i.i.i.i, align 8, !alias.scope !829, !noalias !805, !noundef !50
+  %_4.i.i.i5 = call double @llvm.fabs.f64(double %.val.i4)
+  %_0.i.i.i6 = fcmp ueq double %_4.i.i.i5, +inf
+  br i1 %_0.i.i.i6, label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i, label %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i
+
+_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i: ; preds = %bb1.i.i.2.i.i.i.i.i.i.i
+  %.val.i7 = load double, ptr %_16.i.i.i.ptr.2.i.i.i.i.i.i.i, align 8, !alias.scope !832, !noalias !805, !noundef !50
+  %_4.i.i.i8 = call double @llvm.fabs.f64(double %.val.i7)
+  %_0.i.i.i9 = fcmp ueq double %_4.i.i.i8, +inf
+  %spec.select4.i.i.i.i.i.i = select i1 %_0.i.i.i9, i8 1, i8 2
+  br label %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i
+
+_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i: ; preds = %bb3.i.i.i.i.i, %bb1.i.i.1.i.i.i.i.i.i.i, %bb1.i.i.2.i.i.i.i.i.i.i, %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i
+  %31 = phi i8 [ %spec.select4.i.i.i.i.i.i, %_RNCINvNvMsg_NtNtNtCs9rw95XCWuke_4core4iter8adapters7flattenINtBa_13FlattenCompatppE13iter_try_fold7flattenRAdj4_uINtNtNtBg_3ops12control_flow11ControlFlowuENCINvNvXsi_Ba_BV_NtNtNtBe_6traits8iterator8Iterator8try_fold7flattenINtNtNtBg_5slice4iter4IterdEuB1N_NCINvNvB2L_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4B_5WorldB5n_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0B4B_.exit.i.i.i.i.i.i ], [ 1, %bb1.i.i.2.i.i.i.i.i.i.i ], [ 1, %bb1.i.i.1.i.i.i.i.i.i.i ], [ 1, %bb3.i.i.i.i.i ]
+  %cond14 = icmp eq i8 %31, 2
+  br i1 %cond14, label %bb1.i.i.i.i.i, label %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit
+
+bb5.i:                                            ; preds = %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2
+  %32 = load <8 x double>, ptr %map.i, align 8, !alias.scope !835, !noalias !837
+  %33 = shufflevector <2 x double> %26, <2 x double> poison, <2 x i32> <i32 1, i32 0>
+  %34 = shufflevector <8 x double> %32, <8 x double> poison, <2 x i32> <i32 1, i32 4>
+  %35 = fmul <2 x double> %33, %34
+  %36 = shufflevector <8 x double> %32, <8 x double> poison, <2 x i32> <i32 0, i32 5>
+  %37 = fmul <2 x double> %26, %36
+  %38 = fadd <2 x double> %37, %35
+  %39 = insertelement <2 x double> poison, double %_22.i.sroa.5.0.copyload, i64 0
+  %40 = shufflevector <2 x double> %39, <2 x double> poison, <2 x i32> zeroinitializer
+  %41 = shufflevector <8 x double> %32, <8 x double> poison, <2 x i32> <i32 2, i32 6>
+  %42 = fmul <2 x double> %40, %41
+  %43 = fadd <2 x double> %38, %42
+  %44 = shufflevector <8 x double> %32, <8 x double> poison, <2 x i32> <i32 3, i32 7>
+  %45 = fadd <2 x double> %44, %43
+  %46 = load <2 x double>, ptr %21, align 8, !alias.scope !835, !noalias !837
+  %47 = fmul <2 x double> %26, %46
+  %shift = shufflevector <2 x double> %47, <2 x double> poison, <2 x i32> <i32 1, i32 poison>
+  %foldExtExtBinop = fadd <2 x double> %47, %shift
+  %_38.i = extractelement <2 x double> %foldExtExtBinop, i64 0
+  %_44.i = load double, ptr %22, align 8, !alias.scope !835, !noalias !837, !noundef !50
+  %_43.i = fmul double %_22.i.sroa.5.0.copyload, %_44.i
+  %_37.i = fadd double %_38.i, %_43.i
+  %_45.i = load double, ptr %23, align 8, !alias.scope !835, !noalias !837, !noundef !50
+  %zp.i = fadd double %_45.i, %_37.i
+  %48 = extractelement <2 x double> %45, i64 0
+  %_2.i.i.i.i.i16.i = call double @llvm.fabs.f64(double %48)
+  %_0.i.i.i.i.i17.i = fcmp ueq double %_2.i.i.i.i.i16.i, +inf
+  %49 = extractelement <2 x double> %45, i64 1
+  %_2.i.i.i.i.i16.1.i = call double @llvm.fabs.f64(double %49)
+  %_0.i.i.i.i.i17.1.i = fcmp ueq double %_2.i.i.i.i.i16.1.i, +inf
+  %or.cond31.i = or i1 %_0.i.i.i.i.i17.i, %_0.i.i.i.i.i17.1.i
+  %_2.i.i.i.i.i16.2.i = call double @llvm.fabs.f64(double %zp.i)
+  %_0.i.i.i.i.i17.2.i = fcmp ueq double %_2.i.i.i.i.i16.2.i, +inf
+  %or.cond32.i = or i1 %or.cond31.i, %_0.i.i.i.i.i17.2.i
+  br i1 %or.cond32.i, label %bb9.i, label %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit
+
+bb9.i:                                            ; preds = %bb5.i
+  br label %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit
+
+_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit: ; preds = %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i, %bb9.i, %bb5.i, %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.i
+  %_21.i.sroa.8.3 = phi double [ %_21.i.sroa.8.1, %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.i ], [ %_21.i.sroa.8.1, %bb9.i ], [ %zp.i, %bb5.i ], [ %_21.i.sroa.8.1, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i ], [ %_21.i.sroa.8.1, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2 ], [ %_21.i.sroa.8.1, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1 ]
+  %.sink.i = phi i8 [ 1, %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.i ], [ 1, %bb9.i ], [ 0, %bb5.i ], [ 1, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i ], [ 1, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2 ], [ 1, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1 ]
+  %50 = phi <2 x double> [ %24, %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.i ], [ %24, %bb9.i ], [ %45, %bb5.i ], [ %24, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i ], [ %24, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.2 ], [ %24, %_RNCINvNvXs_NtNtNtCs9rw95XCWuke_4core4iter8adapters4takeINtB9_4TakepENtNtNtBd_6traits8iterator8Iterator8try_fold5checkRAdj4_uINtNtNtBf_3ops12control_flow11ControlFlowuENCINvNvMsg_NtBb_7flattenINtB2Q_13FlattenCompatppE13iter_try_fold7flattenB1R_uB1Y_NCINvNvXsi_B2Q_B33_B14_8try_fold7flattenINtNtNtBf_5slice4iter4IterdEuB1Y_NCINvNvB14_3all5checkRdNCINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB5D_5WorldB6p_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersE0E0E0E0E0B5D_.exit.i.i.i.i.i.1 ]
+  store i8 %.sink.i, ptr %_3.i.i.i, align 8, !noalias !798
+  %_21.i.sroa.4.0._3.i.i.i.sroa_idx = getelementptr inbounds nuw i8, ptr %_3.i.i.i, i64 1
+  store i8 0, ptr %_21.i.sroa.4.0._3.i.i.i.sroa_idx, align 1, !noalias !798
+  %_21.i.sroa.612.0._3.i.i.i.sroa_idx = getelementptr inbounds nuw i8, ptr %_3.i.i.i, i64 8
+  store <2 x double> %50, ptr %_21.i.sroa.612.0._3.i.i.i.sroa_idx, align 8, !noalias !798
+  %_21.i.sroa.8.0._3.i.i.i.sroa_idx = getelementptr inbounds nuw i8, ptr %_3.i.i.i, i64 24
+  store double %_21.i.sroa.8.3, ptr %_21.i.sroa.8.0._3.i.i.i.sroa_idx, align 8, !noalias !798
+  %exitcond.not.i = icmp eq i64 %25, %input.1.i
+  br i1 %exitcond.not.i, label %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00B5_.exit, label %_RNvXs3_NtNtNtCs9rw95XCWuke_4core4iter8adapters3zipINtB5_3ZipINtNtNtBb_5slice4iter7IterMutINtNtBb_6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1Q_5units6MetersENtNtB1Q_6errors12SpatialErrorEEINtBZ_4IterB1L_EEINtB5_7ZipImplBW_B3V_E4nextB2C_.exit.i
+
+_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00B5_.exit: ; preds = %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit, %bb1.i
+  %_21.i.sroa.8.2 = phi double [ %_21.i.sroa.8.017, %bb1.i ], [ %_21.i.sroa.8.3, %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit ]
+  %51 = phi <2 x double> [ %20, %bb1.i ], [ %50, %_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_localNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_.exit ]
+  call void @llvm.lifetime.start.p0(ptr nonnull %_23.i), !noalias !798
+  store ptr %output.0.i, ptr %_23.i, align 8, !noalias !798
+  store i64 %input.1.i, ptr %14, align 8, !noalias !798
+  call void asm sideeffect "", "r,~{memory}"(ptr nonnull %_23.i) #14, !noalias !798, !srcloc !58
+  call void @llvm.lifetime.end.p0(ptr nonnull %_23.i), !noalias !798
+  call void @llvm.lifetime.end.p0(ptr nonnull %_10.i)
+  %exitcond.not = icmp eq i64 %_17, %iter1
+  br i1 %exitcond.not, label %bb16, label %bb15
+}

@@ -32,3 +32,9 @@ local execution. Physical frame correctness and certification are not promised.
 The tests named in these files are the verification entry points. No generated
 trace matrix or external compliance tooling is implied. Changes to a contract
 must update this table and its concrete evidence in the same review.
+
+The [borrowed-validation study](../borrowed_validation.md) provides experimental
+lifetime/type/bit evidence without extending the production contracts above.
+Its prepare-time matrix errors and fixture batch protocol are not approved APIs.
+See [prototype tests](../../tests/borrowed_validation.rs) and
+[live-borrow rejection](../../tests/ui/borrowed_matrix_mutation.rs).

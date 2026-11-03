@@ -91,7 +91,7 @@ def collect(home, label, metadata):
     (home.parent / "result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
 
 
-def run(study, configs, selected_filter):
+def run(study, configs, selected_filter, analysis_threads):
     manifest = json.loads((OUT / "manifest.json").read_text())
     if manifest["fingerprint"] != fingerprint():
         raise RuntimeError("Source changed after preparation; rebuild before collecting timings")
@@ -100,7 +100,7 @@ def run(study, configs, selected_filter):
     study_folder = OUT / study
     study_folder.mkdir(parents=True, exist_ok=True)
     plan = {"fingerprint": manifest["fingerprint"], "configs": configs,
-            "filter": selected_filter}
+            "filter": selected_filter, "analysis_threads": analysis_threads}
     plan_file = study_folder / "study-plan.json"
     if plan_file.exists() and json.loads(plan_file.read_text()) != plan:
         raise RuntimeError("Study plan changed; choose a fresh study name")
@@ -128,6 +128,8 @@ def run(study, configs, selected_filter):
             env = os.environ.copy()
             env["CRITERION_HOME"] = str(home)
             env["SPATIAL_BENCH_SEED"] = "5573589319906701683"
+            if analysis_threads is not None:
+                env["RAYON_NUM_THREADS"] = str(analysis_threads)
             # Reverse candidate registration, not benchmark IDs or inputs.
             env.pop("SPATIAL_BENCH_REVERSE", None)
             if repeat % 2 == 0:
@@ -140,7 +142,8 @@ def run(study, configs, selected_filter):
             metadata = {"config": config, "repeat": repeat, "command": command,
                         "seed": env["SPATIAL_BENCH_SEED"], "reverse": repeat % 2 == 0,
                         "utc_start": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                        "fingerprint": manifest["fingerprint"]}
+                        "fingerprint": manifest["fingerprint"],
+                        "analysis_threads": env.get("RAYON_NUM_THREADS")}
             print("MEASURE " + label, flush=True)
             start = time.monotonic()
             with (folder / "console.log").open("w", encoding="utf-8") as log:
@@ -173,13 +176,17 @@ if __name__ == "__main__":
                         help="comma-separated named profiles (default: all)")
     parser.add_argument("--filter", default=None,
                         help="optional Criterion filter, replacing the no-LTO subset")
+    parser.add_argument("--analysis-threads", type=int, default=None,
+                        help="explicit Rayon bootstrap worker cap, outside operation timing")
     args = parser.parse_args()
     configs = args.configs.split(",")
     if not configs or any(config not in CONFIGS for config in configs):
         parser.error("unknown/empty profile selection")
+    if args.analysis_threads is not None and args.analysis_threads < 1:
+        parser.error("analysis threads must be positive")
     if not args.prepare and not args.run:
         parser.error("select --prepare and/or --run")
     if args.prepare:
         prepare(configs)
     if args.run:
-        run(args.study, configs, args.filter)
+        run(args.study, configs, args.filter, args.analysis_threads)

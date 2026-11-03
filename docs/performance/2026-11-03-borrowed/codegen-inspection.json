@@ -1,0 +1,494 @@
+{
+  "loops": [
+    {
+      "profile": "lto-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial12amortizations0_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 9,
+        "fcmp": 18,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-std-point-full_local.ll.txt",
+      "operation": "point/full_local",
+      "matrix_validation": "inside per-element loop (public LTO vector has a nested three-row loop)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial12amortizations1_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 9,
+        "fcmp": 18,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-std-point-caller_hoisted.ll.txt",
+      "operation": "point/caller_hoisted",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial12amortizations2_00EB10_",
+      "counts": {
+        "fmul": 5,
+        "fadd": 6,
+        "fcmp": 18,
+        "vector_arithmetic": 8,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-std-point-prepare_each_batch.ll.txt",
+      "operation": "point/prepare_each_batch",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial12amortizations3_00EB10_",
+      "counts": {
+        "fmul": 5,
+        "fadd": 6,
+        "fcmp": 6,
+        "vector_arithmetic": 8,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-std-point-borrowed_reuse.ll.txt",
+      "operation": "point/borrowed_reuse",
+      "matrix_validation": "before timing, at preparation; none inside timed loop",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial12amortizations5_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 9,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-std-vector-public.ll.txt",
+      "operation": "vector/public",
+      "matrix_validation": "inside per-element loop (public LTO vector has a nested three-row loop)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial12amortizations6_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 15,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-std-vector-caller_hoisted.ll.txt",
+      "operation": "vector/caller_hoisted",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial12amortizations7_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 15,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-std-vector-prepare_each_batch.ll.txt",
+      "operation": "vector/prepare_each_batch",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial12amortizations8_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 6,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-std-vector-borrowed_reuse.ll.txt",
+      "operation": "vector/borrowed_reuse",
+      "matrix_validation": "before timing, at preparation; none inside timed loop",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial12amortizations_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 9,
+        "fcmp": 18,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-std-point-public.ll.txt",
+      "operation": "point/public",
+      "matrix_validation": "inside per-element loop (public LTO vector has a nested three-row loop)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-no-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations0_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 9,
+        "fcmp": 18,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-no-std-point-full_local.ll.txt",
+      "operation": "point/full_local",
+      "matrix_validation": "inside per-element loop (public LTO vector has a nested three-row loop)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-no-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations1_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 9,
+        "fcmp": 18,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-no-std-point-caller_hoisted.ll.txt",
+      "operation": "point/caller_hoisted",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-no-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations2_00EB10_",
+      "counts": {
+        "fmul": 5,
+        "fadd": 6,
+        "fcmp": 18,
+        "vector_arithmetic": 8,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-no-std-point-prepare_each_batch.ll.txt",
+      "operation": "point/prepare_each_batch",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-no-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations3_00EB10_",
+      "counts": {
+        "fmul": 5,
+        "fadd": 6,
+        "fcmp": 6,
+        "vector_arithmetic": 8,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-no-std-point-borrowed_reuse.ll.txt",
+      "operation": "point/borrowed_reuse",
+      "matrix_validation": "before timing, at preparation; none inside timed loop",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-no-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations5_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 9,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-no-std-vector-public.ll.txt",
+      "operation": "vector/public",
+      "matrix_validation": "inside per-element loop (public LTO vector has a nested three-row loop)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-no-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations6_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 15,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-no-std-vector-caller_hoisted.ll.txt",
+      "operation": "vector/caller_hoisted",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-no-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations7_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 15,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-no-std-vector-prepare_each_batch.ll.txt",
+      "operation": "vector/prepare_each_batch",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-no-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations8_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 6,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-no-std-vector-borrowed_reuse.ll.txt",
+      "operation": "vector/borrowed_reuse",
+      "matrix_validation": "before timing, at preparation; none inside timed loop",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "lto-no-std",
+      "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCs7NUHba9K0DZ_7spatial12amortizations_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 9,
+        "fcmp": 18,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "lto-no-std-point-public.ll.txt",
+      "operation": "point/public",
+      "matrix_validation": "inside per-element loop (public LTO vector has a nested three-row loop)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations0_00EB10_",
+      "counts": {
+        "fmul": 5,
+        "fadd": 6,
+        "fcmp": 18,
+        "vector_arithmetic": 8,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "nolto-std-point-full_local.ll.txt",
+      "operation": "point/full_local",
+      "matrix_validation": "inside per-element loop (public LTO vector has a nested three-row loop)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations1_00EB10_",
+      "counts": {
+        "fmul": 0,
+        "fadd": 0,
+        "fcmp": 0,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [
+        "%_8.i = call noundef i8 @_RINvNtCsjsvrWVj1VHl_7spatial8borrowed19caller_local_pointsNtB4_5WorldBU_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(128) %map.i, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) %input.0.i, i64 noundef %input.1.i, ptr noalias nofree noundef nonnull align 8 %output.0.i, i64 noundef %output.1.i), !noalias !839"
+      ],
+      "ir_file": "nolto-std-point-caller_hoisted.ll.txt",
+      "operation": "point/caller_hoisted",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "one caller-local call per timed batch"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations2_00EB10_",
+      "counts": {
+        "fmul": 5,
+        "fadd": 6,
+        "fcmp": 18,
+        "vector_arithmetic": 8,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "nolto-std-point-prepare_each_batch.ll.txt",
+      "operation": "point/prepare_each_batch",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations3_00EB10_",
+      "counts": {
+        "fmul": 5,
+        "fadd": 6,
+        "fcmp": 6,
+        "vector_arithmetic": 8,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "nolto-std-point-borrowed_reuse.ll.txt",
+      "operation": "point/borrowed_reuse",
+      "matrix_validation": "before timing, at preparation; none inside timed loop",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations5_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 15,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "nolto-std-vector-public.ll.txt",
+      "operation": "vector/public",
+      "matrix_validation": "inside per-element loop (public LTO vector has a nested three-row loop)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations6_00EB10_",
+      "counts": {
+        "fmul": 0,
+        "fadd": 0,
+        "fcmp": 0,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [
+        "%_8.i = call noundef i8 @_RINvNtCsjsvrWVj1VHl_7spatial8borrowed20caller_local_vectorsNtB4_5WorldBV_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersNtB1b_13DimensionlessEB4_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(128) %map.i, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) %input.0.i, i64 noundef %input.1.i, ptr noalias nofree noundef nonnull align 8 %output.0.i, i64 noundef %output.1.i), !noalias !919"
+      ],
+      "ir_file": "nolto-std-vector-caller_hoisted.ll.txt",
+      "operation": "vector/caller_hoisted",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "one caller-local call per timed batch"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations7_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 15,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "nolto-std-vector-prepare_each_batch.ll.txt",
+      "operation": "vector/prepare_each_batch",
+      "matrix_validation": "once per batch before element loop (in a once-per-batch callee for no-LTO caller-local)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations8_00EB10_",
+      "counts": {
+        "fmul": 9,
+        "fadd": 6,
+        "fcmp": 6,
+        "vector_arithmetic": 0,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "nolto-std-vector-borrowed_reuse.ll.txt",
+      "operation": "vector/borrowed_reuse",
+      "matrix_validation": "before timing, at preparation; none inside timed loop",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations_00EB10_",
+      "counts": {
+        "fmul": 5,
+        "fadd": 6,
+        "fcmp": 18,
+        "vector_arithmetic": 8,
+        "barriers": 2
+      },
+      "calls": [],
+      "ir_file": "nolto-std-point-public.ll.txt",
+      "operation": "point/public",
+      "matrix_validation": "inside per-element loop (public LTO vector has a nested three-row loop)",
+      "per_element_checks": "three input and three output components, always retained",
+      "inlining": "scalar mapping/loop helpers inline in timing closure"
+    }
+  ],
+  "out_of_line_batch_helpers": [
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvNtCsjsvrWVj1VHl_7spatial8borrowed19caller_local_pointsNtB4_5WorldBU_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_",
+      "fmul": 9,
+      "fadd": 9,
+      "fcmp": 18,
+      "vector_arithmetic": 0,
+      "ir_file": "nolto-std-caller-points.ll.txt",
+      "matrix_validation": "once before its element loop",
+      "per_element_checks": "3 inputs +3 outputs",
+      "scope": "called once per batch, not per element"
+    },
+    {
+      "profile": "nolto-std",
+      "symbol": "_RINvNtCsjsvrWVj1VHl_7spatial8borrowed20caller_local_vectorsNtB4_5WorldBV_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersNtB1b_13DimensionlessEB4_",
+      "fmul": 9,
+      "fadd": 6,
+      "fcmp": 15,
+      "vector_arithmetic": 0,
+      "ir_file": "nolto-std-caller-vectors.ll.txt",
+      "matrix_validation": "once before its element loop",
+      "per_element_checks": "3 inputs +3 outputs",
+      "scope": "called once per batch, not per element"
+    }
+  ],
+  "counts_are": "static IR instructions; not scalar FLOPs or dynamic validation counts"
+}

@@ -1,0 +1,10 @@
+error[E0506]: cannot assign to `map.matrix[_][_]` because it is borrowed
+  --> tests/ui/borrowed_vector_mutation.rs:10:5
+   |
+ 9 |     let prepared = borrowed::BorrowedVector::prepare(&map).unwrap();
+   |                                                      ---- `map.matrix[_][_]` is borrowed here
+10 |     map.matrix[0][3] = f64::NAN;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ `map.matrix[_][_]` is assigned to here but it was already borrowed
+11 |     assert!(map.matrix[0][3].is_nan());
+12 |     let _ = prepared.apply_vector(Vector3::<World, Dimensionless>::new(1.0, 2.0, 3.0));
+   |             -------- borrow later used here

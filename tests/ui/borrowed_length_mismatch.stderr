@@ -1,0 +1,15 @@
+error[E0308]: mismatched types
+  --> tests/ui/borrowed_length_mismatch.rs:10:34
+   |
+10 |     let _ = prepared.apply_point(Point3::<World, Feet>::new(1.0, 2.0, 3.0));
+   |                      ----------- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Point3<World, Meters>`, found `Point3<World, Feet>`
+   |                      |
+   |                      arguments to this method are incorrect
+   |
+   = note: expected struct `Point3<World, Meters>`
+              found struct `Point3<World, Feet>`
+note: method defined here
+  --> tests/ui/../../benches/support/borrowed.rs
+   |
+   |     pub fn apply_point(&self, point: Point3<F, L>) -> Result<Point3<T, L>, SpatialError> {
+   |            ^^^^^^^^^^^        -------------------

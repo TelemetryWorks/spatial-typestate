@@ -161,3 +161,10 @@ cargo +1.99.0-x86_64-pc-windows-msvc bench --locked --jobs 2 --bench spatial -- 
 # Run selected timings only in a quiet window; see the report for repeats/profiles.
 cargo +1.99.0-x86_64-pc-windows-msvc bench --locked --jobs 2 --bench spatial -- point_candidates
 ```
+
+[Borrowed-validation prototype and decision record](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/borrowed_validation.md)
+compare caller-local hoisting with lifetime-bound point/vector preparations.
+The isolated prototype preserves per-input/output checks and numeric/type
+contracts. Preparation error timing and any batch API remain decisions for
+review; no production API is added. New measurements remain separate from the
+original study, with environment load, variance and codegen limitations recorded.

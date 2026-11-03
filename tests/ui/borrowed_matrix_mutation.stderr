@@ -1,0 +1,10 @@
+error[E0506]: cannot assign to `map.matrix[_][_]` because it is borrowed
+  --> tests/ui/borrowed_matrix_mutation.rs:11:5
+   |
+10 |     let prepared = borrowed::BorrowedPoint::prepare(&map).unwrap();
+   |                                                     ---- `map.matrix[_][_]` is borrowed here
+11 |     map.matrix[0][0] = f64::NAN;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ `map.matrix[_][_]` is assigned to here but it was already borrowed
+12 |     assert!(map.matrix[0][0].is_nan());
+13 |     let _ = prepared.apply_point(Point3::new(1.0, 2.0, 3.0));
+   |             -------- borrow later used here

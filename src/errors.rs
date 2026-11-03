@@ -22,8 +22,8 @@ use core::fmt;
 /// matches and must be treated as a public API change.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SpatialError {
-    /// A value was non-finite (`NaN` or infinite) where a finite number was
-    /// required.
+    /// A participating input or computed output component was non-finite
+    /// (`NaN` or infinite), including floating-point overflow.
     NonFinite,
 
     /// All four quaternion components were zero (positive or negative zero).

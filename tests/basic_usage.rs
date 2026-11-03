@@ -31,7 +31,7 @@ fn identity_transform_preserves_point() {
     let p_body: Point3<Body> = Point3::new(1.0, 0.0, -2.0);
     let t_body_world: Transform<Body, World> = Transform::identity();
 
-    let p_world = t_body_world.apply_point(p_body);
+    let p_world = t_body_world.apply_point(p_body).unwrap();
 
     // Identity should preserve coordinates exactly.
     assert_eq!(p_world.x, 1.0);

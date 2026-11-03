@@ -19,15 +19,15 @@ fn main() -> Result<(), spatial_typestate::SpatialError> {
         UnitQuat::try_from_components(1.0, 0.0, 0.0, 1.0)?, // Rx(+90 degrees)
         Vector3::new(10.0, 20.0, 30.0),
     )?;
-    let sensor_world = sensor_aircraft.then(aircraft_world);
+    let sensor_world = sensor_aircraft.then(aircraft_world)?;
     let point = Point3::<Sensor>::new(2.0, 0.0, 1.0);
-    let world = sensor_world.apply_point(point);
+    let world = sensor_world.apply_point(point)?;
     assert!((world.x - 11.0).abs() < 1e-9);
     assert!((world.y - 16.0).abs() < 1e-9);
     assert!((world.z - 34.0).abs() < 1e-9);
-    let restored = sensor_world.try_inverse()?.apply_point(world);
+    let restored = sensor_world.try_inverse()?.apply_point(world)?;
     assert!((restored.x - point.x).abs() < 1e-9);
-    let vector = sensor_world.apply_vector(Vector3::new(2.0, 0.0, 1.0));
+    let vector = sensor_world.apply_vector(Vector3::new(2.0, 0.0, 1.0))?;
     assert!((vector.y + 1.0).abs() < 1e-9); // translation is not applied
     Ok(())
 }
@@ -57,14 +57,17 @@ numeric relationships, not a sensor calibration performed by the library.
 - `first.then(next)` means next(first(point)). `apply_vector` uses only R.
   Row storage is matrix[row][column], with last-column translation. Raw bottom
   rows are ignored by point application/composition, and composition emits a
-  canonical affine bottom row. Neither operation checks numeric outputs.
+  canonical affine bottom row. Each operation returns Result and rejects
+  non-finite participating inputs or outputs. Sequential and composed mappings
+  check different intermediates, so their overflow errors can differ.
 - Public matrix storage/from_matrix remain unvalidated. `try_inverse` checks
   finite entries, affine row, orthonormal rotation and det(R)=+1 with absolute
   tolerance 1e-10, then returns R^T and -R^T*t. It rejects non-rigid finite input
   or non-finite input/output, including inverse translation overflow.
 - Inverse tolerance permits near-rigid input. Error scales with coordinate and
   translation magnitude and accumulates over long chains; no universal absolute
-  roundtrip bound or finite-output guarantee exists for unchecked operations.
+  roundtrip bound exists. Successful application/composition returns finite values;
+  raw construction does not establish a finite or rigid invariant.
 - UnitQuat accepts all finite nonzero components, including MAX/subnormals,
   rejects non-finite/all-zero input, and has private fields with const getters.
   Unit length is approximate; tiny relative components may round to signed zero.

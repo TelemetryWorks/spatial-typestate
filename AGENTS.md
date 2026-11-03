@@ -72,7 +72,11 @@ UnitQuat<To> and target translation; the quaternion does not bind From, so the
 caller asserts the physical relation. Raw public matrices remain unvalidated.
 Storage is row-major/column-vector, with translation in the last column.
 Application/composition ignore raw bottom rows; then means next(first(p)), emits
-canonical bottom row, and is unchecked. Vectors omit translation. try_inverse
+canonical bottom row, and returns Result. apply_point/apply_vector also return
+Result under their existing names, rejecting non-finite participating inputs and
+results. Raw bottom rows and vector translations remain ignored. This validates
+finiteness, not rigidity; no parallel unchecked/try_ operation APIs are added.
+Vectors omit translation. try_inverse
 validates finiteness, affine row, orthonormality and proper determinant at
 absolute 1e-10, returning NonRigidTransform or NonFinite as appropriate. Accepted
 near-rigid input implies magnitude/chain-dependent error, not exact roundtrips.
@@ -87,7 +91,7 @@ math. The library denies unsafe and uses stack values without allocation or I/O.
 - Distinguish enforced numeric/type properties from physical meaning and goals.
 - State numerical tolerances, overflow, degeneracy and unchecked boundaries.
 - Do not claim certification, correctly-rounded helper sqrt, benchmark speed,
-  universal finite output, or arbitrary absolute roundtrip bounds.
+  unqualified finite-output guarantees for raw values, or arbitrary absolute roundtrip bounds.
 - Reproduce bugs, add independent oracles and meaningful properties. Never bless
   a UI snapshot without reviewing the intended error (not a warning failure).
 - Keep implementation small; no speculative abstractions/dependencies or unit redesign.

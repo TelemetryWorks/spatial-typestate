@@ -44,7 +44,7 @@
 //! let t_body_world: Transform<Body, World> = Transform::identity();
 //!
 //! // Safely convert to world frame.
-//! let p_world = t_body_world.apply_point(p_body);
+//! let p_world = t_body_world.apply_point(p_body).unwrap();
 //! ```
 //!
 //! # Feature flags

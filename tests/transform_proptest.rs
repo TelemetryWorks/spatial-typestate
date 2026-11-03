@@ -22,7 +22,7 @@ proptest! {
                                               z in -1e6_f64..1e6_f64) {
         let p: Point3<World> = Point3::new(x, y, z);
         let id: Transform<World, World> = Transform::identity();
-        let q = id.apply_point(p);
+        let q = id.apply_point(p).unwrap();
 
         prop_assert!(approx_eq(q.x, x, 1e-9));
         prop_assert!(approx_eq(q.y, y, 1e-9));
@@ -41,7 +41,7 @@ proptest! {
         let p: Point3<World> = Point3::new(x, y, z);
         let t: Transform<World, World> = Transform::from_translation(tx, ty, tz);
 
-        let q = t.apply_point(p);
+        let q = t.apply_point(p).unwrap();
 
         prop_assert!(approx_eq(q.x, x + tx, 1e-9));
         prop_assert!(approx_eq(q.y, y + ty, 1e-9));

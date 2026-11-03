@@ -53,7 +53,12 @@ their components differ: PartialEq is not rotation equivalence.
 t = R_next*t_first + t_next. It ignores both raw bottom rows and emits
 `[0,0,0,1]`, matching apply_point's affine interpretation. Different evaluation
 order introduces rounding, so sequential and composed results need not be bit-equal.
-`apply_vector` uses R*v without translation. Both operations are unchecked.
+`apply_vector` uses R*v without translation. Application and composition return
+Result under their existing names. Their used inputs and computed output must be
+finite; raw bottom rows are ignored, as is translation during vector application.
+This is a finiteness contract, not proof of rigidity or calibration.
+Sequential application and composition have different intermediate calculations,
+so a sequence can overflow even if its composed map succeeds (or conversely).
 
 `try_inverse` first rejects any non-finite entry. Finite matrices must have
 bottom row `[0,0,0,1]`, row dot products matching the identity, and det(R)=+1,
@@ -69,13 +74,18 @@ The bounded workflow property uses points in [-100,100] and translations in
 [-1000,1000], allowing absolute 1e-9 roundtrip/composition error. No uniform
 absolute roundtrip bound is claimed for unbounded inputs or long chains.
 
-Arithmetic follows ordinary `f64` behavior, with no output finiteness check.
-Even pure translations of finite inputs can overflow to signed infinity. For a
-pure translation and finite inputs, zero/one matrix products and the finite
-coordinate-plus-offset addition cannot produce NaN. The compatibility helper
-tests exact per-axis sums, treating positive and negative zero as numerically
-equal, and verifies the correct infinity sign on overflow. This narrow property
-does not apply to arbitrary raw matrices.
+Arithmetic retains the existing ordinary `f64` evaluation order. Non-finite
+participating inputs or computed results return SpatialError::NonFinite. Finite
+inputs do not guarantee success: intermediate multiplication/addition can
+overflow, even if differently ordered real-number arithmetic would cancel it.
+No compensated arithmetic, saturation or clamping is introduced. Raw constructors
+and public fields remain unvalidated; no finite-value type invariant is implied.
+
+For pure translation and finite inputs, zero/one products and a finite-plus-finite
+addition cannot produce NaN, but can overflow. The compatibility helper verifies
+exact finite per-axis sums (zero signs compare numerically equal) or NonFinite
+for invalid input/overflow. General affine maps can produce non-finite results
+through products and cancellation too; those are also errors.
 
 ## No-std quaternion norm
 

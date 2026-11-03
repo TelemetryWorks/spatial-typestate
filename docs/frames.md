@@ -20,7 +20,8 @@ marker implementations of those traits. Different labels remain distinct even
 when the coordinate values are numerically identical.
 
 Transform<Sensor, Aircraft>.then(Transform<Aircraft, World>) gives
-Transform<Sensor, World>. Applying a World vector to a Sensor-input transform
+Result with Transform<Sensor, World> on success. Application and composition
+require handling possible NonFinite errors. Applying a World vector to a Sensor-input transform
 or composing mismatched intermediate frames fails to compile. Private quaternion
 components prevent mutation around normalization; no unchecked constructor exists.
 

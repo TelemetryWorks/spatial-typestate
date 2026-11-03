@@ -33,7 +33,9 @@ fn right_handed_active_quarter_turn_oracles() {
             Vector3::new(0.0, 0.0, 0.0),
         )
         .unwrap();
-        let result = transform.apply_point(Point3::new(input[0], input[1], input[2]));
+        let result = transform
+            .apply_point(Point3::new(input[0], input[1], input[2]))
+            .unwrap();
         for (actual, expected) in [result.x, result.y, result.z].into_iter().zip(expected) {
             close(actual, expected);
         }
@@ -49,7 +51,7 @@ fn rational_quaternion_has_independent_matrix_oracle() {
         Vector3::new(0.0, 0.0, 0.0),
     )
     .unwrap();
-    let result = transform.apply_point(Point3::new(1.0, 2.0, 3.0));
+    let result = transform.apply_point(Point3::new(1.0, 2.0, 3.0)).unwrap();
     close(result.x, 1.8);
     close(result.y, 2.0);
     close(result.z, 2.6);
@@ -68,13 +70,13 @@ fn sensor_aircraft_world_workflow() {
     )
     .unwrap();
     let point = Point3::<Sensor>::new(2.0, 0.0, 1.0);
-    let intermediate = sensor_aircraft.apply_point(point);
+    let intermediate = sensor_aircraft.apply_point(point).unwrap();
     close(intermediate.x, 1.0);
     close(intermediate.y, 4.0);
     close(intermediate.z, 4.0);
-    let sequential = aircraft_world.apply_point(intermediate);
-    let composed = sensor_aircraft.then(aircraft_world);
-    let result: Point3<World> = composed.apply_point(point);
+    let sequential = aircraft_world.apply_point(intermediate).unwrap();
+    let composed = sensor_aircraft.then(aircraft_world).unwrap();
+    let result: Point3<World> = composed.apply_point(point).unwrap();
     for (actual, expected) in [
         (result.x, 11.0),
         (result.y, 16.0),
@@ -85,11 +87,13 @@ fn sensor_aircraft_world_workflow() {
     ] {
         close(actual, expected);
     }
-    let restored = composed.try_inverse().unwrap().apply_point(result);
+    let restored = composed.try_inverse().unwrap().apply_point(result).unwrap();
     close(restored.x, point.x);
     close(restored.y, point.y);
     close(restored.z, point.z);
-    let vector = composed.apply_vector(Vector3::<Sensor>::new(2.0, 0.0, 1.0));
+    let vector = composed
+        .apply_vector(Vector3::<Sensor>::new(2.0, 0.0, 1.0))
+        .unwrap();
     close(vector.x, 0.0);
     close(vector.y, -1.0);
     close(vector.z, 2.0);
@@ -108,8 +112,8 @@ fn composition_order_is_noncommutative() {
     )
     .unwrap();
     let point = Point3::new(1.0, 0.0, 0.0);
-    let first = rz.then(rx).apply_point(point);
-    let second = rx.then(rz).apply_point(point);
+    let first = rz.then(rx).unwrap().apply_point(point).unwrap();
+    let second = rx.then(rz).unwrap().apply_point(point).unwrap();
     close(first.x, 0.0);
     close(first.y, 0.0);
     close(first.z, 1.0);
@@ -131,7 +135,8 @@ fn inverse_accepts_proper_half_turn() {
         transform
             .try_inverse()
             .unwrap()
-            .apply_point(transform.apply_point(point)),
+            .apply_point(transform.apply_point(point).unwrap())
+            .unwrap(),
         point
     );
 }
@@ -148,10 +153,10 @@ fn raw_composition_ignores_both_bottom_rows() {
     first.matrix[3] = [f64::NAN, f64::INFINITY, -7.0, 0.0];
     next.matrix[3] = [2.0, 3.0, 4.0, -5.0];
     let point = Point3::new(2.0, 3.0, 4.0);
-    let sequential = next.apply_point(first.apply_point(point));
-    let composed = first.then(next);
+    let sequential = next.apply_point(first.apply_point(point).unwrap()).unwrap();
+    let composed = first.then(next).unwrap();
     assert_eq!(composed.matrix[3], [0.0, 0.0, 0.0, 1.0]);
-    assert_eq!(composed.apply_point(point), sequential);
+    assert_eq!(composed.apply_point(point).unwrap(), sequential);
 }
 
 #[test]
@@ -251,12 +256,10 @@ fn checked_construction_rejects_non_finite_translation() {
         }
     }
     let transform = Transform::<Sensor, World>::from_translation(f64::MAX, 0.0, 0.0);
-    assert!(
-        transform
-            .apply_point(Point3::new(f64::MAX, 0.0, 0.0))
-            .x
-            .is_infinite()
-    );
+    assert!(matches!(
+        transform.apply_point(Point3::new(f64::MAX, 0.0, 0.0)),
+        Err(SpatialError::NonFinite)
+    ));
 }
 
 proptest! {
@@ -271,10 +274,10 @@ proptest! {
         let transform = Transform::<Sensor, Aircraft>::try_from_rotation_translation(rotation, Vector3::new(translation[0], translation[1], translation[2])).unwrap();
         let next = Transform::<Aircraft, World>::try_from_rotation_translation(UnitQuat::try_from_components(0.0,1.0,0.0,1.0).unwrap(), Vector3::new(-3.0, 5.0, 7.0)).unwrap();
         let input = Point3::<Sensor>::new(point[0], point[1], point[2]);
-        let combined = transform.then(next);
-        let output = combined.apply_point(input);
-        let sequential = next.apply_point(transform.apply_point(input));
-        let restored = combined.try_inverse().unwrap().apply_point(output);
+        let combined = transform.then(next).unwrap();
+        let output = combined.apply_point(input).unwrap();
+        let sequential = next.apply_point(transform.apply_point(input).unwrap()).unwrap();
+        let restored = combined.try_inverse().unwrap().apply_point(output).unwrap();
         // Bounded coordinates/translations keep roundoff well below 1e-9;
         // this does not promise that tolerance for unbounded raw inputs.
         for (actual, expected) in [(output.x,sequential.x),(output.y,sequential.y),(output.z,sequential.z),(restored.x,input.x),(restored.y,input.y),(restored.z,input.z)] {

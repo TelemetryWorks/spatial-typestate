@@ -41,7 +41,8 @@ jobs:
           toolchain: '1.99.0'
           components: rustfmt, clippy
       - name: Install hash-locked build tool
-        run: python -m pip install --require-hashes --only-binary=:all: -r python/requirements-build.txt
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: -r python/requirements-build.txt
       - name: Native format, lint and parity tests
         run: |
           cargo +1.99.0 fmt --manifest-path python/native/Cargo.toml -- --check

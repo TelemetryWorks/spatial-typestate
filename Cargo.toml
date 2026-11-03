@@ -34,3 +34,7 @@ criterion = "0.5"    # Benchmarks (Supports measurable + provable behavior)
 proptest = "1.4"     # Property-based testing (Supports measurable + provable behavior)
 rand = "0.8"
 trybuild = "1.0"
+
+[[bench]]
+name = "spatial"
+harness = false

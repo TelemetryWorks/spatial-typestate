@@ -72,3 +72,14 @@ covered by strict paired passing/compile-fail public doctests instead. Stable
 rustdoc verifies rejection, not a specific diagnostic code. Migrate examples
 with explicit actual units, not a silent Meters default. No new runtime unit
 conversion dependency or broader dimensional algebra is implied.
+
+## Performance characterization
+
+Use [the benchmark report](docs/performance.md) for methodology, selected commands,
+profile differences, source fingerprints and resumable repeats. Criterion uses
+existing dev dependencies; optional automation uses Python's standard library.
+Prebuild before arranging a quiet timing window. CI compiles benches through
+all-target Clippy and runs experimental correctness tests, not timing thresholds.
+Host timing is not embedded evidence. Preserve raw independent repeats and
+negative results; do not remove safety checks or adopt a candidate from one
+favored profile/input case. Benchmark-only controls are not library APIs.

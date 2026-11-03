@@ -1,0 +1,148 @@
+define internal fastcc void @_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsbmGSFb9fEtH_7spatial8controlss5_00EB10_(ptr noalias nofree noundef nonnull align 8 captures(none) dereferenceable(56) initializes((48, 49)) %self, ptr noalias nofree noundef nonnull readonly align 8 captures(none) dead_on_return dereferenceable(24) %routine) unnamed_addr #1 personality ptr @__CxxFrameHandler3 !guid !8897 {
+start:
+  %e.i.i = alloca [1 x i8], align 1
+  %_18.i = alloca [8 x i8], align 8
+  %_4.i = alloca [16 x i8], align 16
+  %0 = getelementptr inbounds nuw i8, ptr %self, i64 48
+  store i8 1, ptr %0, align 8
+; call <std::time::Instant>::now
+  %1 = tail call fastcc { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant3now()
+; call <std::time::Instant>::now
+  %2 = tail call fastcc { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant3now()
+  %3 = getelementptr inbounds nuw i8, ptr %self, i64 40
+  %iter1 = load i64, ptr %3, align 8, !noundef !8074
+  %_163.not = icmp eq i64 %iter1, 0
+  br i1 %_163.not, label %bb16, label %bb15.lr.ph
+
+bb15.lr.ph:                                       ; preds = %start
+  %4 = load <2 x ptr>, ptr %routine, align 8, !alias.scope !8898
+  %5 = getelementptr inbounds nuw i8, ptr %_4.i, i64 8
+  %6 = getelementptr inbounds nuw i8, ptr %routine, i64 16
+  %_22.i = load ptr, ptr %6, align 8, !nonnull !8074, !align !8101
+  br label %bb15
+
+bb16:                                             ; preds = %_RNCNCNvCsbmGSFb9fEtH_7spatial8controlss5_00B5_.exit, %start
+  %7 = extractvalue { i64, i32 } %1, 1
+  %8 = extractvalue { i64, i32 } %1, 0
+  %start.1 = extractvalue { i64, i32 } %2, 1
+  %start.0 = extractvalue { i64, i32 } %2, 0
+; call <std::time::Instant>::elapsed
+  %9 = call fastcc { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant7elapsed(i64 range(i64 0, 18446744074) %start.0, i32 range(i32 0, 1000000000) %start.1)
+  %_9.0 = extractvalue { i64, i32 } %9, 0
+  %_9.1 = extractvalue { i64, i32 } %9, 1
+  store i64 %_9.0, ptr %self, align 8
+  %10 = getelementptr inbounds nuw i8, ptr %self, i64 8
+  store i32 %_9.1, ptr %10, align 8
+; call <std::time::Instant>::elapsed
+  %11 = call fastcc { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant7elapsed(i64 %8, i32 %7)
+  %_11.0 = extractvalue { i64, i32 } %11, 0
+  %_11.1 = extractvalue { i64, i32 } %11, 1
+  %12 = getelementptr inbounds nuw i8, ptr %self, i64 16
+  store i64 %_11.0, ptr %12, align 8
+  %13 = getelementptr inbounds nuw i8, ptr %self, i64 24
+  store i32 %_11.1, ptr %13, align 8
+  ret void
+
+bb15:                                             ; preds = %bb15.lr.ph, %_RNCNCNvCsbmGSFb9fEtH_7spatial8controlss5_00B5_.exit
+  %iter.sroa.0.04 = phi i64 [ 0, %bb15.lr.ph ], [ %_17, %_RNCNCNvCsbmGSFb9fEtH_7spatial8controlss5_00B5_.exit ]
+  %_17 = add nuw i64 %iter.sroa.0.04, 1
+  call void @llvm.experimental.noalias.scope.decl(metadata !8898)
+  call void @llvm.lifetime.start.p0(ptr nonnull %_4.i), !noalias !8898
+  store <2 x ptr> %4, ptr %_4.i, align 16, !noalias !8898
+  call void asm sideeffect "", "r,~{memory}"(ptr nonnull %_4.i) #89, !noalias !8898, !srcloc !8103
+  %map.i = load ptr, ptr %_4.i, align 16, !noalias !8898, !nonnull !8074, !align !8101, !noundef !8074
+  %points.i = load ptr, ptr %5, align 8, !noalias !8898, !nonnull !8074, !align !8101, !noundef !8074
+  call void @llvm.lifetime.end.p0(ptr nonnull %_4.i), !noalias !8898
+  %14 = getelementptr i8, ptr %points.i, i64 8
+  %points.val.i = load ptr, ptr %14, align 8, !noalias !8898, !nonnull !8074, !noundef !8074
+  %15 = getelementptr i8, ptr %points.i, i64 16
+  %points.val1.i = load i64, ptr %15, align 8, !noalias !8898, !noundef !8074
+  %..i.i.i.i = call noundef i64 @llvm.umin.i64(i64 %points.val1.i, i64 64)
+  %_2.i14.not.i = icmp eq i64 %points.val1.i, 0
+  br i1 %_2.i14.not.i, label %_RNCNCNvCsbmGSFb9fEtH_7spatial8controlss5_00B5_.exit, label %bb4.lr.ph.i
+
+bb4.lr.ph.i:                                      ; preds = %bb15
+  %16 = getelementptr inbounds nuw i8, ptr %map.i, i64 64
+  %17 = getelementptr inbounds nuw i8, ptr %map.i, i64 80
+  %18 = getelementptr inbounds nuw i8, ptr %map.i, i64 88
+  br label %bb4.i
+
+bb4.i:                                            ; preds = %_RNvMNtCs9rw95XCWuke_4core6resultINtB2_6ResultINtNtCs6GmTcXmsQnZ_17spatial_typestate5point6Point3NtCsbmGSFb9fEtH_7spatial5WorldNtNtBM_5units6MetersENtNtBM_6errors12SpatialErrorE6unwrapB1y_.exit.i, %bb4.lr.ph.i
+  %iter.sroa.8.015.i = phi i64 [ 0, %bb4.lr.ph.i ], [ %19, %_RNvMNtCs9rw95XCWuke_4core6resultINtB2_6ResultINtNtCs6GmTcXmsQnZ_17spatial_typestate5point6Point3NtCsbmGSFb9fEtH_7spatial5WorldNtNtBM_5units6MetersENtNtBM_6errors12SpatialErrorE6unwrapB1y_.exit.i ]
+  %19 = add nuw nsw i64 %iter.sroa.8.015.i, 1
+  %_3.i.i.i = getelementptr inbounds nuw [24 x i8], ptr %_22.i, i64 %iter.sroa.8.015.i
+  %_3.i1.i.i = getelementptr inbounds nuw [24 x i8], ptr %points.val.i, i64 %iter.sroa.8.015.i
+  %20 = load <2 x double>, ptr %_3.i1.i.i, align 8, !noalias !8898
+  %_17.sroa.5.0..sroa_idx.i = getelementptr inbounds nuw i8, ptr %_3.i1.i.i, i64 16
+  %_17.sroa.5.0.copyload.i = load double, ptr %_17.sroa.5.0..sroa_idx.i, align 8, !noalias !8898
+  %21 = extractelement <2 x double> %20, i64 0
+  %_2.i.i.i.i.i.i.i = call double @llvm.fabs.f64(double %21)
+  %_0.i.i.i.i.i.i.i = fcmp ueq double %_2.i.i.i.i.i.i.i, +inf
+  %22 = extractelement <2 x double> %20, i64 1
+  %_2.i.i.i.i.i.1.i.i = call double @llvm.fabs.f64(double %22)
+  %_0.i.i.i.i.i.1.i.i = fcmp ueq double %_2.i.i.i.i.i.1.i.i, +inf
+  %or.cond.i.i = or i1 %_0.i.i.i.i.i.i.i, %_0.i.i.i.i.i.1.i.i
+  %_2.i.i.i.i.i.2.i.i = call double @llvm.fabs.f64(double %_17.sroa.5.0.copyload.i)
+  %_0.i.i.i.i.i.2.i.i = fcmp ueq double %_2.i.i.i.i.i.2.i.i, +inf
+  %or.cond26.i.i = or i1 %or.cond.i.i, %_0.i.i.i.i.i.2.i.i
+  br i1 %or.cond26.i.i, label %bb2.i.i, label %bb1.i.2.i.i
+
+bb1.i.2.i.i:                                      ; preds = %bb4.i
+  %23 = load <8 x double>, ptr %map.i, align 8, !alias.scope !8901, !noalias !8904
+  %24 = shufflevector <2 x double> %20, <2 x double> poison, <2 x i32> <i32 1, i32 0>
+  %25 = shufflevector <8 x double> %23, <8 x double> poison, <2 x i32> <i32 1, i32 4>
+  %26 = fmul <2 x double> %24, %25
+  %27 = shufflevector <8 x double> %23, <8 x double> poison, <2 x i32> <i32 0, i32 5>
+  %28 = fmul <2 x double> %20, %27
+  %29 = fadd <2 x double> %26, %28
+  %30 = insertelement <2 x double> poison, double %_17.sroa.5.0.copyload.i, i64 0
+  %31 = shufflevector <2 x double> %30, <2 x double> poison, <2 x i32> zeroinitializer
+  %32 = shufflevector <8 x double> %23, <8 x double> poison, <2 x i32> <i32 2, i32 6>
+  %33 = fmul <2 x double> %31, %32
+  %34 = fadd <2 x double> %29, %33
+  %35 = shufflevector <8 x double> %23, <8 x double> poison, <2 x i32> <i32 3, i32 7>
+  %36 = fadd <2 x double> %35, %34
+  %37 = load <2 x double>, ptr %16, align 8, !alias.scope !8901, !noalias !8904
+  %38 = fmul <2 x double> %20, %37
+  %shift = shufflevector <2 x double> %38, <2 x double> poison, <2 x i32> <i32 1, i32 poison>
+  %foldExtExtBinop = fadd <2 x double> %38, %shift
+  %_33.i.i = extractelement <2 x double> %foldExtExtBinop, i64 0
+  %_39.i.i = load double, ptr %17, align 8, !alias.scope !8901, !noalias !8904, !noundef !8074
+  %_38.i.i = fmul double %_17.sroa.5.0.copyload.i, %_39.i.i
+  %_32.i.i = fadd double %_33.i.i, %_38.i.i
+  %_40.i.i = load double, ptr %18, align 8, !alias.scope !8901, !noalias !8904, !noundef !8074
+  %_31.i.i = fadd double %_40.i.i, %_32.i.i
+  %39 = extractelement <2 x double> %36, i64 0
+  %_2.i.i.i.i.i14.i.i = call double @llvm.fabs.f64(double %39)
+  %_0.i.i.i.i.i15.i.i = fcmp ueq double %_2.i.i.i.i.i14.i.i, +inf
+  %40 = extractelement <2 x double> %36, i64 1
+  %_2.i.i.i.i.i14.1.i.i = call double @llvm.fabs.f64(double %40)
+  %_0.i.i.i.i.i15.1.i.i = fcmp ueq double %_2.i.i.i.i.i14.1.i.i, +inf
+  %or.cond27.i.i = or i1 %_0.i.i.i.i.i15.i.i, %_0.i.i.i.i.i15.1.i.i
+  %_2.i.i.i.i.i14.2.i.i = call double @llvm.fabs.f64(double %_31.i.i)
+  %_0.i.i.i.i.i15.2.i.i = fcmp ueq double %_2.i.i.i.i.i14.2.i.i, +inf
+  %or.cond28.i.i = or i1 %or.cond27.i.i, %_0.i.i.i.i.i15.2.i.i
+  br i1 %or.cond28.i.i, label %bb2.i.i, label %_RNvMNtCs9rw95XCWuke_4core6resultINtB2_6ResultINtNtCs6GmTcXmsQnZ_17spatial_typestate5point6Point3NtCsbmGSFb9fEtH_7spatial5WorldNtNtBM_5units6MetersENtNtBM_6errors12SpatialErrorE6unwrapB1y_.exit.i
+
+bb2.i.i:                                          ; preds = %bb1.i.2.i.i, %bb4.i
+  call void @llvm.lifetime.start.p0(ptr nonnull %e.i.i), !noalias !8907
+  store i8 0, ptr %e.i.i, align 1, !noalias !8907
+; call core::result::unwrap_failed
+  call fastcc void @_RNvNtCs9rw95XCWuke_4core6result13unwrap_failed(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) @anon.502c043d099bb493ffa33a1e448556de.80, i64 noundef 43, ptr noundef nonnull %e.i.i, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) @vtable.T, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @alloc_da87c627cadcd8c9d1aee617996ba986) #131, !noalias !8912
+  unreachable
+
+_RNvMNtCs9rw95XCWuke_4core6resultINtB2_6ResultINtNtCs6GmTcXmsQnZ_17spatial_typestate5point6Point3NtCsbmGSFb9fEtH_7spatial5WorldNtNtBM_5units6MetersENtNtBM_6errors12SpatialErrorE6unwrapB1y_.exit.i: ; preds = %bb1.i.2.i.i
+  store <2 x double> %36, ptr %_3.i.i.i, align 8, !noalias !8898
+  %_15.sroa.5.0..sroa_idx.i = getelementptr inbounds nuw i8, ptr %_3.i.i.i, i64 16
+  store double %_31.i.i, ptr %_15.sroa.5.0..sroa_idx.i, align 8, !noalias !8898
+  %exitcond.not.i = icmp eq i64 %19, %..i.i.i.i
+  br i1 %exitcond.not.i, label %_RNCNCNvCsbmGSFb9fEtH_7spatial8controlss5_00B5_.exit, label %bb4.i
+
+_RNCNCNvCsbmGSFb9fEtH_7spatial8controlss5_00B5_.exit: ; preds = %_RNvMNtCs9rw95XCWuke_4core6resultINtB2_6ResultINtNtCs6GmTcXmsQnZ_17spatial_typestate5point6Point3NtCsbmGSFb9fEtH_7spatial5WorldNtNtBM_5units6MetersENtNtBM_6errors12SpatialErrorE6unwrapB1y_.exit.i, %bb15
+  call void @llvm.lifetime.start.p0(ptr nonnull %_18.i), !noalias !8898
+  store ptr %_22.i, ptr %_18.i, align 8, !noalias !8898
+  call void asm sideeffect "", "r,~{memory}"(ptr nonnull %_18.i) #89, !noalias !8898, !srcloc !8103
+  call void @llvm.lifetime.end.p0(ptr nonnull %_18.i), !noalias !8898
+  %exitcond.not = icmp eq i64 %_17, %iter1
+  br i1 %exitcond.not, label %bb16, label %bb15
+}

@@ -131,7 +131,7 @@ graphs have zero normal dependencies; dev testing/benchmark tools remain.
 The unused nalgebra/glam features/dependencies were removed, not implemented as
 backends. The std path retains native sqrt; no-std uses a private eight-step
 Newton helper only on scaled squared norms in [1,4]. No libm, correctly-rounded
-sqrt equivalence, timing guarantee, or benchmark performance number is claimed.
+sqrt equivalence or timing guarantee is claimed.
 
 The declared MSRV is 1.85, the committed development pin is 1.91.1, and explicit
 local/CI runtime verification uses installed Rust 1.99.0. No toolchain policy was
@@ -143,6 +143,21 @@ Local tests do not claim remote CI success or device execution. Bare-metal targe
 installation is authorized on CI only; it has not been performed locally.
 
 The translation compatibility helper has deterministic/property tests, not a
-cargo-fuzz setup. Two other example files and benches remain placeholders;
+cargo-fuzz setup. Two other example files remain placeholders;
 diagrams are unpopulated. See [migration/change notes](https://github.com/TelemetryWorks/spatial-typestate/blob/main/CHANGELOG.md) and the
 [canonical remaining-work list](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/ROADMAP.md). License: [Apache-2.0](https://github.com/TelemetryWorks/spatial-typestate/blob/main/LICENSE).
+
+## Performance characterization
+
+[Measured host study and limitations](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/performance.md)
+cover checked math/conversion, actual std/no-std normalization, error/extreme
+inputs, chained/batched workflows and isolated optimization controls. Results
+retain raw samples, per-run intervals and observed spikes on one Windows/Ryzen
+host across LTO/no-LTO profiles. They are not universal or embedded timing guarantees.
+No production optimization or new prepared/batch API is introduced by the study.
+
+```powershell
+cargo +1.99.0-x86_64-pc-windows-msvc bench --locked --jobs 2 --bench spatial -- --test
+# Run selected timings only in a quiet window; see the report for repeats/profiles.
+cargo +1.99.0-x86_64-pc-windows-msvc bench --locked --jobs 2 --bench spatial -- point_candidates
+```

@@ -35,6 +35,14 @@
 
 ### Added
 
+- Reusable bounded Criterion host characterization for checked operations,
+  unit conversions, std/actual no-std quaternion normalization, errors/extremes,
+  dependent and batched workflows. Reproducible dated estimates, intervals,
+  raw samples, source snapshots and codegen controls document profile dependence,
+  retained variance/spikes and rejected hypotheses in [the report](docs/performance.md).
+  No production optimization, new API, universal speed/timing claim or dependency
+  is introduced. Validation amortization remains a bounded future investigation.
+
 - Meters/international Feet and Dimensionless tags, open custom markers with
   opt-in length-only LinearLengthUnit metadata, and shared checked convert_to
   for Quantity/Point3/length Vector3/Transform. Transform scales translation

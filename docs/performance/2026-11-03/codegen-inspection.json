@@ -1,0 +1,110 @@
+[
+  {
+    "config": "lto",
+    "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iterINtNtCs9rw95XCWuke_4core6result6ResultINtNtCs6GmTcXmsQnZ_17spatial_typestate5point6Point3NtCsbmGSFb9fEtH_7spatial5WorldNtNtB1A_5units6MetersENtNtB1A_6errors12SpatialErrorENCNCINvB2m_7indexedNtB2m_4CaseBT_NCNvB2m_10operations0E00EB2m_",
+    "fmul_instructions": 0,
+    "fadd_instructions": 0,
+    "vector_float_compares": 0,
+    "barriers": 4,
+    "relaxed_additions": 0,
+    "point_calls": [
+      "call fastcc void @_RNvMNtCs6GmTcXmsQnZ_17spatial_typestate9transformINtB2_9TransformNtCsbmGSFb9fEtH_7spatial5WorldB11_NtNtB4_5units6MetersE11apply_pointB13_(ptr noalias nofree noundef nonnull align 8 captures(none) dereferenceable(32) %_7, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(128) %15, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(24) %_5.i.i) #132, !noalias !8196"
+    ]
+  },
+  {
+    "config": "lto",
+    "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iterINtNtCs9rw95XCWuke_4core6result6ResultINtNtCs6GmTcXmsQnZ_17spatial_typestate5point6Point3NtCsbmGSFb9fEtH_7spatial5WorldNtNtB1A_5units6MetersENtNtB1A_6errors12SpatialErrorENCNCINvB2m_7indexedNtB2m_4CaseBT_NCNvB2m_16point_candidatess0_0E00EB2m_",
+    "fmul_instructions": 9,
+    "fadd_instructions": 9,
+    "vector_float_compares": 0,
+    "barriers": 4,
+    "relaxed_additions": 0,
+    "point_calls": []
+  },
+  {
+    "config": "lto",
+    "symbol": "_RINvMNtCscknBwhueOSn_9criterion7bencherNtB3_7Bencher4iterINtNtCs9rw95XCWuke_4core6result6ResultINtNtCs6GmTcXmsQnZ_17spatial_typestate5point6Point3NtCsbmGSFb9fEtH_7spatial5WorldNtNtB1A_5units6MetersENtNtB1A_6errors12SpatialErrorENCNCINvB2m_7indexedNtB2m_4CaseBT_NCNvB2m_16point_candidatess_0E00EB2m_",
+    "fmul_instructions": 9,
+    "fadd_instructions": 9,
+    "vector_float_compares": 2,
+    "barriers": 4,
+    "relaxed_additions": 0,
+    "point_calls": []
+  },
+  {
+    "config": "lto",
+    "symbol": "_RNvMNtCs6GmTcXmsQnZ_17spatial_typestate9transformINtB2_9TransformNtCsbmGSFb9fEtH_7spatial5WorldB11_NtNtB4_5units6MetersE11apply_pointB13_",
+    "fmul_instructions": 9,
+    "fadd_instructions": 9,
+    "vector_float_compares": 0,
+    "barriers": 0,
+    "relaxed_additions": 0,
+    "point_calls": []
+  },
+  {
+    "config": "nolto",
+    "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iterINtNtCs9rw95XCWuke_4core6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1A_5units6MetersENtNtB1A_6errors12SpatialErrorENCNCINvB2m_7indexedNtB2m_4CaseBT_NCNvB2m_10operations0E00EB2m_",
+    "fmul_instructions": 0,
+    "fadd_instructions": 0,
+    "vector_float_compares": 0,
+    "barriers": 4,
+    "relaxed_additions": 0,
+    "point_calls": [
+      "call fastcc void @_RNvMNtCscxpytxKd7jb_17spatial_typestate9transformINtB2_9TransformNtCsjsvrWVj1VHl_7spatial5WorldB11_NtNtB4_5units6MetersE11apply_pointB13_(ptr noalias nofree noundef nonnull align 8 captures(none) dereferenceable(32) %_7, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(128) %17, ptr noalias nofree noundef readonly align 8 captures(none) dereferenceable(24) %_5.i.i) #15, !noalias !100"
+    ]
+  },
+  {
+    "config": "nolto",
+    "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iterINtNtCs9rw95XCWuke_4core6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1A_5units6MetersENtNtB1A_6errors12SpatialErrorENCNCINvB2m_7indexedNtB2m_4CaseBT_NCNvB2m_16point_candidatess0_0E00EB2m_",
+    "fmul_instructions": 0,
+    "fadd_instructions": 0,
+    "vector_float_compares": 0,
+    "barriers": 4,
+    "relaxed_additions": 0,
+    "point_calls": [
+      "call void @_RINvNtCsjsvrWVj1VHl_7spatial11experiments10point_rowsNtB4_5WorldBP_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_(ptr noalias nofree noundef nonnull sret([32 x i8]) align 8 captures(none) dereferenceable(32) %_7, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(128) %17, ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) %_5.i.i), !noalias !221"
+    ]
+  },
+  {
+    "config": "nolto",
+    "symbol": "_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iterINtNtCs9rw95XCWuke_4core6result6ResultINtNtCscxpytxKd7jb_17spatial_typestate5point6Point3NtCsjsvrWVj1VHl_7spatial5WorldNtNtB1A_5units6MetersENtNtB1A_6errors12SpatialErrorENCNCINvB2m_7indexedNtB2m_4CaseBT_NCNvB2m_16point_candidatess_0E00EB2m_",
+    "fmul_instructions": 0,
+    "fadd_instructions": 0,
+    "vector_float_compares": 0,
+    "barriers": 4,
+    "relaxed_additions": 0,
+    "point_calls": [
+      "call void @_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_eagerNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_(ptr noalias nofree noundef nonnull sret([32 x i8]) align 8 captures(none) dereferenceable(32) %_7, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(128) %17, ptr noalias nofree noundef nonnull readonly align 8 captures(none) dereferenceable(24) %_5.i.i), !noalias !233"
+    ]
+  },
+  {
+    "config": "nolto",
+    "symbol": "_RNvMNtCscxpytxKd7jb_17spatial_typestate9transformINtB2_9TransformNtCsjsvrWVj1VHl_7spatial5WorldB11_NtNtB4_5units6MetersE11apply_pointB13_",
+    "fmul_instructions": 5,
+    "fadd_instructions": 6,
+    "vector_float_compares": 0,
+    "barriers": 0,
+    "relaxed_additions": 0,
+    "point_calls": []
+  },
+  {
+    "config": "nolto",
+    "symbol": "_RINvNtCsjsvrWVj1VHl_7spatial11experiments10point_rowsNtB4_5WorldBP_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_",
+    "fmul_instructions": 9,
+    "fadd_instructions": 9,
+    "vector_float_compares": 0,
+    "barriers": 0,
+    "relaxed_additions": 0,
+    "point_calls": []
+  },
+  {
+    "config": "nolto",
+    "symbol": "_RINvNtCsjsvrWVj1VHl_7spatial11experiments11point_eagerNtB4_5WorldBQ_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_",
+    "fmul_instructions": 9,
+    "fadd_instructions": 9,
+    "vector_float_compares": 2,
+    "barriers": 0,
+    "relaxed_additions": 0,
+    "point_calls": []
+  }
+]

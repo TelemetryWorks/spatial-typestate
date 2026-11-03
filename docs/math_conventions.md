@@ -114,7 +114,8 @@ only as a native sqrt reference; this does not enable the library's std feature.
 Sampling and comparison are regression evidence, not an exhaustive proof.
 
 The no-std helper has fixed iteration count but may be slower than native sqrt;
-no benchmark or timing guarantee is claimed. It avoids adding libm. All runtime
+[host benchmark findings](performance.md) do not establish a universal timing
+or speed guarantee. It avoids adding libm. All runtime
 feature configurations have no normal dependencies. Previously advertised unused
 nalgebra/glam switches were removed; no backend implementation existed to replace.
 

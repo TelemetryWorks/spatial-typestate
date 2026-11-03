@@ -1,0 +1,231 @@
+{
+  "build": {
+    "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+    "configs": {
+      "lto-std": {
+        "executable": "target/release/deps/spatial-55d8a535fd98928a.exe",
+        "command": [
+          "cargo",
+          "+1.99.0-x86_64-pc-windows-msvc",
+          "bench",
+          "--locked",
+          "--jobs",
+          "2",
+          "--bench",
+          "spatial",
+          "--no-run",
+          "--message-format=json"
+        ],
+        "overrides": {}
+      },
+      "lto-no-std": {
+        "executable": "target/release/deps/spatial-0d73c2e837e7b183.exe",
+        "command": [
+          "cargo",
+          "+1.99.0-x86_64-pc-windows-msvc",
+          "bench",
+          "--locked",
+          "--jobs",
+          "2",
+          "--bench",
+          "spatial",
+          "--no-run",
+          "--message-format=json",
+          "--no-default-features",
+          "--features",
+          "no_std"
+        ],
+        "overrides": {}
+      },
+      "nolto-std": {
+        "executable": "target/performance-study/build-nolto/release/deps/spatial-ad5920fe174900a3.exe",
+        "command": [
+          "cargo",
+          "+1.99.0-x86_64-pc-windows-msvc",
+          "bench",
+          "--locked",
+          "--jobs",
+          "2",
+          "--bench",
+          "spatial",
+          "--no-run",
+          "--message-format=json"
+        ],
+        "overrides": {
+          "CARGO_PROFILE_BENCH_LTO": "false",
+          "CARGO_PROFILE_BENCH_CODEGEN_UNITS": "16"
+        }
+      }
+    },
+    "compiler": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-pc-windows-msvc\nrelease: 1.99.0\nLLVM version: 23.1.1",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "base_commit": "776b32bdde8e148a6e1a4cce03f6c7837eda1810"
+  },
+  "environment": {
+    "cpu": {
+      "Name": "AMD Ryzen 7 2700 Eight-Core Processor          ",
+      "NumberOfCores": 8,
+      "NumberOfLogicalProcessors": 16,
+      "MaxClockSpeed": 3200,
+      "CurrentClockSpeed": 3200
+    },
+    "os": {
+      "Caption": "Microsoft Windows 11 Pro",
+      "Version": "10.0.26200",
+      "BuildNumber": "26200"
+    },
+    "power_plan": "Power Scheme GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  (High performance)",
+    "pre_measurement_cpu": {
+      "PercentProcessorTime": 1
+    },
+    "turbo_actual": "unknown; settings not modified",
+    "affinity": "OS default; not pinned",
+    "coordination": "standards/reviewer heavy work paused; no other owned build processes",
+    "ambient_flags": {
+      "CARGO_PROFILE_BENCH_LTO": null,
+      "RUSTFLAGS": null,
+      "CARGO_PROFILE_BENCH_CODEGEN_UNITS": null
+    },
+    "captured_utc": "2026-11-03T13:07:06.0732969Z"
+  },
+  "runs": [
+    {
+      "config": "lto-no-std",
+      "repeat": 1,
+      "command": [
+        "target/release/deps/spatial-0d73c2e837e7b183.exe",
+        "--bench",
+        "--noplot"
+      ],
+      "seed": "5573589319906701683",
+      "reverse": false,
+      "utc_start": "2026-11-03T13:08:24Z",
+      "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+      "seconds": 77.65599999998813
+    },
+    {
+      "config": "lto-no-std",
+      "repeat": 2,
+      "command": [
+        "target/release/deps/spatial-0d73c2e837e7b183.exe",
+        "--bench",
+        "--noplot"
+      ],
+      "seed": "5573589319906701683",
+      "reverse": true,
+      "utc_start": "2026-11-03T13:10:06Z",
+      "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+      "seconds": 78.35999999998603
+    },
+    {
+      "config": "lto-no-std",
+      "repeat": 3,
+      "command": [
+        "target/release/deps/spatial-0d73c2e837e7b183.exe",
+        "--bench",
+        "--noplot"
+      ],
+      "seed": "5573589319906701683",
+      "reverse": false,
+      "utc_start": "2026-11-03T13:14:25Z",
+      "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+      "seconds": 78.04699999999139
+    },
+    {
+      "config": "lto-std",
+      "repeat": 1,
+      "command": [
+        "target/release/deps/spatial-55d8a535fd98928a.exe",
+        "--bench",
+        "--noplot"
+      ],
+      "seed": "5573589319906701683",
+      "reverse": false,
+      "utc_start": "2026-11-03T13:07:06Z",
+      "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+      "seconds": 77.73399999999674
+    },
+    {
+      "config": "lto-std",
+      "repeat": 2,
+      "command": [
+        "target/release/deps/spatial-55d8a535fd98928a.exe",
+        "--bench",
+        "--noplot"
+      ],
+      "seed": "5573589319906701683",
+      "reverse": true,
+      "utc_start": "2026-11-03T13:11:25Z",
+      "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+      "seconds": 77.65600000001723
+    },
+    {
+      "config": "lto-std",
+      "repeat": 3,
+      "command": [
+        "target/release/deps/spatial-55d8a535fd98928a.exe",
+        "--bench",
+        "--noplot"
+      ],
+      "seed": "5573589319906701683",
+      "reverse": false,
+      "utc_start": "2026-11-03T13:13:06Z",
+      "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+      "seconds": 78.2039999999979
+    },
+    {
+      "config": "nolto-std",
+      "repeat": 1,
+      "command": [
+        "target/performance-study/build-nolto/release/deps/spatial-ad5920fe174900a3.exe",
+        "--bench",
+        "--noplot",
+        "operations/(point_valid|vector_valid|compose_valid|inverse_valid|constructor_valid)$|conversion/.*valid$|point_candidates/(valid|mixed_1in8|subnormal)/|quaternion/normal/public$|preparation/"
+      ],
+      "seed": "5573589319906701683",
+      "reverse": false,
+      "utc_start": "2026-11-03T13:09:42Z",
+      "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+      "seconds": 24.030999999988126
+    },
+    {
+      "config": "nolto-std",
+      "repeat": 2,
+      "command": [
+        "target/performance-study/build-nolto/release/deps/spatial-ad5920fe174900a3.exe",
+        "--bench",
+        "--noplot",
+        "operations/(point_valid|vector_valid|compose_valid|inverse_valid|constructor_valid)$|conversion/.*valid$|point_candidates/(valid|mixed_1in8|subnormal)/|quaternion/normal/public$|preparation/"
+      ],
+      "seed": "5573589319906701683",
+      "reverse": true,
+      "utc_start": "2026-11-03T13:12:43Z",
+      "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+      "seconds": 23.655999999988126
+    },
+    {
+      "config": "nolto-std",
+      "repeat": 3,
+      "command": [
+        "target/performance-study/build-nolto/release/deps/spatial-ad5920fe174900a3.exe",
+        "--bench",
+        "--noplot",
+        "operations/(point_valid|vector_valid|compose_valid|inverse_valid|constructor_valid)$|conversion/.*valid$|point_candidates/(valid|mixed_1in8|subnormal)/|quaternion/normal/public$|preparation/"
+      ],
+      "seed": "5573589319906701683",
+      "reverse": false,
+      "utc_start": "2026-11-03T13:15:43Z",
+      "fingerprint": "043d78ea9205d900e7aa5aa1c3ae7888a038f27b16b644984ab9f35377abf8e8",
+      "seconds": 24.14000000001397
+    }
+  ],
+  "criterion": {
+    "samples": 40,
+    "warmup_ms": 200,
+    "measure_ms": 700,
+    "resamples": 10000,
+    "confidence": 0.95,
+    "noise_threshold": 0.03
+  },
+  "estimated_point_is_median": true
+}

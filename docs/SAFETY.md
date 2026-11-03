@@ -83,8 +83,9 @@ or exact roundtrip is promised.
 Constructors/math use stack values, no allocation, boxing, formatting, virtual
 error calls, global state or I/O. Callers may format errors or choose Box<dyn
 Error>; tests exercise both. Source review and #![deny(unsafe_code)] enforce the
-library constraint, not downstream code. No measured speed or timing guarantee
-is claimed. There are no normal dependencies in any runtime feature configuration;
+library constraint, not downstream code. [Measured host findings](performance.md)
+are not universal speed or timing guarantees; no production check is removed by
+the study. There are no normal dependencies in any runtime feature configuration;
 dev-only testing tools remain separate. No libm or backend switch is retained.
 
 ## Validation limits

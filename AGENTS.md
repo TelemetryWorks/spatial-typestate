@@ -16,8 +16,11 @@ contracts and [math conventions](docs/math_conventions.md) before changing math.
 - tests/: marker traits, independent math oracles, properties, error and fuzz-helper checks.
 - tests/ui/: reviewed frame/unit/private-field compiler-rejection fixtures.
 - examples/sensor_alignment.rs: working sensor-aircraft-world workflow.
-- Two other examples and benches: placeholders, not performance evidence.
+- Two other examples remain placeholders. benches/spatial.rs provides Criterion
+  host characterization; support experiments are not library APIs/optimizations.
 - docs/: requirements/evidence, design, frames, coordinate/math/safety notes.
+- docs/performance.md and dated data: reproducible host findings, raw samples,
+  uncertainty, rejected candidates and bounded future validation-amortization work.
 - docs/ROADMAP.md: canonical remaining work; root ROADMAP.md points there.
 - .github/workflows/ci.yml: direct quality gates; CodeQL/Sonar remain separate.
 - Cargo.toml/Cargo.lock: no normal dependencies, dev-only tools; .cargo/config.toml
@@ -103,7 +106,7 @@ math. The library denies unsafe and uses stack values without allocation or I/O.
 - Keep source/target direction explicit and preserve compile-time mismatches.
 - Distinguish enforced numeric/type properties from physical meaning and goals.
 - State numerical tolerances, overflow, degeneracy and unchecked boundaries.
-- Do not claim certification, correctly-rounded helper sqrt, benchmark speed,
+- Do not claim certification, correctly-rounded helper sqrt, unqualified benchmark speed,
   unqualified finite-output guarantees for raw values, or arbitrary absolute roundtrip bounds.
 - Reproduce bugs, add independent oracles and meaningful properties. Never bless
   a UI snapshot without reviewing the intended error (not a warning failure).
@@ -132,6 +135,7 @@ is implied. Releases/version bumps/tags require an assigned task.
 - [units](docs/units.md): conversion decisions, migration and trust boundaries.
 - [structure](docs/PROJECT_STRUCTURE.md): actual file roles.
 - [roadmap](docs/ROADMAP.md): remaining proposals, not implemented guarantees.
+- [performance](docs/performance.md): measured host study, reproducibility and limits.
 - [changelog](CHANGELOG.md): final unreleased change/migration record.
 
 ## Git conventions
@@ -151,3 +155,14 @@ Inspect final diff before reporting completion.
 
 No tool attribution anywhere in repository work: no tool Co-Authored-By trailers,
 generated-by footers or similar text in code, docs, commits, PRs, issues or releases.
+
+## Performance work
+
+Use existing Criterion dev tooling with explicit installed compiler/two workers.
+`cargo +1.99.0-x86_64-pc-windows-msvc bench --locked --jobs 2 --bench spatial -- --test`
+smoke-checks the harness. Follow [methodology](docs/performance.md) for timed runs;
+coordinate a quiet CPU/I/O window, prebuild, retain independent repeats/spikes,
+inspect caller codegen and compare profiles. The optional Python stdlib runner
+supports fresh/resumed named studies and source fingerprint guards. No timing
+threshold is a CI gate. Prepared maps/shorter Newton replays remain isolated
+experiments, not approved public APIs or promoted library changes.

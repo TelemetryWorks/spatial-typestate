@@ -6,7 +6,11 @@
 - tests/ui/: reviewed Rust 1.99 compile-fail fixtures and stderr snapshots.
 - examples/sensor_alignment.rs: runnable sensor-aircraft-world workflow.
 - examples/basic_usage.rs and examples/aircraft_frames.rs: no-op placeholders.
-- benches/: essentially empty placeholders, not performance evidence.
+- benches/spatial.rs: Criterion host characterization and matched controls;
+  support/experiments.rs: isolated hypotheses, not public library APIs.
+- scripts/performance_study.py: optional stdlib-only resumable study runner.
+- docs/performance.md and dated data: methods, raw samples/results/source snapshots,
+  codegen evidence and limitations; excluded from crate packaging.
 - docs/: requirements/evidence, design, frame/coordinate/math conventions, safety,
   and the canonical remaining-work roadmap. Diagram files are placeholders.
 - .github/workflows/ci.yml: direct runtime, lint/docs, compatibility, dependency,

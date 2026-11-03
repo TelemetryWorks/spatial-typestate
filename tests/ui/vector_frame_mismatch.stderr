@@ -11,5 +11,5 @@ error[E0308]: mismatched types
 note: method defined here
  --> src/transform.rs
   |
-  |     pub fn apply_vector(&self, vector: Vector3<From>) -> Vector3<To> {
+  |     pub fn apply_vector(&self, vector: Vector3<From>) -> Result<Vector3<To>, SpatialError> {
   |            ^^^^^^^^^^^^

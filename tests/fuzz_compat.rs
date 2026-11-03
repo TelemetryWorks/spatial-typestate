@@ -11,12 +11,12 @@ spatial_frames! {
 /// Entry-style function suitable for fuzzing.
 ///
 /// A fuzz target can feed arbitrary point coordinates and translation offsets
-/// into this function. Non-finite inputs are outside this helper's contract.
-/// Finite inputs must produce the expected per-axis sums, including signed
-/// infinity on overflow. Zero signs may differ due to additions of matrix zeros.
+/// into this function. Non-finite inputs and overflowing sums must return
+/// NonFinite; successful calls match exact finite per-axis sums. Zero signs
+/// may differ due to additions of matrix zeros.
 pub fn fuzz_apply_point_with_translation(x: f64, y: f64, z: f64, tx: f64, ty: f64, tz: f64) {
-    // Reject obviously non-finite inputs early; fuzzers will still discover
-    // more interesting edge cases near the finite boundary.
+    let result =
+        Transform::<World, World>::from_translation(tx, ty, tz).apply_point(Point3::new(x, y, z));
     if !x.is_finite()
         || !y.is_finite()
         || !z.is_finite()
@@ -24,18 +24,23 @@ pub fn fuzz_apply_point_with_translation(x: f64, y: f64, z: f64, tx: f64, ty: f6
         || !ty.is_finite()
         || !tz.is_finite()
     {
+        assert!(matches!(
+            result,
+            Err(spatial_typestate::SpatialError::NonFinite)
+        ));
         return;
     }
-
-    let p = Point3::<World>::new(x, y, z);
-    let t = Transform::<World, World>::from_translation(tx, ty, tz);
-
-    let q = t.apply_point(p);
-
-    // Identity coefficients only multiply finite inputs by zero or one; all
-    // intermediate sums before translation are finite. The final finite+finite
-    // addition can overflow, but cannot produce NaN. Equality checks the exact
-    // finite sum or correct infinity sign, while treating +0 and -0 as equal.
+    let expected = [x + tx, y + ty, z + tz];
+    if !expected.into_iter().all(f64::is_finite) {
+        assert!(matches!(
+            result,
+            Err(spatial_typestate::SpatialError::NonFinite)
+        ));
+        return;
+    }
+    let q = result.expect("finite translation sums must succeed");
+    // Independent per-axis sums retain exact numeric equality, with +0/-0
+    // numerically equal. Overflow must be reported, not silently accepted.
     for (actual, expected) in [(q.x, x + tx), (q.y, y + ty), (q.z, z + tz)] {
         assert!(!actual.is_nan());
         assert_eq!(actual, expected);
@@ -49,7 +54,7 @@ fn fuzz_compat_smoke_test() {
 }
 
 #[test]
-fn finite_translation_can_overflow_without_nan() {
+fn finite_translation_overflow_is_reported() {
     fuzz_apply_point_with_translation(f64::MAX, -f64::MAX, f64::MAX, f64::MAX, -f64::MAX, f64::MAX);
 }
 

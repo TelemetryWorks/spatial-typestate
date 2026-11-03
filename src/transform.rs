@@ -3,7 +3,7 @@
 //! [`Transform<From, To>`] represents a rigid transformation from frame
 //! `From` to frame `To` when built through the checked rotation/translation
 //! constructor; raw public matrices are unvalidated. Applying the transform to a [`crate::point::Point3`]
-//! tagged with `From` yields a point tagged with `To`.
+//! tagged with `From` returns a `Result` whose successful point is tagged with `To`.
 //!
 //! ```rust
 //! use spatial_typestate::{Frame, Point3, Transform};
@@ -16,7 +16,7 @@
 //! let p_body = Point3::<Body>::new(1.0, 0.0, 0.0);
 //! let t_body_world: Transform<Body, World> = Transform::identity();
 //!
-//! let p_world = t_body_world.apply_point(p_body);
+//! let p_world = t_body_world.apply_point(p_body).unwrap();
 //! ```
 
 use core::marker::PhantomData;
@@ -82,7 +82,7 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     ///     [0.0,  0.0, 1.0, 30.0],
     ///     [0.0,  0.0, 0.0,  1.0],
     /// ]);
-    /// let result: Point3<Body> = transform.apply_point(Point3::<World>::new(2.0, 3.0, 4.0));
+    /// let result: Point3<Body> = transform.apply_point(Point3::<World>::new(2.0, 3.0, 4.0)).unwrap();
     /// assert_eq!([result.x, result.y, result.z], [7.0, 22.0, 34.0]);
     /// ```
     #[inline]
@@ -129,7 +129,7 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     ///     UnitQuat::try_from_components(0.0, 0.0, 1.0, 1.0)?,
     ///     Vector3::new(1.0, 2.0, 3.0),
     /// )?;
-    /// let result = transform.apply_point(Point3::new(2.0, 0.0, 1.0));
+    /// let result = transform.apply_point(Point3::new(2.0, 0.0, 1.0)).unwrap();
     /// assert!((result.x - 1.0).abs() < 1e-12);
     /// assert!((result.y - 4.0).abs() < 1e-12);
     /// assert!((result.z - 4.0).abs() < 1e-12);
@@ -173,10 +173,35 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     ///
     /// Composes the affine maps defined by the first three rows; both raw bottom
     /// rows are ignored, consistently with [`Self::apply_point`]. The result has
-    /// canonical bottom row `[0, 0, 0, 1]`. Arithmetic is unchecked and may
-    /// overflow or produce NaN; composition does not certify raw inputs as rigid.
-    #[must_use]
-    pub fn then<Next: Frame>(&self, next: Transform<To, Next>) -> Transform<From, Next> {
+    /// canonical bottom row `[0, 0, 0, 1]`. Composition checks finite inputs and
+    /// output, but does not certify raw inputs as rigid. Evaluation order is
+    /// unchanged; overflow is an error even if another evaluation could cancel it.
+    /// Sequential point application and composition check different intermediate
+    /// values, so they can differ in which calls overflow and return an error.
+    ///
+    /// # Errors
+    /// Returns [`SpatialError::NonFinite`] for any non-finite entry in either
+    /// first-three-row affine map, or non-finite computed output. Ignored raw
+    /// bottom rows are not validated.
+    pub fn then<Next: Frame>(
+        &self,
+        next: Transform<To, Next>,
+    ) -> Result<Transform<From, Next>, SpatialError> {
+        if !self
+            .matrix
+            .iter()
+            .take(3)
+            .flatten()
+            .all(|entry| entry.is_finite())
+            || !next
+                .matrix
+                .iter()
+                .take(3)
+                .flatten()
+                .all(|entry| entry.is_finite())
+        {
+            return Err(SpatialError::NonFinite);
+        }
         let mut matrix = [[0.0; 4]; 4];
         for (row, output) in matrix.iter_mut().take(3).enumerate() {
             for (column, entry) in output.iter_mut().enumerate() {
@@ -189,21 +214,47 @@ impl<From: Frame, To: Frame> Transform<From, To> {
             }
         }
         matrix[3][3] = 1.0;
-        Transform::from_matrix(matrix)
+        if !matrix.iter().flatten().all(|entry| entry.is_finite()) {
+            return Err(SpatialError::NonFinite);
+        }
+        Ok(Transform::from_matrix(matrix))
     }
 
     /// Apply only the linear part to a vector, without adding translation.
     ///
-    /// Raw matrices are unvalidated; results follow unchecked `f64` arithmetic.
+    /// Checks only participating values: the vector and linear 3x3 matrix.
+    /// Translation and bottom row are ignored, even if they contain NaN/Inf.
+    /// Finiteness does not establish rigidity or physical frame correctness.
+    ///
+    /// # Errors
+    /// Returns [`SpatialError::NonFinite`] for any non-finite participating input
+    /// or computed component, including floating-point overflow.
     #[inline]
-    #[must_use]
-    pub fn apply_vector(&self, vector: Vector3<From>) -> Vector3<To> {
+    pub fn apply_vector(&self, vector: Vector3<From>) -> Result<Vector3<To>, SpatialError> {
+        if ![vector.x, vector.y, vector.z]
+            .into_iter()
+            .all(f64::is_finite)
+            || !self
+                .matrix
+                .iter()
+                .take(3)
+                .all(|row| row.iter().take(3).all(|entry| entry.is_finite()))
+        {
+            return Err(SpatialError::NonFinite);
+        }
         let matrix = &self.matrix;
-        Vector3::new(
+        let result = Vector3::new(
             matrix[0][0] * vector.x + matrix[0][1] * vector.y + matrix[0][2] * vector.z,
             matrix[1][0] * vector.x + matrix[1][1] * vector.y + matrix[1][2] * vector.z,
             matrix[2][0] * vector.x + matrix[2][1] * vector.y + matrix[2][2] * vector.z,
-        )
+        );
+        if ![result.x, result.y, result.z]
+            .into_iter()
+            .all(f64::is_finite)
+        {
+            return Err(SpatialError::NonFinite);
+        }
+        Ok(result)
     }
 
     /// Validate and invert an approximately rigid affine transform.
@@ -269,12 +320,26 @@ impl<From: Frame, To: Frame> Transform<From, To> {
     ///
     /// Multiplies the first three matrix rows by the column vector `[x, y, z, 1]`.
     /// The bottom row is not read and no perspective division is performed;
-    /// callers should supply an affine matrix. Raw matrices remain unvalidated.
-    /// Floating-point arithmetic can overflow to infinity; this method does not
-    /// check or return errors for numerical results.
+    /// callers should supply an affine matrix. Checks the point, first three
+    /// matrix rows and output for finiteness, without validating rigidity.
+    /// Evaluation order is unchanged; no compensated arithmetic is used.
+    ///
+    /// # Errors
+    /// Returns [`SpatialError::NonFinite`] for a non-finite participating input
+    /// or computed component, including floating-point overflow. Ignored bottom
+    /// row values are not validated.
     #[inline]
-    #[must_use]
-    pub fn apply_point(&self, p: Point3<From>) -> Point3<To> {
+    pub fn apply_point(&self, p: Point3<From>) -> Result<Point3<To>, SpatialError> {
+        if ![p.x, p.y, p.z].into_iter().all(f64::is_finite)
+            || !self
+                .matrix
+                .iter()
+                .take(3)
+                .flatten()
+                .all(|entry| entry.is_finite())
+        {
+            return Err(SpatialError::NonFinite);
+        }
         let matrix = &self.matrix;
         let x = p.x;
         let y = p.y;
@@ -284,7 +349,10 @@ impl<From: Frame, To: Frame> Transform<From, To> {
         let yp = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z + matrix[1][3];
         let zp = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z + matrix[2][3];
 
-        Point3::<To>::new(xp, yp, zp)
+        if ![xp, yp, zp].into_iter().all(f64::is_finite) {
+            return Err(SpatialError::NonFinite);
+        }
+        Ok(Point3::<To>::new(xp, yp, zp))
     }
 }
 

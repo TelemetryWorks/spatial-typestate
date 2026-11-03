@@ -3,7 +3,6 @@
 These are proposals, not implemented guarantees or promises of a release date.
 
 - Design explicit dimensional units/conversions for points, vectors, and translation.
-- Consider checked arithmetic for applications that require finite outputs after application/composition.
 - Assess long-chain rotation drift and whether explicit reconditioning is needed.
 - Add useful benchmarks before making any performance claims; current bench files are placeholders.
 - Expand domain examples and populate diagrams where they explain a concrete workflow.

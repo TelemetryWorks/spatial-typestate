@@ -4,6 +4,16 @@
 
 ### Changed
 
+- **Breaking:** `Transform::apply_point`, `apply_vector`, and `then` now return
+  `Result<_, SpatialError>` under their existing names. Add `?` or explicit error
+  handling to callers; no separate `try_` variants or unchecked alternatives are
+  introduced. Participating non-finite inputs and computed overflow/NaN return
+  `NonFinite`. Raw bottom rows remain ignored; vector application also ignores
+  translation. Finiteness checks do not certify rigidity or calibration.
+- Sequential application and composition validate different intermediates and
+  can return errors at different stages. Evaluation order is retained without
+  compensated arithmetic or clamping. The checks add work to every operation;
+  no benchmark timing or zero-overhead claim is made.
 - **Breaking:** UnitQuat components are private. Replace q.x/q.y/q.z/q.w reads
   with const x()/y()/z()/w() getters. Replace mutation or removed new_unchecked
   calls with try_from_components and handle its Result, or use const identity().

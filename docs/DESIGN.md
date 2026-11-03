@@ -22,8 +22,10 @@ The frame relationship is asserted by the caller. UnitQuat<To> does not encode
 From, and types cannot verify a physical calibration. The checked constructor
 produces a proper rigid affine matrix within floating-point rounding. Public
 matrix storage and from_matrix deliberately remain an unchecked compatibility
-path. Application and composition add no finiteness/rigidity checks; inversion
-explicitly validates raw input, with absolute tolerance 1e-10.
+path. Application and composition return Result, checking participating inputs
+and computed outputs for finiteness without checking rigidity. Existing method
+names are retained; callers propagate failures with ?. Inversion additionally
+validates raw rigidity with absolute tolerance 1e-10.
 
 Errors are concrete enum values implementing Display and core::error::Error.
 Library math uses no allocation, boxing, unsafe code, global state, or I/O.

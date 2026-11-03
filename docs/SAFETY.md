@@ -42,11 +42,19 @@ asserts the physical relationship. A finite target translation is required.
 Raw matrices remain public/unvalidated. Point application and composition use
 the affine mapping defined by their first three rows and ignore bottom rows;
 there is no perspective division. Composition order is next(first(p)); vectors
-receive no translation. These methods are unchecked and may overflow or yield
-NaN for general inputs. Pure finite translations can overflow to signed infinity
-but cannot yield NaN under ordinary IEEE 754 arithmetic. The compatibility helper
-checks exact per-axis expected sums, including infinity sign (zero signs compare
-numerically equal); it is not a configured or continuous cargo-fuzz setup.
+receive no translation. apply_point, apply_vector and then return Result under
+their existing names. Non-finite participating inputs/results, including overflow,
+return NonFinite. Ignored matrix entries remain ignored: bottom rows for point/
+composition and translation/bottom row for vectors. Finite scale/shear matrices
+are accepted; these checks do not establish rigidity.
+
+The existing IEEE 754 evaluation order is retained, with no compensated
+arithmetic or clamping. Finite inputs can still fail on intermediate overflow.
+Sequential application and a composed map check different intermediates and
+can fail at different points. Successful results are finite, not necessarily
+accurate or physically calibrated. The translation helper checks exact finite
+sums (zero signs compare numerically equal), invalid inputs and overflow errors;
+it is not a configured or continuous cargo-fuzz setup.
 
 Checked inversion rejects all non-finite entries and finite matrices failing
 an affine-row, rotation-row orthonormality, or determinant +1 check, each with

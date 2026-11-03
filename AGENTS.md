@@ -13,6 +13,9 @@ contracts and [math conventions](docs/math_conventions.md) before changing math.
 ## Layout
 
 - src/: small fixed-size, dependency-free library; lib.rs re-exports its API.
+- python/: separate CPython batch facade/native crate, own PyO3 dependency lock;
+  Python runtime/packaging contracts are in docs/PYTHON-GUIDE.md. No core runtime
+  dependency is added. Test-only NumPy is isolated from wheel metadata.
 - tests/: marker traits, independent math oracles, properties, error and fuzz-helper checks.
 - tests/ui/: reviewed frame/unit/private-field compiler-rejection fixtures.
 - examples/sensor_alignment.rs: working sensor-aircraft-world workflow.
@@ -158,6 +161,29 @@ Inspect final diff before reporting completion.
 
 No tool attribution anywhere in repository work: no tool Co-Authored-By trailers,
 generated-by footers or similar text in code, docs, commits, PRs, issues or releases.
+
+## Python binding
+
+Keep the core math/signatures/pin/MSRV/no_std/runtime graph independent. The
+binding has its own Cargo.lock and release profile; use explicit installed 1.99
+and two workers for its manifest. Read [Python guide](docs/PYTHON-GUIDE.md) and
+[reviewed design](docs/python_design.md) before changing its contracts. Validate
+foreign buffers/copy into private Rust Vec while attached; never access them
+while detached. The caller excludes external/native writers during import.
+Frozen frame identity is process-local, not name equality; no mutable relabeling.
+Closed unit dispatch and existing core math stay outside/inside the Rust row loop
+respectively. Point/vector ignored-entry scopes, finite errors and first-row
+atomic results must remain tested. Empty mapping does not eagerly validate raw
+matrix values. Cache safe immutable PyBytes after reattachment; count import
+copy, export copy/zero fill and retained Vec+bytes honestly. No unsafe buffer
+tricks, borrowed lifetime fabrication, prepared API promotion or Python runtime
+NumPy/Arrow/pandas dependency. New binding dependencies require task approval.
+
+Build/install/test the actual wheel; optional NumPy interop tests are dev-only.
+CI tests GIL-enabled CPython 3.11/3.14 Linux/Windows and a Linux source rebuild.
+Local venv/build requirements are allowed for assigned Python work, never global
+system installs. See guide for exact separate-native lint/test/build commands.
+No PyPI publishing/wheel release/version changes without an assigned task.
 
 ## Performance work
 

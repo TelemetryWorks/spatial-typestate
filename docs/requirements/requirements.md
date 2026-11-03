@@ -38,3 +38,15 @@ lifetime/type/bit evidence without extending the production contracts above.
 Its prepare-time matrix errors and fixture batch protocol are not approved APIs.
 See [prototype tests](../../tests/borrowed_validation.rs) and
 [live-borrow rejection](../../tests/ui/borrowed_matrix_mutation.rs).
+
+## Separate Python binding contracts
+
+These are runtime adapter contracts, not extensions of Rust compile-time proofs.
+
+| ID | Python contract | Verification |
+| --- | --- | --- |
+| PY-001 | Frozen non-subclassable process-local frame identity, pointer equality/hash, closed immutable units; call-time frame/unit/kind checks, no implicit conversion. | identity/frozen/runtime checks and copy/pickle cases in [installed-wheel tests](../../python/tests/test_batches.py). |
+| PY-002 | C-contiguous bare-native-d float64 (N,3)/flat3N input is snapshotted while attached, finite import enforced, external writers excluded. Rust-owned immutable data only while detached. | buffer shape/dtype/endian/stride/unaligned/zero and snapshot/alias tests; [adapter source](../../python/native/src/lib.rs). Concurrent foreign writers are an explicit unsupported condition, not a tested atomic-snapshot guarantee. |
+| PY-003 | Checked core math and unit dispatch reused; all-or-nothing output, first ascending zero-based row error, metadata first, empty applications do not validate unused raw matrices. | 4,096 random-bit direct-core parity and all-position scope tests in [native kernels](../../python/native/src/kernels.rs); analytic workflow/error tests in installed wheel. |
+| PY-004 | First view copies once into immutable cached bytes (plus zero fill); later flat views share bytes, survive batch deletion and cannot mutate the Vec. Viewed batches retain two payloads. | cached-base/lifetime/concurrent tests, [safe exporter](../../python/native/src/lib.rs), structural review and [RSS evidence](../python/2026-11-03/README.md). |
+| PY-005 | Core remains normal-dependency-free/no_std; binding std/CPython, allocations/copies, closed-unit/runtime checks and platform limits are explicit. No native parity/zero-copy/certification claim. | separate manifests/locks, root graph gates, [guide](../PYTHON-GUIDE.md), [Python CI](../../.github/workflows/python.yml); compile/runtime results reported separately. |

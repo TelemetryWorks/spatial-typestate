@@ -1,0 +1,23 @@
+[package]
+name = "spatial-typestate-py"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+publish = false
+description = "Batch-oriented CPython adapter for spatial-typestate"
+repository = "https://github.com/TelemetryWorks/spatial-typestate"
+license = "Apache-2.0"
+
+[lib]
+name = "_native"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+spatial-typestate = { path = "../.." }
+pyo3 = { version = "=0.29.2", features = ["abi3-py311"] }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = "symbols"

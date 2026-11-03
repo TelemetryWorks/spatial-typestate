@@ -1,0 +1,66 @@
+name: Python package
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_BUILD_JOBS: 2
+  RUSTUP_TOOLCHAIN: '1.99.0'
+
+jobs:
+  wheel:
+    name: Python (${{ matrix.os }}, ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.14']
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master, verified
+        with:
+          toolchain: '1.99.0'
+          components: rustfmt, clippy
+      - name: Install hash-locked build tool
+        run: python -m pip install --require-hashes --only-binary=:all: -r python/requirements-build.txt
+      - name: Native format, lint and parity tests
+        run: |
+          cargo +1.99.0 fmt --manifest-path python/native/Cargo.toml -- --check
+          cargo +1.99.0 clippy --manifest-path python/native/Cargo.toml --locked --all-targets --jobs 2 -- -D warnings
+          cargo +1.99.0 test --manifest-path python/native/Cargo.toml --locked --jobs 2 -- --test-threads=2
+      - name: Build release wheel and source distribution
+        run: |
+          python -m maturin build --manifest-path python/native/Cargo.toml --release --locked --jobs 2 --interpreter python --out dist
+          python -m maturin sdist --manifest-path python/native/Cargo.toml --out dist
+      - name: Install wheel without runtime dependencies
+        run: python -c "import glob,subprocess,sys; subprocess.run([sys.executable,'-m','pip','install','--no-deps',*glob.glob('dist/*.whl')],check=True)"
+      - name: Test installed wheel, not source checkout
+        run: python -I -m unittest discover -s python/tests -v
+      - name: Optional NumPy interop test environment
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: -r python/requirements-interop.txt
+          python -I -m unittest discover -s python/tests -v
+      - name: Build and test source distribution (Linux 3.11)
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.11'
+        run: |
+          python -c "import glob,subprocess,sys; subprocess.run([sys.executable,'-m','pip','install','--force-reinstall','--no-deps','--no-build-isolation','--config-settings=build-args=--locked',*glob.glob('dist/*.tar.gz')],check=True)"
+          python -I -m unittest discover -s python/tests -v

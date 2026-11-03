@@ -1,0 +1,18 @@
+{
+  "rustc": "1.99.0-x86_64-pc-windows-msvc",
+  "profile": "opt-level=3,thin LTO,codegen-units=1,unwind",
+  "pyo3": "0.29.2",
+  "maturin": "1.16.0",
+  "numpy_test_only": "2.4.6",
+  "reference": "759ebd432e5f8048cbccb10f6f80fdbd3edd436a",
+  "quiet_window": "standards agent notified START/END; no concurrent local builds/tests; background/turbo/thermals not continuously controlled",
+  "sources": {
+    "python\\native\\src\\lib.rs": "8111017cc9919a0fcd58a5a048cdc2cef33e51be485e1415a0369f8cb12dc478",
+    "python\\native\\src\\kernels.rs": "215e9617f2ddb01678bae2ea0781bbaa8bcb42b49b619d5b6ee611f31cdd3650",
+    "python\\native\\Cargo.toml": "f69df9b19e9ccc7417cd9d5a02a9e97f50990e2f80aa98f3e21aaa48ac972205",
+    "python\\native\\Cargo.lock": "4d016dac06c59d5aa404bea5f8cc31fd354da2a090aae95e2db162b1d79ff194",
+    "python\\pyproject.toml": "26a9a656404650f5a4702a14edc197cb56265d3819612a6329b70c1862635c44",
+    "python\\benchmark.py": "4145db0068392253dc19ebf59a8608cb3e538718ba591772ac913ac9f1fb89a9"
+  },
+  "source_fingerprint_normalization": "CRLF -> LF; formatting only, no measured values or code tokens changed"
+}

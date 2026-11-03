@@ -35,6 +35,16 @@
 
 ### Added
 
+- Separate unreleased CPython batch package under python/, with isolated PyO3
+  dependencies/lockfile and maturin build tooling. Frozen runtime frame identities,
+  closed meter/foot/dimensionless tags, Rust-owned points/vectors, core-backed
+  checked quaternion/transform/conversion operations, atomic first-index errors
+  and cached immutable bytes views. No Python per-row numeric loop objects or
+  runtime NumPy dependency. [Guide](docs/PYTHON-GUIDE.md) records copies, early
+  import errors, lost compile-time/generic/lifetime guarantees and concurrency
+  limits. Linux/Windows wheel and source-build checks and bounded host evidence
+  are separate from unchanged core math/API/normal dependencies. No release.
+
 - Isolated borrowed-validation prototype and matched caller-local hoisting
   controls, with point/vector-specific finite scopes, private immutable borrows,
   lifetime/type rejection and bit/error tests. Separate repeatable host evidence

@@ -1,0 +1,8 @@
+error[E0515]: cannot return value referencing local variable `map`
+ --> tests/ui/borrowed_outlives_map.rs:9:5
+  |
+9 |     borrowed::BorrowedPoint::prepare(&map).unwrap()
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^----^^^^^^^^^^
+  |     |                                |
+  |     |                                `map` is borrowed here
+  |     returns a value referencing data owned by the current function

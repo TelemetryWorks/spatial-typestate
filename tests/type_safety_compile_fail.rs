@@ -31,3 +31,14 @@ fn length_contract_mismatches_do_not_compile() {
     t.compile_fail("tests/ui/composition_length_mismatch.rs");
     t.compile_fail("tests/ui/length_arithmetic_mismatch.rs");
 }
+
+#[test]
+fn borrowed_prototype_invariants_do_not_compile() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/ui/borrowed_matrix_mutation.rs");
+    t.compile_fail("tests/ui/borrowed_vector_mutation.rs");
+    t.compile_fail("tests/ui/borrowed_outlives_map.rs");
+    t.compile_fail("tests/ui/borrowed_frame_mismatch.rs");
+    t.compile_fail("tests/ui/borrowed_length_mismatch.rs");
+    t.compile_fail("tests/ui/borrowed_private_state.rs");
+}

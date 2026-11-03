@@ -83,3 +83,9 @@ all-target Clippy and runs experimental correctness tests, not timing thresholds
 Host timing is not embedded evidence. Preserve raw independent repeats and
 negative results; do not remove safety checks or adopt a candidate from one
 favored profile/input case. Benchmark-only controls are not library APIs.
+
+The [borrowed prototype](docs/borrowed_validation.md) is benchmark/test-only.
+Target it with `--filter '^amortization' --analysis-threads 2` in a fresh named
+study; retain the original evidence. Lifetime/private-state/frame/unit fixtures
+must fail for their intended compiler errors on Windows and Linux. Do not infer
+an approved API or batch failure policy from the fixture loop protocol.

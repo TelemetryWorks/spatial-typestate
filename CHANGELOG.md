@@ -35,6 +35,13 @@
 
 ### Added
 
+- Isolated borrowed-validation prototype and matched caller-local hoisting
+  controls, with point/vector-specific finite scopes, private immutable borrows,
+  lifetime/type rejection and bit/error tests. Separate repeatable host evidence
+  and [design decisions](docs/borrowed_validation.md) retain uncertainty and pending
+  prepare-time-error/batch choices. No production public API, scalar rewrite,
+  six-step normalization or dependency change is promoted.
+
 - Reusable bounded Criterion host characterization for checked operations,
   unit conversions, std/actual no-std quaternion normalization, errors/extremes,
   dependent and batched workflows. Reproducible dated estimates, intervals,

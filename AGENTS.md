@@ -21,6 +21,8 @@ contracts and [math conventions](docs/math_conventions.md) before changing math.
 - docs/: requirements/evidence, design, frames, coordinate/math/safety notes.
 - docs/performance.md and dated data: reproducible host findings, raw samples,
   uncertainty, rejected candidates and bounded future validation-amortization work.
+- docs/borrowed_validation.md: isolated borrowed/caller-local prototype, measurements
+  and pending API/error/batch decisions; no production API promotion.
 - docs/ROADMAP.md: canonical remaining work; root ROADMAP.md points there.
 - .github/workflows/ci.yml: direct quality gates; CodeQL/Sonar remain separate.
 - Cargo.toml/Cargo.lock: no normal dependencies, dev-only tools; .cargo/config.toml
@@ -136,6 +138,7 @@ is implied. Releases/version bumps/tags require an assigned task.
 - [structure](docs/PROJECT_STRUCTURE.md): actual file roles.
 - [roadmap](docs/ROADMAP.md): remaining proposals, not implemented guarantees.
 - [performance](docs/performance.md): measured host study, reproducibility and limits.
+- [borrowed prototype](docs/borrowed_validation.md): operation scopes, lifetimes, evidence and pending decisions.
 - [changelog](CHANGELOG.md): final unreleased change/migration record.
 
 ## Git conventions
@@ -166,3 +169,10 @@ inspect caller codegen and compare profiles. The optional Python stdlib runner
 supports fresh/resumed named studies and source fingerprint guards. No timing
 threshold is a CI gate. Prepared maps/shorter Newton replays remain isolated
 experiments, not approved public APIs or promoted library changes.
+
+The borrowed followup uses `benches/support/borrowed.rs` and lifetime/type rejection
+fixtures. Keep point (12 affine entries) and vector (9 linear entries) validation
+scopes distinct. Raw nonrigid acceptance and per-value/result checks remain;
+prepare-time errors and a general batch contract require separate approval.
+For targeted repeats, use the runner's `--filter '^amortization' --analysis-threads 2`;
+prebuild and coordinate a quiet window. Do not edit historical study evidence.

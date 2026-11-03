@@ -1,0 +1,105 @@
+define hidden void @_RINvMNtCsepw49DxxxIC_9criterion7bencherNtB3_7Bencher4iteruNCNCNvCsjsvrWVj1VHl_7spatial12amortizations1_00EB10_(ptr noalias nofree noundef align 8 captures(none) dereferenceable(56) initializes((48, 49)) %self, ptr noalias nofree noundef readonly align 8 captures(none) dead_on_return dereferenceable(24) %routine) unnamed_addr #0 personality ptr @__CxxFrameHandler3 !guid !838 {
+start:
+  %e.i.i = alloca [1 x i8], align 1
+  %_9.i = alloca [16 x i8], align 8
+  %_5.i = alloca [40 x i8], align 8
+  %time_start = alloca [16 x i8], align 8
+  %0 = getelementptr inbounds nuw i8, ptr %self, i64 48
+  store i8 1, ptr %0, align 8
+  call void @llvm.lifetime.start.p0(ptr nonnull %time_start)
+; call <std::time::Instant>::now
+  %1 = tail call { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant3now()
+  %2 = extractvalue { i64, i32 } %1, 0
+  %3 = extractvalue { i64, i32 } %1, 1
+  store i64 %2, ptr %time_start, align 8
+  %4 = getelementptr inbounds nuw i8, ptr %time_start, i64 8
+  store i32 %3, ptr %4, align 8
+  %5 = getelementptr inbounds nuw i8, ptr %self, i64 32
+  %_13 = load ptr, ptr %5, align 8, !nonnull !50, !noundef !50
+; call <criterion::measurement::WallTime as criterion::measurement::Measurement>::start
+  %6 = tail call { i64, i32 } @_RNvXs0_NtCsepw49DxxxIC_9criterion11measurementNtB5_8WallTimeNtB5_11Measurement5start(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) %_13)
+  %7 = getelementptr inbounds nuw i8, ptr %self, i64 40
+  %iter1 = load i64, ptr %7, align 8, !noundef !50
+  %_163.not = icmp eq i64 %iter1, 0
+  br i1 %_163.not, label %bb16, label %bb15.lr.ph
+
+bb15.lr.ph:                                       ; preds = %start
+  %_10.i = load ptr, ptr %routine, align 8, !alias.scope !839, !nonnull !50, !align !56, !noundef !50
+  %8 = getelementptr inbounds nuw i8, ptr %routine, i64 8
+  %_11.i = load ptr, ptr %8, align 8, !alias.scope !839, !nonnull !50, !align !56, !noundef !50
+  %9 = getelementptr inbounds nuw i8, ptr %_11.i, i64 8
+  %10 = getelementptr inbounds nuw i8, ptr %_11.i, i64 16
+  %11 = getelementptr inbounds nuw i8, ptr %routine, i64 16
+  %_12.i = load ptr, ptr %11, align 8, !alias.scope !839, !nonnull !50, !align !56, !noundef !50
+  %12 = getelementptr inbounds nuw i8, ptr %_12.i, i64 8
+  %13 = getelementptr inbounds nuw i8, ptr %_12.i, i64 16
+  %_6.sroa.4.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 8
+  %_6.sroa.5.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 16
+  %_6.sroa.6.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 24
+  %_6.sroa.7.0._5.sroa_idx.i = getelementptr inbounds nuw i8, ptr %_5.i, i64 32
+  %14 = getelementptr inbounds nuw i8, ptr %_9.i, i64 8
+  br label %bb15
+
+bb16:                                             ; preds = %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations1_00B5_.exit, %start
+  %start.1 = extractvalue { i64, i32 } %6, 1
+  %start.0 = extractvalue { i64, i32 } %6, 0
+; call <criterion::measurement::WallTime as criterion::measurement::Measurement>::end
+  %15 = call { i64, i32 } @_RNvXs0_NtCsepw49DxxxIC_9criterion11measurementNtB5_8WallTimeNtB5_11Measurement3end(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) %_13, i64 noundef %start.0, i32 noundef %start.1)
+  %_9.0 = extractvalue { i64, i32 } %15, 0
+  %_9.1 = extractvalue { i64, i32 } %15, 1
+  store i64 %_9.0, ptr %self, align 8
+  %16 = getelementptr inbounds nuw i8, ptr %self, i64 8
+  store i32 %_9.1, ptr %16, align 8
+; call <std::time::Instant>::elapsed
+  %17 = call { i64, i32 } @_RNvMNtCsljvfXcM3w8L_3std4timeNtB2_7Instant7elapsed(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(16) %time_start)
+  %_11.0 = extractvalue { i64, i32 } %17, 0
+  %_11.1 = extractvalue { i64, i32 } %17, 1
+  %18 = getelementptr inbounds nuw i8, ptr %self, i64 16
+  store i64 %_11.0, ptr %18, align 8
+  %19 = getelementptr inbounds nuw i8, ptr %self, i64 24
+  store i32 %_11.1, ptr %19, align 8
+  call void @llvm.lifetime.end.p0(ptr nonnull %time_start)
+  ret void
+
+bb15:                                             ; preds = %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations1_00B5_.exit, %bb15.lr.ph
+  %iter.sroa.0.04 = phi i64 [ 0, %bb15.lr.ph ], [ %_17, %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations1_00B5_.exit ]
+  call void @llvm.experimental.noalias.scope.decl(metadata !839)
+  call void @llvm.lifetime.start.p0(ptr nonnull %_5.i), !noalias !839
+  %_17.i = load ptr, ptr %9, align 8, !noalias !839, !nonnull !50, !noundef !50
+  %_16.i = load i64, ptr %10, align 8, !noalias !839, !noundef !50
+  %_22.i = load ptr, ptr %12, align 8, !noalias !839, !nonnull !50, !noundef !50
+  %_21.i = load i64, ptr %13, align 8, !noalias !839, !noundef !50
+  store ptr %_10.i, ptr %_5.i, align 8, !noalias !839
+  store ptr %_17.i, ptr %_6.sroa.4.0._5.sroa_idx.i, align 8, !noalias !839
+  store i64 %_16.i, ptr %_6.sroa.5.0._5.sroa_idx.i, align 8, !noalias !839
+  store ptr %_22.i, ptr %_6.sroa.6.0._5.sroa_idx.i, align 8, !noalias !839
+  store i64 %_21.i, ptr %_6.sroa.7.0._5.sroa_idx.i, align 8, !noalias !839
+  call void asm sideeffect "", "r,~{memory}"(ptr nonnull %_5.i) #14, !noalias !839, !srcloc !58
+  %map.i = load ptr, ptr %_5.i, align 8, !noalias !839, !nonnull !50, !align !56, !noundef !50
+  %input.0.i = load ptr, ptr %_6.sroa.4.0._5.sroa_idx.i, align 8, !noalias !839, !nonnull !50, !align !56, !noundef !50
+  %input.1.i = load i64, ptr %_6.sroa.5.0._5.sroa_idx.i, align 8, !noalias !839, !noundef !50
+  %output.0.i = load ptr, ptr %_6.sroa.6.0._5.sroa_idx.i, align 8, !noalias !839, !nonnull !50, !align !56, !noundef !50
+  %output.1.i = load i64, ptr %_6.sroa.7.0._5.sroa_idx.i, align 8, !noalias !839, !noundef !50
+  call void @llvm.lifetime.end.p0(ptr nonnull %_5.i), !noalias !839
+; call spatial::borrowed::caller_local_points::<spatial::World, spatial::World, spatial_typestate::units::Meters>
+  %_8.i = call noundef i8 @_RINvNtCsjsvrWVj1VHl_7spatial8borrowed19caller_local_pointsNtB4_5WorldBU_NtNtCscxpytxKd7jb_17spatial_typestate5units6MetersEB4_(ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) dereferenceable(128) %map.i, ptr noalias nofree noundef nonnull readonly align 8 captures(address, read_provenance) %input.0.i, i64 noundef %input.1.i, ptr noalias nofree noundef nonnull align 8 %output.0.i, i64 noundef %output.1.i), !noalias !839
+  %.not.i.i = icmp eq i8 %_8.i, -1
+  br i1 %.not.i.i, label %_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations1_00B5_.exit, label %bb2.i.i, !prof !801
+
+bb2.i.i:                                          ; preds = %bb15
+  call void @llvm.lifetime.start.p0(ptr nonnull %e.i.i), !noalias !842
+  store i8 %_8.i, ptr %e.i.i, align 1, !noalias !842
+; call core::result::unwrap_failed
+  call void @_RNvNtCs9rw95XCWuke_4core6result13unwrap_failed(ptr noalias nofree noundef nonnull readonly captures(address, read_provenance) @alloc_00ae4b301f7fab8ac9617c03fcbd7274, i64 noundef 43, ptr noundef nonnull %e.i.i, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(32) @vtable.0, ptr noalias nofree noundef readonly align 8 captures(address, read_provenance) dereferenceable(24) @alloc_79f0acbd800c2d2429a66e39f584fabe) #13, !noalias !839
+  unreachable
+
+_RNCNCNvCsjsvrWVj1VHl_7spatial12amortizations1_00B5_.exit: ; preds = %bb15
+  %_17 = add nuw i64 %iter.sroa.0.04, 1
+  call void @llvm.lifetime.start.p0(ptr nonnull %_9.i), !noalias !839
+  store ptr %output.0.i, ptr %_9.i, align 8, !noalias !839
+  store i64 %output.1.i, ptr %14, align 8, !noalias !839
+  call void asm sideeffect "", "r,~{memory}"(ptr nonnull %_9.i) #14, !noalias !839, !srcloc !58
+  call void @llvm.lifetime.end.p0(ptr nonnull %_9.i), !noalias !839
+  %exitcond.not = icmp eq i64 %_17, %iter1
+  br i1 %exitcond.not, label %bb16, label %bb15
+}

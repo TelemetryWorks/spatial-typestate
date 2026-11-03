@@ -1,0 +1,62 @@
+[
+  {
+    "profile": "lto-std",
+    "command": [
+      "cargo",
+      "+1.99.0-x86_64-pc-windows-msvc",
+      "rustc",
+      "--locked",
+      "--profile",
+      "bench",
+      "--bench",
+      "spatial",
+      "--jobs",
+      "2",
+      "--",
+      "--emit=asm,llvm-ir"
+    ],
+    "overrides": {}
+  },
+  {
+    "profile": "lto-no-std",
+    "command": [
+      "cargo",
+      "+1.99.0-x86_64-pc-windows-msvc",
+      "rustc",
+      "--locked",
+      "--profile",
+      "bench",
+      "--bench",
+      "spatial",
+      "--jobs",
+      "2",
+      "--no-default-features",
+      "--features",
+      "no_std",
+      "--",
+      "--emit=asm,llvm-ir"
+    ],
+    "overrides": {}
+  },
+  {
+    "profile": "nolto-std",
+    "command": [
+      "cargo",
+      "+1.99.0-x86_64-pc-windows-msvc",
+      "rustc",
+      "--locked",
+      "--profile",
+      "bench",
+      "--bench",
+      "spatial",
+      "--jobs",
+      "2",
+      "--",
+      "--emit=asm,llvm-ir"
+    ],
+    "overrides": {
+      "CARGO_PROFILE_BENCH_LTO": "false",
+      "CARGO_PROFILE_BENCH_CODEGEN_UNITS": "16"
+    }
+  }
+]

@@ -1,5 +1,7 @@
 //! Runtime-input benchmarks; the executable uses std even for the no-std library.
 #![deny(unsafe_code)]
+#[path = "support/borrowed.rs"]
+mod borrowed;
 #[path = "support/experiments.rs"]
 mod experiments;
 
@@ -499,5 +501,222 @@ fn controls(c: &mut Criterion) {
     }
     group.finish();
 }
-criterion_group! {name=benches;config=configuration();targets=operations,conversions,point_candidates,quaternions,workflows,preparation,controls}
+
+fn amortization(c: &mut Criterion) {
+    let data = cases("valid");
+    let ordinary = data[0].map;
+    let mut group = c.benchmark_group("amortization");
+    let reverse = std::env::var_os("SPATIAL_BENCH_REVERSE").is_some();
+    for (kind, n) in [
+        ("valid", 1_usize),
+        ("valid", 8),
+        ("valid", 64),
+        ("valid", 1024),
+        ("subnormal", 64),
+        ("mixed_nan", 64),
+        ("overflow", 64),
+    ] {
+        let mut map = ordinary;
+        if kind == "subnormal" {
+            map.matrix = [
+                [0.5, f64::from_bits(1), 0.0, 0.0],
+                [0.0, 0.5, 0.0, 0.0],
+                [0.0, 0.0, 0.5, 0.0],
+                [0.0, 0.0, 0.0, 1.0],
+            ];
+        }
+        if kind == "overflow" {
+            for row in map.matrix.iter_mut().take(3) {
+                row[3] = f64::MAX;
+            }
+        }
+        let mut state = 0x8e45_a4b7_32cd_9f01_u64;
+        let points: Vec<_> = (0..n)
+            .map(|i| {
+                let base = data[i % COUNT].point;
+                state = state
+                    .wrapping_mul(6_364_136_223_846_793_005)
+                    .wrapping_add(1);
+                match kind {
+                    "subnormal" => {
+                        Point3::new(f64::from_bits(1), -f64::from_bits(1), f64::from_bits(3))
+                    }
+                    "mixed_nan" if state >> 61 == 0 => Point3::new(f64::NAN, base.y, base.z),
+                    "overflow" => Point3::new(f64::MAX, f64::MAX, f64::MAX),
+                    _ => base,
+                }
+            })
+            .collect();
+        let prepared = borrowed::BorrowedPoint::prepare(&map).unwrap();
+        let mut outputs = vec![Err(spatial_typestate::SpatialError::NonFinite); n];
+        group.throughput(Throughput::Elements(n as u64));
+        let order = if reverse {
+            [4, 3, 2, 1, 0]
+        } else {
+            [0, 1, 2, 3, 4]
+        };
+        for variant in order {
+            let prefix = format!("point_{kind}_n{n}");
+            match variant {
+                0 => {
+                    group.bench_function(format!("{prefix}/public"), |b| {
+                        b.iter(|| {
+                            let (map, input, output) =
+                                black_box((&map, &points[..], &mut outputs[..]));
+                            assert_eq!(input.len(), output.len());
+                            for (out, p) in output.iter_mut().zip(input) {
+                                *out = map.apply_point(*p);
+                            }
+                            black_box(output);
+                        })
+                    });
+                }
+                1 => {
+                    group.bench_function(format!("{prefix}/full_local"), |b| {
+                        b.iter(|| {
+                            let (map, input, output) =
+                                black_box((&map, &points[..], &mut outputs[..]));
+                            assert_eq!(input.len(), output.len());
+                            for (out, p) in output.iter_mut().zip(input) {
+                                *out = experiments::point_local(map, *p);
+                            }
+                            black_box(output);
+                        })
+                    });
+                }
+                2 => {
+                    group.bench_function(format!("{prefix}/caller_hoisted"), |b| {
+                        b.iter(|| {
+                            let (map, input, output) =
+                                black_box((&map, &points[..], &mut outputs[..]));
+                            borrowed::caller_local_points(map, input, output).unwrap();
+                            black_box(output);
+                        })
+                    });
+                }
+                3 => {
+                    group.bench_function(format!("{prefix}/prepare_each_batch"), |b| {
+                        b.iter(|| {
+                            let (map, input, output) =
+                                black_box((&map, &points[..], &mut outputs[..]));
+                            assert_eq!(input.len(), output.len());
+                            let prepared = borrowed::BorrowedPoint::prepare(map).unwrap();
+                            for (out, p) in output.iter_mut().zip(input) {
+                                *out = prepared.apply_point(*p);
+                            }
+                            black_box(output);
+                        })
+                    });
+                }
+                _ => {
+                    group.bench_function(format!("{prefix}/borrowed_reuse"), |b| {
+                        b.iter(|| {
+                            let (map, input, output) =
+                                black_box((&prepared, &points[..], &mut outputs[..]));
+                            assert_eq!(input.len(), output.len());
+                            for (out, p) in output.iter_mut().zip(input) {
+                                *out = map.apply_point(*p);
+                            }
+                            black_box(output);
+                        })
+                    });
+                }
+            }
+        }
+    }
+    for kind in ["valid", "ignored_translation"] {
+        let mut map = ordinary;
+        if kind == "ignored_translation" {
+            map.matrix[0][3] = f64::NAN;
+            map.matrix[1][3] = f64::INFINITY;
+            map.matrix[3] = [f64::NAN; 4];
+        }
+        let vectors: Vec<_> = data
+            .iter()
+            .map(|v| Vector3::<World, Dimensionless>::new(v.point.x, v.point.y, v.point.z))
+            .collect();
+        let prepared = borrowed::BorrowedVector::prepare(&map).unwrap();
+        let mut outputs = vec![Err(spatial_typestate::SpatialError::NonFinite); COUNT];
+        group.throughput(Throughput::Elements(COUNT as u64));
+        let order = if reverse { [3, 2, 1, 0] } else { [0, 1, 2, 3] };
+        for variant in order {
+            match variant {
+                0 => {
+                    group.bench_function(format!("vector_{kind}_n64/public"), |b| {
+                        b.iter(|| {
+                            let (map, input, output) =
+                                black_box((&map, &vectors[..], &mut outputs[..]));
+                            assert_eq!(input.len(), output.len());
+                            for (out, v) in output.iter_mut().zip(input) {
+                                *out = map.apply_vector(*v);
+                            }
+                            black_box(output);
+                        })
+                    });
+                }
+                1 => {
+                    group.bench_function(format!("vector_{kind}_n64/caller_hoisted"), |b| {
+                        b.iter(|| {
+                            let (map, input, output) =
+                                black_box((&map, &vectors[..], &mut outputs[..]));
+                            borrowed::caller_local_vectors(map, input, output).unwrap();
+                            black_box(output);
+                        })
+                    });
+                }
+                2 => {
+                    group.bench_function(format!("vector_{kind}_n64/prepare_each_batch"), |b| {
+                        b.iter(|| {
+                            let (map, input, output) =
+                                black_box((&map, &vectors[..], &mut outputs[..]));
+                            assert_eq!(input.len(), output.len());
+                            let prepared = borrowed::BorrowedVector::prepare(map).unwrap();
+                            for (out, v) in output.iter_mut().zip(input) {
+                                *out = prepared.apply_vector(*v);
+                            }
+                            black_box(output);
+                        })
+                    });
+                }
+                _ => {
+                    group.bench_function(format!("vector_{kind}_n64/borrowed_reuse"), |b| {
+                        b.iter(|| {
+                            let (map, input, output) =
+                                black_box((&prepared, &vectors[..], &mut outputs[..]));
+                            assert_eq!(input.len(), output.len());
+                            for (out, v) in output.iter_mut().zip(input) {
+                                *out = map.apply_vector(*v);
+                            }
+                            black_box(output);
+                        })
+                    });
+                }
+            }
+        }
+    }
+    group.finish();
+    let mut group = c.benchmark_group("amortization_setup");
+    group.bench_function("point_valid", |b| {
+        b.iter(|| black_box(borrowed::BorrowedPoint::prepare(black_box(&ordinary))))
+    });
+    group.bench_function("vector_valid", |b| {
+        b.iter(|| black_box(borrowed::BorrowedVector::prepare(black_box(&ordinary))))
+    });
+    let mut bad_translation = ordinary;
+    bad_translation.matrix[0][3] = f64::NAN;
+    group.bench_function("point_bad_translation", |b| {
+        b.iter(|| {
+            black_box(borrowed::BorrowedPoint::prepare(black_box(
+                &bad_translation,
+            )))
+        })
+    });
+    let mut bad_linear = ordinary;
+    bad_linear.matrix[2][2] = f64::NAN;
+    group.bench_function("vector_bad_linear", |b| {
+        b.iter(|| black_box(borrowed::BorrowedVector::prepare(black_box(&bad_linear))))
+    });
+    group.finish();
+}
+criterion_group! {name=benches;config=configuration();targets=operations,conversions,point_candidates,quaternions,workflows,preparation,controls,amortization}
 criterion_main!(benches);

@@ -4,6 +4,9 @@
 
 ### Changed
 
+- Corrected current-API README installation to a validated source commit;
+  repository 0.0.2 is not available on crates.io at the recorded check date.
+
 - **Breaking:** Point3<F,L:LengthUnit>, Transform<From,To,L:LengthUnit>, and
   Vector3<F,U:Unit> require explicit unit parameters, without defaults. Choose
   actual units for former raw values. Translation/point/composition lengths
@@ -34,6 +37,13 @@
   equality remains component equality, not q/-q rotation equivalence.
 
 ### Added
+
+- Executable synthetic 100 Hz Python sensor-aircraft-world lab analysis and
+  installed-wheel tests: explicit feet/meters, runtime frame identities,
+  independent all-sample oracle, read-only export and actionable atomic errors.
+- Release/versioning policy with verified registry baseline, independent Rust/
+  Python versions, migration classification and future artifact provenance/
+  publication gates. No version, tag, upload or additional platform support.
 
 - Separate unreleased CPython batch package under python/, with isolated PyO3
   dependencies/lockfile and maturin build tooling. Frozen runtime frame identities,

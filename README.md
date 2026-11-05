@@ -120,10 +120,12 @@ for the conservative algorithm, raw escape hatches and deliberately excluded sco
 ## Features, development, and verification
 
 The only runtime features are `std` (default) and `no_std` (a marker).
-Disable defaults to select the no-std implementation:
+Current guide APIs are source-only: crates.io currently has legacy 0.0.1, not
+this checkout's 0.0.2 (checked 2026-11-04). Use a reviewed source revision; this
+validated full commit contains the current core API. Disable defaults for no-std:
 
 ```toml
-spatial-typestate = { version = "0.0.2", default-features = false, features = ["no_std"] }
+spatial-typestate = { git = "https://github.com/TelemetryWorks/spatial-typestate.git", rev = "1b80c3d7aa930538eb29ce0107a6e5ec2523ea86", default-features = false, features = ["no_std"] }
 ```
 
 Enabling no_std alongside defaults does not disable std. All runtime feature
@@ -178,3 +180,8 @@ object per row. Python frame/unit errors are runtime checks, not Rust compile-ti
 proofs. Import/export copy, the binding requires std/CPython, and custom Rust unit
 markers are not exposed. The core remains dependency-free/no_std-capable.
 No PyPI publication or native performance parity is implied.
+
+The [synthetic Python lab walkthrough](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/python_lab_workflow.md)
+uses the installed wheel for a 100 Hz sensor-aircraft-world batch analysis.
+The [release/versioning policy](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/RELEASING.md)
+defines compatibility and future publication gates; no new release is implied.

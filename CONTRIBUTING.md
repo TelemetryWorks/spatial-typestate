@@ -103,3 +103,9 @@ tools. It tests without optional NumPy first, then with NumPy; Linux 3.11 also
 rebuilds/installs the source distribution using the preinstalled build backend.
 No upload/release job or new external service is introduced. Review all returned
 PR checks, including external status contexts, before merge. Timing is not a gate.
+
+The [synthetic lab walkthrough](docs/python_lab_workflow.md) runs outside the
+checkout against the installed wheel; python/tests/test_lab_workflow.py is picked
+up by the existing wheel and source-install CI test discovery. CSV decoding is
+setup, not a Python per-row numeric loop. Before any assigned publication, follow
+[versioning and release gates](docs/RELEASING.md); they do not authorize publishing.

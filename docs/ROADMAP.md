@@ -16,7 +16,11 @@ These are proposals, not implemented guarantees or promises of a release date.
   custom units, broader platforms/free-threaded Python and public wheel publication
   are not yet supported. Preserve explicit runtime checks, copies and lost-guarantee
   documentation. [Host observations](python/2026-11-03/README.md) are not native parity.
-- Define release/versioning and compatibility policy before the next published release.
+- Satisfy [release-policy gates](RELEASING.md) before any separately authorized
+  publication: embedded Python core provenance, artifact versions/signoff and
+  explicit Linux wheel baseline/clean-platform validation remain future work.
+- Ground further lab workflows in real licensed data/calibration when available;
+  the [current lab walkthrough](python_lab_workflow.md) is synthetic offline telemetry.
 
 Current behavior is specified in [requirements](requirements/requirements.md).
 Completed work belongs in the [changelog](../CHANGELOG.md), not a stale checklist here.

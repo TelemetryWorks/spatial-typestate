@@ -17,6 +17,8 @@ concurrency:
 env:
   CARGO_BUILD_JOBS: 2
   RUSTUP_TOOLCHAIN: '1.99.0'
+  SPATIAL_EXPECT_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+  SPATIAL_DENY_WARNINGS: '1'
 
 jobs:
   wheel:
@@ -33,13 +35,15 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ matrix.python }}
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master, verified
         with:
           toolchain: '1.99.0'
-          components: rustfmt, clippy
+          components: rustfmt, clippy, rust-docs
       - name: Install hash-locked build tool
         run: |
           python -m pip install --require-hashes --only-binary=:all: -r python/requirements-build.txt
@@ -48,12 +52,13 @@ jobs:
           cargo +1.99.0 fmt --manifest-path python/native/Cargo.toml -- --check
           cargo +1.99.0 clippy --manifest-path python/native/Cargo.toml --locked --all-targets --jobs 2 -- -D warnings
           cargo +1.99.0 test --manifest-path python/native/Cargo.toml --locked --jobs 2 -- --test-threads=2
-      - name: Build release wheel and source distribution
+      - name: Packaging control and negative tests
         run: |
-          python -m maturin build --manifest-path python/native/Cargo.toml --release --locked --jobs 2 --interpreter python --out dist
-          python -m maturin sdist --manifest-path python/native/Cargo.toml --out dist
+          python -I -m unittest discover -s python/packaging_tests -v
+      - name: Build readiness wheel and source distribution
+        run: python python/package_ci.py build --python ${{ matrix.python }} --out target/package-artifacts
       - name: Install wheel without runtime dependencies
-        run: python -c "import glob,subprocess,sys; subprocess.run([sys.executable,'-m','pip','install','--no-deps',*glob.glob('dist/*.whl')],check=True)"
+        run: python -c "import glob,subprocess,sys; subprocess.run([sys.executable,'-m','pip','install','--no-deps',*glob.glob('target/package-artifacts/*.whl')],check=True)"
       - name: Test installed wheel, not source checkout
         run: python -I -m unittest discover -s python/tests -v
       - name: Optional NumPy interop test environment
@@ -63,5 +68,18 @@ jobs:
       - name: Build and test source distribution (Linux 3.11)
         if: matrix.os == 'ubuntu-latest' && matrix.python == '3.11'
         run: |
-          python -c "import glob,subprocess,sys; subprocess.run([sys.executable,'-m','pip','install','--force-reinstall','--no-deps','--no-build-isolation','--config-settings=build-args=--locked',*glob.glob('dist/*.tar.gz')],check=True)"
+          python python/package_ci.py build --python 3.11 --from-sdist --out target/package-artifacts
+          python -c "import glob,subprocess,sys; subprocess.run([sys.executable,'-m','pip','install','--force-reinstall','--no-deps',*glob.glob('target/package-artifacts/from-sdist/*.whl')],check=True)"
+          python python/check_package_metadata.py target/package-artifacts
           python -I -m unittest discover -s python/tests -v
+      - name: Fresh glibc 2.28 floor and glibc 2.36 runtime containers
+        if: runner.os == 'Linux'
+        run: python python/package_ci.py runtime --python ${{ matrix.python }} --out target/package-artifacts
+      - name: Retain candidates and inventories (failed jobs are diagnostics only)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified upstream ref
+        with:
+          name: packages-${{ matrix.os }}-${{ matrix.python }}-attempt${{ github.run_attempt }}
+          path: target/package-artifacts/
+          if-no-files-found: warn
+          retention-days: 14

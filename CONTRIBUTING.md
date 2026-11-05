@@ -109,3 +109,35 @@ checkout against the installed wheel; python/tests/test_lab_workflow.py is picke
 up by the existing wheel and source-install CI test discovery. CSV decoding is
 setup, not a Python per-row numeric loop. Before any assigned publication, follow
 [versioning and release gates](docs/RELEASING.md); they do not authorize publishing.
+
+## Readiness artifacts (no publication)
+
+Use pip wheel with the in-tree backend in the Python guide, not direct maturin,
+for provenance-bearing artifacts. Build-only control/negative tests:
+
+```powershell
+$env:RUSTUP_TOOLCHAIN = '1.99.0-x86_64-pc-windows-msvc'
+$env:CARGO_BUILD_JOBS = '2'
+python -I -m unittest discover -s python/packaging_tests -v
+python python/verify_artifacts.py target/python-wheels
+```
+
+SPATIAL_EXPECT_COMMIT in readiness CI requires exact clean checked-out source;
+never set it to bless a dirty build. The private backend stages inputs outside
+Git, preserves checkout -Dwarnings alongside path remaps, disables implicit Rust
+installation and rejects stale/tampered sdist contents. Extracted source archives
+omit repository dev pin/config; source builds record the actual selected compiler.
+Compiler notices require rust-docs; missing notices are explicitly unready.
+
+Python CI uses digest-pinned manylinux_2_28 build/floor and newer Bookworm runtime
+containers, Windows native builds, prepared/rebuilt metadata and complete RECORD
+checks, a real too-new-glibc ELF negative, binary path scans and third-party license
+inventory gates. Uploaded artifacts/hash inventories are dry-run evidence, not
+published releases. Core CI, warnings, pin/MSRV and normal dependency policy stay
+unchanged. See [design/limits](docs/package_readiness.md). No local Docker or
+system/target install is inferred from those CI commands.
+
+Artifact CI checks out the PR head for exact source identity; core CI still tests
+the merge ref. Keep the branch current with main before merge and rerun gates on
+any new merge commit. Linux candidates are each tested on both 3.11 and 3.14;
+Windows matrix jobs build separate candidates. No upload selects a release.

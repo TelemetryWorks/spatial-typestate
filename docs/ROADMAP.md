@@ -17,8 +17,10 @@ These are proposals, not implemented guarantees or promises of a release date.
   are not yet supported. Preserve explicit runtime checks, copies and lost-guarantee
   documentation. [Host observations](python/2026-11-03/README.md) are not native parity.
 - Satisfy [release-policy gates](RELEASING.md) before any separately authorized
-  publication: embedded Python core provenance, artifact versions/signoff and
-  explicit Linux wheel baseline/clean-platform validation remain future work.
+  publication: exact artifact versions/signoff and registry/ownership rechecks
+  remain future work. [Readiness tooling](package_readiness.md) now implements
+  embedded source/build provenance and narrow Linux baseline/container gates;
+  these are not publication approval or universal-platform guarantees.
 - Ground further lab workflows in real licensed data/calibration when available;
   the [current lab walkthrough](python_lab_workflow.md) is synthetic offline telemetry.
 

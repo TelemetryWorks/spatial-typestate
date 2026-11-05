@@ -185,3 +185,8 @@ The [synthetic Python lab walkthrough](https://github.com/TelemetryWorks/spatial
 uses the installed wheel for a 100 Hz sensor-aircraft-world batch analysis.
 The [release/versioning policy](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/RELEASING.md)
 defines compatibility and future publication gates; no new release is implied.
+
+[Package readiness](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/package_readiness.md)
+adds inspectable source/build records and license checks to backend-produced
+Python artifacts. Linux wheels target glibc >= 2.28 x86_64 with narrow container
+checks; this is not universal Linux support or publication approval.

@@ -51,8 +51,8 @@ These are runtime adapter contracts, not extensions of Rust compile-time proofs.
 | PY-004 | First view copies once into immutable cached bytes (plus zero fill); later flat views share bytes, survive batch deletion and cannot mutate the Vec. Viewed batches retain two payloads. | cached-base/lifetime/concurrent tests, [safe exporter](../../python/native/src/lib.rs), structural review and [RSS evidence](../python/2026-11-03/README.md). |
 | PY-005 | Core remains normal-dependency-free/no_std; binding std/CPython, allocations/copies, closed-unit/runtime checks and platform limits are explicit. No native parity/zero-copy/certification claim. | separate manifests/locks, root graph gates, [guide](../PYTHON-GUIDE.md), [Python CI](../../.github/workflows/python.yml); compile/runtime results reported separately. |
 | PY-006 | The repository lab example uses explicitly synthetic 100 Hz feet telemetry, shared runtime frame identities, explicit meter conversion and Rust batch mapping/inverse/vector operations. Independent oracle checks bounded coordinates; failures are actionable/all-or-nothing. | [Example](../../python/examples/lab_workflow.py), [all-sample oracle/outside-checkout CLI/error tests](../../python/tests/test_lab_workflow.py), [walkthrough and limits](../python_lab_workflow.md). |
+| PY-007 | Backend artifacts embed separate frozen source identity and actual wheel build record, reject altered vendored inputs and inspect metadata/licenses/RECORD/path/ELF constraints. Readiness is not signed attestation or publication approval. | [Backend control/negative tests](../../python/packaging_tests/test_backend.py), [installed resource](../../python/tests/test_provenance.py), [artifact verifier](../../python/verify_artifacts.py), [metadata parity](../../python/check_package_metadata.py), [CI](../../.github/workflows/python.yml) and [scope/limits](../package_readiness.md). |
 
 
-Release compatibility/provenance requirements are future publication gates in
-[release policy](../RELEASING.md), not implemented artifact guarantees or a
-registry publication claim.
+Release compatibility/provenance requirements remain exact-artifact publication gates in
+[release policy](../RELEASING.md), not a registry publication or signed-attestation claim.

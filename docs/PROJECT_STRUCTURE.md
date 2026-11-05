@@ -45,3 +45,10 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for commands and actual CI scope.
 - [python_lab_workflow.md](python_lab_workflow.md): scenario, oracle and copy/error limits.
 - [RELEASING.md](RELEASING.md): independent versioning, observed registry baseline
   and future release signoff/provenance gates, not publishing automation.
+
+- python/build_backend.py: private stdlib PEP 517 staging/provenance wrapper;
+  licenses/: exact locked dependency license/notice inventory.
+- python/verify_artifacts.py, check_package_metadata.py and package_ci.py:
+  artifact/ELF/metadata gates and CI-only pinned-container orchestration.
+- python/packaging_tests/: negative/control tests separate from wheel runtime tests.
+- [package_readiness.md](package_readiness.md): record schema, baseline and limits.

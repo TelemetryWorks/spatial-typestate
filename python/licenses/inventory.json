@@ -146,8 +146,9 @@
   {
     "checksum": "adb6935a6f5c20170eeceb1a3835a49e12e19d792f6dd344ccc76a985ca5a6ca",
     "files": {
-      "LICENSE": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+      "LICENSE": "a6c48161a09acc75a0e25503bab66a731eb5fba5392ed4bb4743e4ba5085327a"
     },
+    "format_adjustment": "Removed one redundant terminal blank line; license text unchanged.",
     "license": "Apache-2.0 WITH LLVM-exception",
     "name": "target-lexicon",
     "scope": "build-only",

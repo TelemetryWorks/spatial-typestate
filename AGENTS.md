@@ -206,5 +206,9 @@ prebuild and coordinate a quiet window. Do not edit historical study evidence.
 The executable synthetic Python lab example is python/examples/lab_workflow.py;
 its installed-wheel tests verify analytic outputs and actionable errors. See
 [walkthrough](docs/python_lab_workflow.md) and [release policy](docs/RELEASING.md).
-The policy is future procedure: no publication/version/tag authorization, embedded
-core provenance or broader wheel compatibility is implied.
+The policy does not authorize publication/version/tag changes. The private PEP517
+backend embeds validated source/build provenance; direct maturin CLI bypasses
+that gate. See [package readiness](docs/package_readiness.md) before packaging.
+Preserve LF source identity, frozen sdist validation, license/metadata/RECORD
+parity, binary path scans and narrow manylinux_2_28 x86_64 container evidence.
+Never use a dirty/unknown development record as release signoff.

@@ -45,10 +45,12 @@ hidden by an unchanged adapter need not be a Python break. Python-only additions
 do not require republishing the Rust crate. Never replace artifacts under an
 existing version, including wheels rebuilt from a different core commit.
 
-Current wheels have distribution version metadata but **no public embedded core
-commit/build-info API**. A path dependency/version alone does not identify an
-unpublished core revision. The following is a mandatory future release gate,
-not a claim about metadata already shipped:
+Backend-produced wheels now include an importlib.resources-readable
+_provenance.json source/build record and compiler notices (see
+[package readiness](package_readiness.md)). Legacy/direct-maturin wheels lack
+this gate. There is no new native build-info API. A path dependency/version alone
+still does not identify an unpublished core revision. The following remains a
+mandatory exact-artifact release gate, not publication authorization:
 
 1. Record the full reviewed repository commit, Rust manifest version, Python
    distribution/native versions, both lockfile hashes and compiler/build-tool
@@ -113,10 +115,12 @@ versions than intended (for example ~=0.1 versus ~=0.1.0).
 | Python metadata | >=3.11,<3.15 and abi3-py311 allow 3.12/3.13, neither 3.12 nor 3.13 is in the CI matrix. abi3 does not validate every interpreter/platform or provide Rust ABI compatibility. |
 | Not claimed | macOS/other architectures, PyPy, free-threaded CPython, published wheels, Python no_std or certified behavior. |
 
-The CI Linux wheel is evidence of import on its runner, not a manylinux-baseline
-or broad Linux-distribution promise. A publication task must explicitly choose
-wheel tags/glibc baseline, test compatible clean environments and align docs with
-actual artifacts before upload. Do not expand support by changing metadata alone.
+Linux readiness wheels now target manylinux_2_28_x86_64, knowingly excluding
+glibc 2.17-2.27 and musl. CI checks actual ELF requirements and the same wheel in
+fresh pinned manylinux floor (glibc 2.28) and Bookworm (2.36) containers. These
+are narrow host/container checks, not universal Linux/kernel compatibility.
+Windows remains x86_64. Publication must still approve the exact tested artifacts
+and align claims with retained evidence; metadata alone does not expand support.
 
 ## Future release checklist and signoff
 
@@ -152,5 +156,5 @@ actual artifacts before upload. Do not expand support by changing metadata alone
    version. No automatic rollback, deletion or publishing credentials are set up.
 
 Publication is still blocked on a separately assigned release task, the provenance
-resource gate and explicit wheel baseline/artifact decisions. Adopting this policy
-does not implement those gates or promise a first publication date.
+verification and exact artifact decisions. Readiness tooling does not constitute
+artifact approval or promise a first publication date.

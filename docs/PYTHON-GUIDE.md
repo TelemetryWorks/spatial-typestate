@@ -11,6 +11,8 @@ only in `python/native`, with their own lockfile. The binding uses std.
 Use GIL-enabled CPython 3.11-3.14 and an installed Rust toolchain. The wheel uses
 CPython's 3.11 stable ABI; that does not promise PyPy/free-threaded support.
 Linux/Windows x86_64 package jobs test 3.11 and 3.14; local development uses 3.12.
+Linux readiness wheels target manylinux_2_28 (glibc >= 2.28); older glibc, musl
+and other architectures are outside this wheel baseline.
 Other platforms/source builds need their own validation. No platform wheels are
 published by this task. Rust core pin/MSRV are unchanged.
 
@@ -20,7 +22,7 @@ $env:PATH = (Resolve-Path target/python-venv/Scripts).Path + [IO.Path]::PathSepa
 $env:RUSTUP_TOOLCHAIN = '1.99.0-x86_64-pc-windows-msvc'
 $env:CARGO_BUILD_JOBS = '2'
 python -m pip install --require-hashes --only-binary=:all: -r python/requirements-build.txt
-python -m maturin build --manifest-path python/native/Cargo.toml --release --locked --jobs 2 --out target/python-wheels
+python -m pip wheel --no-deps --no-build-isolation --wheel-dir target/python-wheels ./python
 python -m pip install --no-deps target/python-wheels/spatial_typestate-0.1.0-cp311-abi3-win_amd64.whl
 python -I -m unittest discover -s python/tests -v
 ```
@@ -30,7 +32,7 @@ cover x86_64 Windows/Linux; other platforms require reviewed hashes/tooling.
 The optional `python/requirements-interop.txt` installs test-only NumPy in this
 venv; it is not a runtime requirement. Tests run against the installed wheel,
 not `python/src`. The source distribution vendors the core path dependency;
-CI also builds/installs it on Linux and runs the same tests. This uses
+CI also rebuilds/installs it on Linux and runs the same tests. This uses
 --no-build-isolation and the already hash-locked maturin; ordinary isolated builds
 resolve the exact maturin==1.16.0 requirement in pyproject.toml (without the CI
 hash file unless the caller supplies it). Native parity tests:
@@ -187,3 +189,48 @@ they are not a CI timing gate.
 For a longer runnable offline analysis, use the [synthetic 100 Hz lab workflow](python_lab_workflow.md).
 See [release/compatibility policy](RELEASING.md) for current registry facts,
 independent core/Python versions and future provenance/publication gates.
+
+## Inspect build provenance (no publication)
+
+Use the private PEP 517 backend through pip, not direct maturin CLI, for verified
+artifacts. It delegates to pinned maturin, preserves checked math and injects a
+package resource after compilation. Direct maturin output lacks this gate.
+Editable installs are explicitly rejected; use an installed development wheel.
+After source edits, rerun pip wheel and install the newly emitted filename with
+python -m pip install --force-reinstall --no-deps path/to/wheel.whl. This rebuild
+interface change does not change the Python numeric API or Rust core contracts.
+Each build uses fresh staged source paths and can recompile dependencies despite
+an existing target cache; it is slower than an editable development loop.
+Unaccounted external Rust flags/profile/target overrides are rejected.
+
+```python
+import importlib.resources
+import json
+record = json.loads(importlib.resources.files("spatial_typestate").joinpath(
+    "_provenance.json").read_text(encoding="utf-8"))
+assert record["artifact_kind"] == "wheel"
+assert record["build"]["locked"]
+```
+
+source records the actual normalized input inventory, versions, lock hashes and
+Git base/state (clean/dirty/unknown). A dirty base commit does not identify all
+built bytes. source_origin distinguishes checkout from validated sdist. build
+records the actual compiler/target, separate wrapper/maturin versions, configuration,
+wheel tags and compiler-notice hashes. Artifact hashes are external, never self-
+embedded. These unsigned records are descriptive, not trusted attestations.
+
+Sdist provenance is source-only. Rebuilds verify the frozen vendored input bytes
+before compilation and record their own compiler; no Git or registry core lookup
+is needed. The archive omits the development toolchain/config, so it does not
+implicitly select/install the pin. Choose an installed compiler explicitly.
+Project and dependency license texts are static License-File entries; actual Rust
+compiler/std notices are wheel package resources, preserving sdist/wheel metadata
+parity. If compiler rust-docs notices are unavailable, a development record says
+so; readiness verification fails rather than silently treating it as complete.
+
+CI installs rust-docs for explicit 1.99, denies warnings, verifies source commit,
+licenses/RECORD/path leaks, audits real ELF requirements and tests the exact wheel
+bytes in fresh pinned glibc 2.28 floor and 2.36 Bookworm containers. The floor image
+has build tools and runs on the runner kernel; it is not a minimal host or old-
+kernel/device test. See [design/checks](package_readiness.md) and
+[release gates](RELEASING.md). No Python/crates registry publication is implied.

@@ -1,6 +1,7 @@
 [build-system]
 requires = ["maturin==1.16.0"]
-build-backend = "maturin"
+build-backend = "build_backend"
+backend-path = ["."]
 
 [project]
 name = "spatial-typestate"
@@ -8,7 +9,8 @@ version = "0.1.0"
 description = "Checked, frame-tagged spatial batches backed by Rust"
 requires-python = ">=3.11,<3.15"
 license = "Apache-2.0"
-readme = "README.md"
+readme = "PYTHON-README.md"
+license-files = ["LICENSE", "licenses/**/*"]
 dependencies = []
 
 [tool.maturin]
@@ -16,3 +18,9 @@ manifest-path = "native/Cargo.toml"
 python-source = "src"
 module-name = "spatial_typestate._native"
 features = ["pyo3/extension-module"]
+
+locked = true
+include = [{ path = "build_backend.py", format = "sdist" }, { path = "licenses/**/*", format = "sdist" }, { path = "PYTHON-README.md", format = "sdist" }]
+
+[tool.maturin.sbom]
+rust = false

@@ -4,6 +4,10 @@
 
 ### Changed
 
+- Python build interface now uses the private PEP 517 backend for readiness
+  records. Direct maturin CLI bypasses those gates; editable installs explicitly
+  reject with installed-development-wheel/rebuild guidance. Numeric APIs unchanged.
+
 - Corrected current-API README installation to a validated source commit;
   repository 0.0.2 is not available on crates.io at the recorded check date.
 
@@ -37,6 +41,14 @@
   equality remains component equality, not q/-q rotation equivalence.
 
 ### Added
+
+- Private stdlib PEP 517 backend for source-only sdist identity and wheel build
+  provenance/resources, frozen input verification, locked dependency notices,
+  compiler/std notices and full RECORD/package checks. Path-remapped binding
+  builds preserve checkout warning denial; no native/core API change.
+- Pinned manylinux_2_28 x86_64 build and glibc 2.28/2.36 container runtime gates,
+  ELF requirement/path negative tests and external dry-run artifact hash inventory.
+  No version, tag, registry upload or universal Linux compatibility claim.
 
 - Executable synthetic 100 Hz Python sensor-aircraft-world lab analysis and
   installed-wheel tests: explicit feet/meters, runtime frame identities,

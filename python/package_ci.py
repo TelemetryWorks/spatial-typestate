@@ -33,7 +33,8 @@ def build_local(out, from_sdist=False):
         old=Path.cwd()
         try:
             os.chdir(ROOT/"python")
-            build_backend.prepare_metadata_for_build_wheel(str(out/"prepared"))
+            config={"build-args":"--compatibility manylinux_2_28 --auditwheel check"} if sys.platform=="linux" else None
+            build_backend.prepare_metadata_for_build_wheel(str(out/"prepared"),config)
         finally:
             os.chdir(old)
     command = [sys.executable,"-m","pip","wheel","--no-deps","--no-build-isolation","--wheel-dir",destination,source]

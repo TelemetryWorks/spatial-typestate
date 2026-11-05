@@ -312,7 +312,7 @@ def settings(config_settings):
     parser.add_argument("--release", action="store_true")
     parser.add_argument("--locked", action="store_true")
     parser.add_argument("--jobs", choices=["2"], default="2")
-    parser.add_argument("--compatibility", choices=["manylinux_2_28", "off"])
+    parser.add_argument("--compatibility", choices=["manylinux_2_28", "off"], default="off")
     parser.add_argument("--auditwheel", choices=["check"])
     parsed = parser.parse_args(tokens)
     command = "--profile release --locked --jobs 2"
@@ -418,10 +418,15 @@ def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
     source, origin = source_record(project)
     core = layout(project)[1]
     output = str(Path(metadata_directory).resolve())
-    settings(config_settings)  # Validate knobs; write-dist-info has no wheel flags.
+    import shlex
+    tokens = shlex.split(settings(config_settings)["build-args"])
+    compatibility = tokens[tokens.index("--compatibility") + 1] if "--compatibility" in tokens else "off"
+    metadata_args = "--locked --compatibility " + compatibility
+    if "--auditwheel" in tokens:
+        metadata_args += " --auditwheel " + tokens[tokens.index("--auditwheel") + 1]
     with staging(project, source) as (_, root):
         with build_environment(core, root, origin):
-            return maturin.prepare_metadata_for_build_wheel(output, None)
+            return maturin.prepare_metadata_for_build_wheel(output, {"build-args": metadata_args})
 
 
 def get_requires_for_build_wheel(config_settings=None):

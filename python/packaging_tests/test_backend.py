@@ -14,9 +14,33 @@ PROJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT))
 import build_backend as b
 import verify_artifacts as v
+import check_package_metadata as m
 
 
 class BackendTests(unittest.TestCase):
+    def test_extra_wheel_metadata_rejected(self):
+        import zipfile
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);info=root/"prepared/fixture.dist-info";info.mkdir(parents=True)
+            (info/"METADATA").write_bytes(b"Name: fixture\n")
+            with zipfile.ZipFile(root/"fixture.whl","w") as z:
+                z.writestr("fixture.dist-info/METADATA",b"Name: fixture\n")
+                z.writestr("fixture.dist-info/EXTRA",b"unexpected")
+                z.writestr("spatial_typestate/_provenance.json",b"{}")
+            with self.assertRaisesRegex(ValueError,"file set mismatch"):m.verify_prepared(root)
+
+    def test_metadata_compatibility_forwarded_without_wheel_flags(self):
+        with tempfile.TemporaryDirectory() as d:
+            old=Path.cwd()
+            try:
+                os.chdir(PROJECT)
+                with patch("maturin.prepare_metadata_for_build_wheel",return_value="fixture.dist-info") as delegate:
+                    b.prepare_metadata_for_build_wheel(d,{"build-args":"--compatibility manylinux_2_28 --auditwheel check"})
+                    self.assertEqual(delegate.call_args.args[1],{"build-args":"--locked --compatibility manylinux_2_28 --auditwheel check"})
+                    self.assertIn("--compatibility off",b.settings(None)["build-args"])
+            finally:
+                os.chdir(old)
+
     def test_editable_rejection_actionable(self):
         with self.assertRaisesRegex(ValueError,"installed development wheel"):
             b.build_editable("unused")

@@ -23,6 +23,15 @@ def verify_prepared(directory):
             raise ValueError("prepared/wheel metadata mismatch: "+key)
     if prepared.get_payload()!=built.get_payload():
         raise ValueError("prepared/wheel README mismatch")
+    info=next((directory/"prepared").iterdir())
+    with zipfile.ZipFile(next(directory.glob("*.whl"))) as z:
+        prepared_files={info.name+"/"+p.relative_to(info).as_posix() for p in info.rglob("*") if p.is_file()}
+        wheel_files={name for name in z.namelist() if name.startswith(info.name+"/") and not name.endswith("/")} - {info.name+"/RECORD"}
+        if prepared_files!=wheel_files:
+            raise ValueError("prepared/wheel dist-info file set mismatch")
+        for path in info.rglob("*"):
+            if path.is_file() and z.read(info.name+"/"+path.relative_to(info).as_posix())!=path.read_bytes():
+                raise ValueError("prepared/wheel file mismatch: "+path.name)
     print("PASS prepared/build wheel metadata parity")
 
 

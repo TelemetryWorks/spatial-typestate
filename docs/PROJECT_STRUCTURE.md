@@ -39,3 +39,9 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for commands and actual CI scope.
 - .github/workflows/python.yml: wheel/source-build/import/runtime gates.
 - docs/PYTHON-GUIDE.md, python_design.md and python/2026-11-03/: contracts, losses
   and actual host measurement evidence. No public package release is implied.
+
+- python/examples/lab_workflow.py and data/synthetic_sensor_100hz.csv: explicit
+  synthetic telemetry batch analysis, tested through the installed wheel.
+- [python_lab_workflow.md](python_lab_workflow.md): scenario, oracle and copy/error limits.
+- [RELEASING.md](RELEASING.md): independent versioning, observed registry baseline
+  and future release signoff/provenance gates, not publishing automation.

@@ -202,3 +202,9 @@ scopes distinct. Raw nonrigid acceptance and per-value/result checks remain;
 prepare-time errors and a general batch contract require separate approval.
 For targeted repeats, use the runner's `--filter '^amortization' --analysis-threads 2`;
 prebuild and coordinate a quiet window. Do not edit historical study evidence.
+
+The executable synthetic Python lab example is python/examples/lab_workflow.py;
+its installed-wheel tests verify analytic outputs and actionable errors. See
+[walkthrough](docs/python_lab_workflow.md) and [release policy](docs/RELEASING.md).
+The policy is future procedure: no publication/version/tag authorization, embedded
+core provenance or broader wheel compatibility is implied.

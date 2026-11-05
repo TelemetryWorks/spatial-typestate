@@ -183,3 +183,7 @@ See [the reviewed design](python_design.md), [math limits](math_conventions.md),
 [units](units.md) and [requirements/evidence](requirements/requirements.md).
 [Measurements and their limits](python/2026-11-03/README.md) are recorded separately;
 they are not a CI timing gate.
+
+For a longer runnable offline analysis, use the [synthetic 100 Hz lab workflow](python_lab_workflow.md).
+See [release/compatibility policy](RELEASING.md) for current registry facts,
+independent core/Python versions and future provenance/publication gates.

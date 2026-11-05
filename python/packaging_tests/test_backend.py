@@ -34,12 +34,28 @@ class BackendTests(unittest.TestCase):
             old=Path.cwd()
             try:
                 os.chdir(PROJECT)
-                with patch("maturin.prepare_metadata_for_build_wheel",return_value="fixture.dist-info") as delegate:
+                def prepared(*args):
+                    info=Path(d)/"fixture.dist-info";info.mkdir()
+                    (info/"WHEEL").write_bytes(b"Wheel-Version: 1.0\nTag: cp311-abi3-linux_x86_64\n")
+                    return info.name
+                with patch("maturin.prepare_metadata_for_build_wheel",side_effect=prepared) as delegate:
                     b.prepare_metadata_for_build_wheel(d,{"build-args":"--compatibility manylinux_2_28 --auditwheel check"})
                     self.assertEqual(delegate.call_args.args[1],{"build-args":"--locked --compatibility manylinux_2_28 --auditwheel check"})
                     self.assertIn("--compatibility off",b.settings(None)["build-args"])
             finally:
                 os.chdir(old)
+
+    def test_prepared_tag_projection_exact_and_narrow(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d)/"WHEEL"
+            original=b"Wheel-Version: 1.0\nGenerator: fixture\nRoot-Is-Purelib: false\nTag: cp311-abi3-linux_x86_64\n"
+            for system,compat in [("win32","manylinux_2_28"),("linux","off")]:
+                p.write_bytes(original);b.project_prepared_tag(p,compat,system);self.assertEqual(p.read_bytes(),original)
+            p.write_bytes(original);b.project_prepared_tag(p,"manylinux_2_28","linux")
+            self.assertEqual(p.read_bytes(),original.replace(b"linux_x86_64",b"manylinux_2_28_x86_64"))
+            for raw in [b"",original+ b"Tag: cp311-abi3-linux_x86_64\n",original.replace(b"cp311",b"cp314"),p.read_bytes()]:
+                p.write_bytes(raw)
+                with self.assertRaisesRegex(ValueError,"unreviewed"):b.project_prepared_tag(p,"manylinux_2_28","linux")
 
     def test_editable_rejection_actionable(self):
         with self.assertRaisesRegex(ValueError,"installed development wheel"):
@@ -51,6 +67,8 @@ class BackendTests(unittest.TestCase):
             p.write_bytes(b"a\r\nb\r\n")
             self.assertEqual(b.text_bytes(p), b"a\nb\n")
             p.write_bytes(b"a\rb")
+            with self.assertRaises(ValueError): b.text_bytes(p)
+            p.write_bytes(b"a\r\r\n")
             with self.assertRaises(ValueError): b.text_bytes(p)
             p.write_bytes(b"\xff")
             with self.assertRaises(UnicodeDecodeError): b.text_bytes(p)
@@ -94,8 +112,10 @@ class BackendTests(unittest.TestCase):
                 with patch.object(b,"git_identity", side_effect=AssertionError("must not use Git")):
                     self.assertEqual(b.source_record(project), (source,"sdist"))
                 core_file = root/"src/point.rs"; original=core_file.read_bytes()
-                core_file.write_bytes(original.replace(b"\n",b"\r\n"))
-                self.assertEqual(b.source_record(project)[0],source)
+                lf=b.text_bytes(core_file)
+                for representation in (lf,lf.replace(b"\n",b"\r\n")):
+                    core_file.write_bytes(representation)
+                    self.assertEqual(b.source_record(project)[0],source)
                 core_file.write_bytes(original+b"\n// changed\n")
                 with self.assertRaisesRegex(ValueError,"mismatch"): b.source_record(project)
                 core_file.write_bytes(original)

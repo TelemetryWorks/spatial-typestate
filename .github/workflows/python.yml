@@ -75,10 +75,11 @@ jobs:
       - name: Fresh glibc 2.28 floor and glibc 2.36 runtime containers
         if: runner.os == 'Linux'
         run: python python/package_ci.py runtime --python ${{ matrix.python }} --out target/package-artifacts
-      - name: Retain dry-run artifacts and hash inventories (no publication)
+      - name: Retain candidates and inventories (failed jobs are diagnostics only)
+        if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified upstream ref
         with:
-          name: packages-${{ matrix.os }}-${{ matrix.python }}
+          name: packages-${{ matrix.os }}-${{ matrix.python }}-attempt${{ github.run_attempt }}
           path: target/package-artifacts/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14

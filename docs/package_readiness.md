@@ -208,3 +208,12 @@ Python artifact CI explicitly checks out the PR head for source commit identity,
 whereas core CI retains merge-ref testing. Before merging, the feature branch must
 include current main; if main advances, merge it into the feature branch and
 retest/review that new head, without rewriting published history.
+
+Maturin 1.16's prepare hook hardcodes a native Linux tag even with an explicit
+manylinux request (tags_from_bridge in the linked upstream source). The wrapper
+projects only the exact cp311-abi3-linux_x86_64 prepared Tag line to the explicit
+manylinux_2_28_x86_64 request, on Linux only. Other tags/counts fail loudly. This
+is intent, not binary evidence: final wheel tags remain maturin/build/audit output,
+and the strict prepared-file and ELF gates independently verify them. License
+METADATA is untouched. Diagnostic uploads from failed jobs/attempts are not
+readiness evidence; require successful exact-head jobs and artifact review.

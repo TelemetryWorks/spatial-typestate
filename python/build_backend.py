@@ -412,6 +412,21 @@ def build_sdist(sdist_directory, config_settings=None):
     return name
 
 
+def project_prepared_tag(path, compatibility, system):
+    if system != "linux" or compatibility != "manylinux_2_28":
+        return
+    # maturin 1.16 tags_from_bridge() hardcodes PlatformTag::Linux during prepare:
+    # https://github.com/PyO3/maturin/blob/v1.16.0/src/build_orchestrator.rs
+    # This projects intent only. Final build/audit and strict parity independently
+    # establish the actual tag; unexpected/upstream-fixed metadata must fail here.
+    old = b"Tag: cp311-abi3-linux_x86_64"
+    new = b"Tag: cp311-abi3-manylinux_2_28_x86_64"
+    lines = path.read_bytes().splitlines(keepends=True)
+    if [line.rstrip(b"\r\n") for line in lines if line.startswith(b"Tag: ")] != [old]:
+        raise ValueError("unreviewed maturin prepared tag")
+    path.write_bytes(b"".join(line.replace(old,new,1) if line.rstrip(b"\r\n")==old else line for line in lines))
+
+
 def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
     import maturin
     project = Path.cwd()
@@ -426,7 +441,9 @@ def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
         metadata_args += " --auditwheel " + tokens[tokens.index("--auditwheel") + 1]
     with staging(project, source) as (_, root):
         with build_environment(core, root, origin):
-            return maturin.prepare_metadata_for_build_wheel(output, {"build-args": metadata_args})
+            name = maturin.prepare_metadata_for_build_wheel(output, {"build-args": metadata_args})
+            project_prepared_tag(Path(output)/name/"WHEEL",compatibility,__import__("sys").platform)
+            return name
 
 
 def get_requires_for_build_wheel(config_settings=None):

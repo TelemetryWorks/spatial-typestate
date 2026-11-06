@@ -1,0 +1,486 @@
+# LOCAL DIAGNOSTIC DRAFT: do not publish/run with a token without boundary review.
+# The scanner preparation deliberately fails before credentials are available.
+name: Sonar analysis (unreviewed local draft)
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  configuration:
+    name: Sonar eligibility/configuration (not an analysis)
+    runs-on: ubuntu-latest
+    outputs:
+      eligible: ${{ steps.policy.outputs.eligible }}
+      revision: ${{ steps.policy.outputs.revision }}
+      project: ${{ steps.policy.outputs.project }}
+      organization: ${{ steps.policy.outputs.organization }}
+      scm_args: ${{ steps.policy.outputs.scm_args }}
+    steps:
+      - name: Validate event and nonsecret configuration
+        id: policy
+        env:
+          PROJECT_KEY: ${{ vars.SONAR_PROJECT_KEY }}
+          ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
+          TOKEN_PRESENT: ${{ secrets.SONAR_TOKEN != '' }}
+        shell: python
+        run: |
+          # BEGIN SONAR_POLICY
+          import json, os, re
+          from pathlib import Path
+
+          def policy(event_name, event, repository, sha, ref, project, organization, token_present):
+              if event_name not in ('pull_request', 'push', 'workflow_dispatch', 'schedule'):
+                  raise ValueError('unsupported event')
+              scm = []
+              if event_name == 'pull_request':
+                  pr = event['pull_request']
+                  author = pr['user']['login'].lower()
+                  head_repo = (pr['head']['repo'] or {}).get('full_name', '')
+                  if head_repo.lower() != repository.lower() or author in ('dependabot[bot]', 'dependabot-preview[bot]'):
+                      return {'eligible': 'false'}
+                  number = str(event['number'])
+                  if not re.fullmatch(r'[1-9][0-9]{0,9}', number):
+                      raise ValueError('invalid PR number')
+                  revision = pr['head']['sha']
+                  for key in ('head', 'base'):
+                      branch = pr[key]['ref']
+                      if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/-]{0,199}', branch) or any(p in ('', '.', '..') for p in branch.split('/')):
+                          raise ValueError('branch outside supported safe ASCII alphabet')
+                  scm = ['-Dsonar.pullrequest.key=' + number,
+                         '-Dsonar.pullrequest.branch=' + pr['head']['ref'],
+                         '-Dsonar.pullrequest.base=' + pr['base']['ref']]
+              else:
+                  revision = sha
+                  if not ref.startswith('refs/heads/'):
+                      raise ValueError('only branch refs supported')
+                  branch = ref[len('refs/heads/'):]
+                  if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._/-]{0,199}', branch) or any(p in ('', '.', '..') for p in branch.split('/')):
+                      raise ValueError('invalid branch ref')
+                  scm = ['-Dsonar.branch.name=' + branch]
+              if not re.fullmatch(r'[0-9a-f]{40}', revision):
+                  raise ValueError('invalid SCM revision')
+              for value in (project, organization):
+                  if not re.fullmatch(r'[A-Za-z0-9_][A-Za-z0-9_.:-]{0,199}', value):
+                      raise ValueError('missing/invalid SONAR_PROJECT_KEY or SONAR_ORGANIZATION repository variable')
+              if token_present != 'true':
+                  raise ValueError('SONAR_TOKEN missing; owner must configure securely after boundary review')
+              return {'eligible': 'true', 'revision': revision, 'project': project,
+                      'organization': organization,
+                      'scm_args': ' '.join(scm + ['-Dsonar.scm.revision=' + revision])}
+
+          if __name__ == '__main__':
+              result = policy(os.environ['GITHUB_EVENT_NAME'], json.loads(Path(os.environ['GITHUB_EVENT_PATH']).read_text()),
+                              os.environ['GITHUB_REPOSITORY'], os.environ['GITHUB_SHA'], os.environ['GITHUB_REF'],
+                              os.environ['PROJECT_KEY'], os.environ['ORGANIZATION'], os.environ['TOKEN_PRESENT'])
+              with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+                  for key, value in result.items():
+                      output.write(key + '=' + value + '\n')
+          # END SONAR_POLICY
+
+  unavailable:
+    name: Sonar analysis unavailable (fork/Dependabot; not a scan)
+    needs: configuration
+    if: needs.configuration.outputs.eligible == 'false'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Sonar analysis NOT RUN for fork/Dependabot PR. This notification is not an analysis PASS.' >> "$GITHUB_STEP_SUMMARY"
+
+  reports:
+    name: Token-free Sonar reports (not a server analysis)
+    needs: configuration
+    if: needs.configuration.outputs.eligible == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RUSTUP_TOOLCHAIN: '1.99.0'
+      RUSTUP_AUTO_INSTALL: '0'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.configuration.outputs.revision }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: '1.99.0'
+          components: llvm-tools-preview, clippy, rust-docs
+      - name: Install version-pinned coverage tools (hosted runner only)
+        run: |
+          cargo +1.99.0 install cargo-llvm-cov --version 0.9.1 --locked --jobs 2
+          python -m pip install --require-hashes --only-binary=:all: -r .github/security/requirements-coverage.txt -r python/requirements-build.txt
+      - name: Offline pipeline controls
+        run: python -m unittest discover -s .github/scripts -p 'test_*.py' -v
+      - name: Generate real reports and retain failure statuses
+        env:
+          SOURCE_REVISION: ${{ needs.configuration.outputs.revision }}
+        run: python .github/scripts/sonar_reports.py --root "$GITHUB_WORKSPACE" --output "$RUNNER_TEMP/sonar-reports" --revision "$SOURCE_REVISION"
+      - name: Upload prepared same-run reports
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sonar-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sonar-reports/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Retain report diagnostics even on failure
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sonar-report-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/generation-status.json
+            ${{ runner.temp }}/clippy-status.json
+            ${{ runner.temp }}/sonar-reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+  scan:
+    name: Sonar scanner (execution boundary UNAPPROVED)
+    needs: [configuration, reports]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RUSTUP_TOOLCHAIN: '1.99.0'
+      RUSTUP_AUTO_INSTALL: '0'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.configuration.outputs.revision }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: sonar-prepared-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sonar-incoming
+      - name: Validate envelope without executing checked-out code
+        env:
+          SOURCE_REVISION: ${{ needs.configuration.outputs.revision }}
+        shell: python
+        run: |
+          # BEGIN SONAR_ENVELOPE
+          import hashlib, json, os, re, shutil, stat
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          REPORTS = ('core-std.lcov', 'core-no-std.lcov', 'native.lcov', 'clippy-core-std.jsonl',
+                     'clippy-core-no-std.jsonl', 'clippy-native.jsonl', 'python-coverage.xml')
+
+          def validate(directory, root, revision):
+              expected = set(REPORTS) | {'report-inventory.json'}
+              if {p.name for p in directory.iterdir()} != expected:
+                  raise ValueError('unexpected/missing report files')
+              data = {}
+              sizes = {}
+              for path in directory.iterdir():
+                  if not stat.S_ISREG(path.lstat().st_mode) or path.stat().st_size > 64 * 1024 * 1024:
+                      raise ValueError('report must be a bounded regular file')
+                  sizes[path.name] = path.stat().st_size
+              if sum(sizes.values()) > 128 * 1024 * 1024 or sizes['report-inventory.json'] > 1024 * 1024:
+                  raise ValueError('report set/inventory too large')
+              for path in directory.iterdir():
+                  data[path.name] = path.read_bytes()
+                  data[path.name].decode('utf-8')
+              record = json.loads(data['report-inventory.json'])
+              if set(record) != {'schema', 'revision', 'generation_exit_codes', 'clippy_outcomes', 'reports', 'source_paths', 'tools', 'limitations'}:
+                  raise ValueError('unexpected inventory fields')
+              if record['schema'] != 1 or record['revision'] != revision or set(record['reports']) != set(REPORTS):
+                  raise ValueError('report identity/schema mismatch')
+              phases = {'core-std', 'core-no-std', 'native', 'clippy-core-std', 'clippy-core-no-std', 'clippy-native',
+                        'wheel-build', 'wheel-install', 'python-packaging', 'python-pipeline', 'python-wheel', 'coverage-combine', 'coverage-xml'}
+              clippy_phases = {'clippy-core-std', 'clippy-core-no-std', 'clippy-native'}
+              if set(record['clippy_outcomes']) != clippy_phases or set(record['generation_exit_codes']) != phases:
+                  raise ValueError('missing phase status')
+              for phase, status in record['generation_exit_codes'].items():
+                  if type(status) is not int or (phase not in clippy_phases and status != 0):
+                      raise ValueError('report transport failed; inspect phase diagnostics')
+                  if phase in clippy_phases and (record['clippy_outcomes'][phase]['exit_code'] != status or record['clippy_outcomes'][phase]['kind'] not in ('clean', 'lint-findings')):
+                      raise ValueError('Clippy tool/compile failure; diagnostics retained')
+              for name in REPORTS:
+                  if hashlib.sha256(data[name]).hexdigest() != record['reports'][name]:
+                      raise ValueError('report hash mismatch')
+              def source(value, suffix):
+                  if not re.fullmatch(r'[A-Za-z0-9_./-]+', value) or value.startswith('/') or any(p in ('', '.', '..') for p in value.split('/')) or not value.endswith(suffix):
+                      raise ValueError('unsafe source path')
+                  candidate = root / value
+                  resolved = candidate.resolve(strict=True).relative_to(root.resolve())
+                  if any(part.startswith('.') and part != '.github' for part in resolved.parts):
+                      raise ValueError('hidden source path')
+                  if candidate.is_symlink() or not candidate.is_file():
+                      raise ValueError('not a regular checkout source')
+              for name in REPORTS[:3]:
+                  records, active = 0, False
+                  for line in data[name].decode().splitlines():
+                      if line.startswith('SF:'):
+                          if active:
+                              raise ValueError('unclosed LCOV record')
+                          source(line[3:], '.rs')
+                          active = True
+                      elif line == 'end_of_record':
+                          if not active:
+                              raise ValueError('unexpected LCOV terminator')
+                          records += 1
+                          active = False
+                      elif line.startswith(('TN:', 'VER:')):
+                          pass
+                      elif not active or not any(re.fullmatch(pattern, line) for pattern in (
+                          r'DA:[1-9][0-9]*,[0-9]+(?:,[A-Za-z0-9+/=]+)?',
+                          r'BRDA:[0-9]+,[0-9]+,[0-9]+,(?:-|[0-9]+)',
+                          r'FN:[0-9]+,(?:[0-9]+,)?[^\r\n]+', r'FNDA:[0-9]+,[^\r\n]+',
+                          r'(?:FNF|FNH|BRF|BRH|LF|LH):[0-9]+')):
+                          raise ValueError('unsupported/invalid LCOV record')
+                  if active or not records:
+                      raise ValueError('incomplete LCOV')
+              for name in REPORTS[3:6]:
+                  completions, messages = [], []
+                  for line in data[name].decode().splitlines():
+                      item = json.loads(line)
+                      if item.get('reason') == 'build-finished':
+                          completions.append(item)
+                      elif item.get('reason') == 'compiler-message':
+                          messages.append(item['message'])
+                          def spans(message):
+                              for span in message.get('spans', []):
+                                  source(span['file_name'], '.rs')
+                                  if span.get('expansion'):
+                                      raise ValueError('unreviewed macro expansion path')
+                              for child in message.get('children', []):
+                                  spans(child)
+                          spans(item['message'])
+                      else:
+                          raise ValueError('unexpected Clippy record')
+                  phase = name.removesuffix('.jsonl')
+                  outcome = record['clippy_outcomes'][phase]
+                  errors = [m for m in messages if m.get('level') == 'error']
+                  warnings = [m for m in messages if m.get('level') == 'warning']
+                  lint_exit = bool(errors) and all((m.get('code') or {}).get('code', '').startswith('clippy::') for m in errors)
+                  valid = len(completions) == 1 and ((outcome['exit_code'] == 0 and completions[0].get('success') is True and not errors) or (outcome['exit_code'] != 0 and lint_exit and completions[0].get('success') is False))
+                  kind = 'lint-findings' if errors or warnings else 'clean'
+                  if not valid or outcome != {'exit_code': record['generation_exit_codes'][phase], 'kind': kind, 'warnings': len(warnings), 'errors': len(errors)}:
+                      raise ValueError('Clippy outcome does not match diagnostics')
+              xml = data['python-coverage.xml'].decode()
+              if '<!DOCTYPE' in xml.upper() or '<!ENTITY' in xml.upper():
+                  raise ValueError('XML declarations/entities forbidden')
+              tree = ET.fromstring(xml)
+              if tree.tag != 'coverage' or not tree.findall('.//class'):
+                  raise ValueError('empty Python coverage')
+              for node in tree.findall('.//class'):
+                  source(node.attrib['filename'], '.py')
+              for node in tree.findall('.//line'):
+                  if not re.fullmatch(r'[1-9][0-9]*', node.attrib['number']) or not re.fullmatch(r'[0-9]+', node.attrib['hits']):
+                      raise ValueError('invalid Python line counters')
+              if any((node.text or '').strip() != '.' for node in tree.findall('./sources/source')):
+                  raise ValueError('unexpected XML source root')
+              return data
+
+          if __name__ == '__main__':
+              temporary = Path(os.environ['RUNNER_TEMP'])
+              data = validate(temporary / 'sonar-incoming', Path(os.environ['GITHUB_WORKSPACE']), os.environ['SOURCE_REVISION'])
+              destination = temporary / 'sonar-validated'
+              destination.mkdir(exist_ok=False)
+              for name, contents in data.items():
+                  (destination / name).write_bytes(contents)
+              (temporary / 'sonar-settings.properties').write_text('# Trusted empty settings; all parameters are explicit CLI inputs.\n')
+          # END SONAR_ENVELOPE
+      - name: Prepare diagnostic guards and hold token execution
+        shell: python
+        run: |
+          # BEGIN SONAR_GUARD
+          import json, os, shutil
+          from pathlib import Path
+
+          def guard_files(directory, attempts):
+              directory.mkdir(exist_ok=False)
+              for tool in ('cargo', 'rustc', 'rustup', 'clippy-driver', 'cargo-clippy'):
+                  path = directory / tool
+                  path.write_text('#!/usr/bin/python3\nfrom pathlib import Path\n'
+                                  + 'with Path(' + repr(str(attempts)) + ').open("a") as log: log.write('
+                                  + repr(tool + '\n') + ')\nraise SystemExit(126)\n')
+                  path.chmod(0o700)
+
+          if __name__ == '__main__':
+              temporary = Path(os.environ['RUNNER_TEMP'])
+              guard_files(temporary / 'sonar-guard', temporary / 'sonar-tool-attempts.txt')
+              for name in ('sonar-task', 'sonar-neutral-cargo', 'sonar-neutral-rustup'):
+                  (temporary / name).mkdir(exist_ok=False)
+              known = [Path.home() / '.cargo/bin' / tool for tool in ('cargo', 'rustc', 'rustup')]
+              known += [Path(value) for tool in ('cargo', 'rustc', 'rustup') if (value := shutil.which(tool))]
+              known += list((Path.home() / '.rustup/toolchains').glob('*/bin/cargo'))
+              known += [Path('/usr/bin/cargo'), Path('/usr/local/bin/cargo')]
+              accessible = sorted({str(path) for path in known if path.is_file()})
+              (temporary / 'scanner-boundary.json').write_text(json.dumps({'known_accessible_absolute_tools': accessible,
+                  'sandbox': False, 'execution_approved': False}, indent=2) + '\n')
+              # Deliberate local-draft hold. Requires a reviewed code change,
+              # not a repository variable, before any credential-bearing scan.
+              raise RuntimeError('LOCAL DRAFT: absolute-tool/isolation boundary unapproved; token execution blocked')
+          # END SONAR_GUARD
+      - name: Remove Rust tools (DISPOSABLE HOSTED RUNNER ONLY; behind hold)
+        shell: bash
+        run: |
+          sudo --preserve-env=GITHUB_ACTIONS,RUNNER_ENVIRONMENT,RUNNER_OS,GITHUB_WORKSPACE,RUNNER_TEMP /usr/bin/python3 - <<'PY'
+          # BEGIN SONAR_HOSTED_REMOVAL
+          import json, os, platform, shutil
+          from pathlib import Path, PurePosixPath
+
+          def removal_plan(environment, system_name):
+              if system_name != 'Linux' or environment.get('GITHUB_ACTIONS') != 'true' or environment.get('RUNNER_ENVIRONMENT') != 'github-hosted' or environment.get('RUNNER_OS') != 'Linux':
+                  raise RuntimeError('Rust removal is forbidden outside disposable GitHub-hosted Linux')
+              workspace = PurePosixPath(environment['GITHUB_WORKSPACE'])
+              if '..' in workspace.parts or not workspace.is_relative_to('/home/runner/work') or workspace == PurePosixPath('/home/runner/work'):
+                  raise RuntimeError('unexpected hosted workspace')
+              if environment.get('RUNNER_TEMP') != '/home/runner/work/_temp':
+                  raise RuntimeError('unexpected hosted temporary path')
+              homes = ['/home/runner/.cargo', '/home/runner/.rustup']
+              files = [directory + '/' + tool for directory in ('/usr/bin', '/usr/local/bin') for tool in ('cargo', 'rustc', 'rustup')]
+              return homes, files
+
+          if __name__ == '__main__':
+              homes, files = removal_plan(os.environ, platform.system())
+              workspace = Path(os.environ['GITHUB_WORKSPACE']).resolve(strict=True)
+              temporary = Path(os.environ['RUNNER_TEMP']).resolve(strict=True)
+              if temporary != Path('/home/runner/work/_temp'):
+                  raise RuntimeError('temporary path resolved outside allowlist')
+              roots, executables = [Path(value) for value in homes], [Path(value) for value in files]
+              audit = json.loads((temporary / 'scanner-boundary.json').read_text())
+              def allowed(value):
+                  return any(value.is_relative_to(root) for root in roots) or value in executables
+              # Validate EVERY resolved target before any deletion; never follow
+              # an unexpected tool-home symlink or infer a new deletion root.
+              for root in roots:
+                  if root.is_symlink() or root.resolve() != root or workspace.is_relative_to(root):
+                      raise RuntimeError('tool home resolved outside literal allowlist')
+              for path in executables:
+                  if path.is_dir() or path.parent.resolve() != path.parent or not allowed(path.resolve()):
+                      raise RuntimeError('system tool resolved outside allowlist')
+              for value in audit['known_accessible_absolute_tools']:
+                  if not allowed(Path(value).resolve()):
+                      raise RuntimeError('unlisted absolute tool path; needs renewed review')
+              for root in roots:
+                  if root.exists():
+                      shutil.rmtree(root)
+              for path in executables:
+                  if os.path.lexists(path):
+                      path.unlink()
+              remaining = [str(path) for path in roots + executables if os.path.lexists(path)]
+              remaining += [value for value in audit['known_accessible_absolute_tools'] if os.path.exists(value)]
+              if remaining:
+                  raise RuntimeError('known Rust tool paths remain accessible')
+              (temporary / 'rust-tools-removal.json').write_text(json.dumps({'hosted_only': True, 'removed_allowlist': homes + files, 'remaining_known_paths': remaining, 'sandbox': False}, indent=2) + '\n')
+          # END SONAR_HOSTED_REMOVAL
+          PY
+      - name: Official scanner (unreachable until boundary hold is reviewed)
+        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+          SONAR_REGION: ''
+          SONARCLOUD_URL: ''
+          SONAR_ROOT_CERT: ''
+          SONAR_SCANNER_JSON_PARAMS: '{}'
+          SONAR_SCANNER_OPTS: ''
+          SONAR_SCANNER_JAVA_OPTS: ''
+          JAVA_TOOL_OPTIONS: ''
+          JDK_JAVA_OPTIONS: ''
+          JAVA_OPTS: ''
+          HTTP_PROXY: ''
+          HTTPS_PROXY: ''
+          ALL_PROXY: ''
+          NO_PROXY: ''
+          http_proxy: ''
+          https_proxy: ''
+          all_proxy: ''
+          no_proxy: ''
+          CARGO_HOME: ${{ runner.temp }}/sonar-neutral-cargo
+          RUSTUP_HOME: ${{ runner.temp }}/sonar-neutral-rustup
+          CARGO: ${{ runner.temp }}/sonar-guard/cargo
+          RUSTC: ${{ runner.temp }}/sonar-guard/rustc
+          PATH: ${{ runner.temp }}/sonar-guard:/usr/bin:/bin
+          PYTHONPATH: ''
+          RUSTUP_TOOLCHAIN: '1.99.0'
+          RUSTUP_AUTO_INSTALL: '0'
+        with:
+          scannerVersion: 8.3.1.16491
+          skipSignatureVerification: false
+          projectBaseDir: ${{ github.workspace }}
+          args: >-
+            -Dproject.settings=${{ runner.temp }}/sonar-settings.properties
+            -Dsonar.host.url=https://sonarcloud.io
+            -Dsonar.scanner.sonarcloudUrl=https://sonarcloud.io
+            -Dsonar.scanner.apiBaseUrl=https://api.sonarcloud.io
+            -Dsonar.projectKey=${{ needs.configuration.outputs.project }}
+            -Dsonar.organization=${{ needs.configuration.outputs.organization }}
+            -Dsonar.sources=.
+            -Dsonar.tests=.
+            -Dsonar.test.inclusions=tests/**,python/tests/**,python/packaging_tests/**,.github/scripts/test_*.py
+            -Dsonar.exclusions=target/**,python/native/target/**,.scannerwork/**,tests/**,python/tests/**,python/packaging_tests/**,.github/scripts/test_*.py
+            -Dsonar.rust.lcov.reportPaths=${{ runner.temp }}/sonar-validated/core-std.lcov,${{ runner.temp }}/sonar-validated/core-no-std.lcov,${{ runner.temp }}/sonar-validated/native.lcov
+            -Dsonar.rust.clippyReport.reportPaths=${{ runner.temp }}/sonar-validated/clippy-core-std.jsonl,${{ runner.temp }}/sonar-validated/clippy-core-no-std.jsonl,${{ runner.temp }}/sonar-validated/clippy-native.jsonl
+            -Dsonar.python.coverage.reportPaths=${{ runner.temp }}/sonar-validated/python-coverage.xml
+            -Dsonar.scanner.metadataFilePath=${{ runner.temp }}/sonar-task/report-task.txt
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=600
+            ${{ needs.configuration.outputs.scm_args }}
+      - name: Denied tool attempts remain failures
+        if: always()
+        shell: python
+        run: |
+          import os
+          from pathlib import Path
+          attempts = Path(os.environ['RUNNER_TEMP']) / 'sonar-tool-attempts.txt'
+          if attempts.exists() and attempts.stat().st_size:
+              raise RuntimeError('Analyzer attempted a denied tool; no supported-analysis claim')
+      - name: Retain scanner diagnostic/task evidence without credentials
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sonar-task-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/sonar-task/report-task.txt
+            ${{ runner.temp }}/scanner-boundary.json
+            ${{ runner.temp }}/rust-tools-removal.json
+            ${{ runner.temp }}/sonar-tool-attempts.txt
+          if-no-files-found: warn
+          retention-days: 14
+
+  evidence:
+    name: Public Sonar evidence (no scanner token)
+    needs: [configuration, scan]
+    if: always() && needs.configuration.outputs.eligible == 'true' && (needs.scan.result == 'success' || needs.scan.result == 'failure')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.configuration.outputs.revision }}
+          persist-credentials: false
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          name: sonar-task-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sonar-task-evidence
+      - name: Collect complete public evidence or fail explicitly
+        env:
+          PROJECT_KEY: ${{ needs.configuration.outputs.project }}
+          ORGANIZATION: ${{ needs.configuration.outputs.organization }}
+          SOURCE_REVISION: ${{ needs.configuration.outputs.revision }}
+        run: python3 .github/scripts/sonar_evidence.py --task-dir "$RUNNER_TEMP/sonar-task-evidence" --output "$RUNNER_TEMP/sonar-server-evidence.json"
+      - name: Retain server evidence even when incomplete
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sonar-server-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/sonar-server-evidence.json
+          if-no-files-found: warn
+          retention-days: 14

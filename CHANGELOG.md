@@ -4,6 +4,12 @@
 
 ### Changed
 
+- Restore CodeQL for Rust, Python and Actions with pinned actions, extended
+  security queries and retained extraction evidence. Remove the disabled unsafe
+  Sonar workflow and its duplicate SARIF exporter; Sonar is **not restored**
+  pending owner project/access setup. Future Sonar findings belong in Sonar,
+  not GitHub Security. See [security status and plan](docs/security_analysis.md).
+
 - Python build interface now uses the private PEP 517 backend for readiness
   records. Direct maturin CLI bypasses those gates; editable installs explicitly
   reject with installed-development-wheel/rebuild guidance. Numeric APIs unchanged.

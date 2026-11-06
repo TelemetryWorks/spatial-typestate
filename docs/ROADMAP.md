@@ -2,6 +2,10 @@
 
 These are proposals, not implemented guarantees or promises of a release date.
 
+- Complete the [blocked Sonar restoration](security_analysis.md) after owner
+  project/access setup, using a hardened new workflow and actual server-side
+  findings, coverage and quality-gate evidence. CodeQL restoration is independent.
+
 - Assess additional unit conversions/dimensional algebra only against concrete domain needs; current linear lengths deliberately exclude them.
 - Assess long-chain rotation drift and whether explicit reconditioning is needed.
 - Review the [borrowed-validation prototype](borrowed_validation.md): caller-local

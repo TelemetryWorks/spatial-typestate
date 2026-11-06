@@ -1,78 +1,93 @@
-# ----------------------------------------
-# 🔍 CodeQL Security Scan Workflow
-# ----------------------------------------
-# Runs on every push, pull request, and weekly at 3 AM UTC on Mondays.
-# Scans for security vulnerabilities like:
-# - Unsafe deserialization
-# - Insecure function usage
-# - Insecure file handling
-# ----------------------------------------
-
 name: CodeQL Security Scan
 
 on:
-  # Manual trigger
   workflow_dispatch:
-
-  # Run on PRs targeting main and develop
   pull_request:
-    branches: [ main, develop ]
-
-  # Run on Pushes targeting main
+    branches: [main, develop]
   push:
-    branches: [ main ]
-
-  # Weekly scheduled scan (Monday 03:00 UTC)
+    branches: [main]
   schedule:
     - cron: '0 3 * * 1'
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   analyze:
-    name: Analyze with CodeQL
+    name: CodeQL (${{ matrix.language }})
     runs-on: ubuntu-latest
-
-    # ----------------------------------------
-    # 🔐 Set required permissions
-    # ----------------------------------------
+    timeout-minutes: 45
     permissions:
-      security-events: write  # Needed to upload SARIF results to GitHub
-      actions: read           # Read metadata about actions used
-      contents: read          # Required for most scanning workflows
-
+      contents: read
+      security-events: write
     strategy:
       fail-fast: false
+      max-parallel: 2
       matrix:
-        language: [rust]  # ✅ Add more languages here if needed (e.g., ['python', 'javascript'])
-
+        language: [rust, python, actions]
+    env:
+      CARGO_BUILD_JOBS: '2'
+      RUSTUP_TOOLCHAIN: '1.99.0'
     steps:
-      # ----------------------------------------
-      # 🧾 Step 1: Checkout source code
-      # ----------------------------------------
-      - name: Checkout repository
-        uses: actions/checkout@v6
+      - name: Checkout source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          fetch-depth: 0
+          persist-credentials: false
 
-      # ----------------------------------------
-      # ⚙️ Step 2: Initialize CodeQL
-      # ----------------------------------------
+      - name: Test evidence controls
+        if: matrix.language == 'actions'
+        run: python3 -m unittest discover -s .github/scripts -p 'test_*.py'
+
+      - name: Select Rust compiler
+        if: matrix.language == 'rust'
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: 1.99.0
+          components: rust-src
+
+      - name: Record selected compiler
+        if: matrix.language == 'rust'
+        run: |
+          mkdir -p "$RUNNER_TEMP/codeql-results"
+          rustc -vV | tee "$RUNNER_TEMP/codeql-results/rustc.txt"
+
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        id: init
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           languages: ${{ matrix.language }}
+          build-mode: none
+          queries: security-extended
+          threads: 2
+          db-location: ${{ runner.temp }}/codeql-databases
 
-          # Optional: Pin a specific CodeQL CLI bundle
-          # tools: https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.21.4/codeql-bundle-linux64.tar.gz
+      - name: Analyze source
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          # Preserve the previous Rust category instead of leaving a parallel stale analysis.
+          category: .github/workflows/codeql.yml:analyze/language:${{ matrix.language }}
+          threads: 2
+          output: ${{ runner.temp }}/codeql-results
 
-      # ----------------------------------------
-      # 🔄 Step 3 (Optional): Autobuild the project
-      # Uncomment if your project needs to be built before analysis
-      # ----------------------------------------
-      - name: Autobuild project
-        uses: github/codeql-action/autobuild@v4
+      - name: Inventory extracted source and results
+        env:
+          ANALYSIS_LANGUAGE: ${{ matrix.language }}
+          EVIDENCE_DIR: ${{ runner.temp }}/codeql-results
+          DATABASE_DIR: ${{ runner.temp }}/codeql-databases
+        run: python3 .github/scripts/codeql_evidence.py
 
-      # ----------------------------------------
-      # 🧠 Step 4: Run CodeQL Analysis
-      # ----------------------------------------
-      - name: Analyze with CodeQL
-        uses: github/codeql-action/analyze@v4
+      - name: Retain analysis evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: codeql-${{ matrix.language }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/codeql-results/
+            ${{ runner.temp }}/codeql-databases/**/src.zip
+            ${{ runner.temp }}/codeql-databases/**/codeql-database.yml
+          if-no-files-found: warn
+          retention-days: 30

@@ -44,8 +44,9 @@ builds, and empty normal dependency graphs. Compatibility jobs compile the libra
 on 1.85.0 and 1.91.1 in three feature modes. A runner installs thumbv7em-none-eabihf
 and cross-builds no_std thumb debug/release and MUSL library code; these are compile-only checks, not device runtime validation.
 CI target installation is authorized on the runner, not on the local computer.
-The redundant old Clippy/Rustfmt files were consolidated. Existing CodeQL/Sonar
-service configurations are separate; no new secrets/services were enabled.
+The redundant old Clippy/Rustfmt files were consolidated. CodeQL has a separate
+three-language workflow. Sonar is not restored and has no workflow; owner access
+and a hardened successor are pending. No new secrets are configured.
 Local PASS does not claim remote CI PASS; wait for the actual GitHub checks.
 
 ## Review and maintenance
@@ -141,3 +142,25 @@ Artifact CI checks out the PR head for exact source identity; core CI still test
 the merge ref. Keep the branch current with main before merge and rerun gates on
 any new merge commit. Linux candidates are each tested on both 3.11 and 3.14;
 Windows matrix jobs build separate candidates. No upload selects a release.
+
+## Security analysis
+
+CodeQL checks Rust (including python/native), Python and Actions using extended
+security queries. Its source-archive inventory and SARIF artifacts must show the
+intended files and query results; a green workflow alone is insufficient evidence.
+PR analyses are diff-informed (changed-line findings), not whole-source baselines.
+Use a manual run on the exact head for full-source review and confirm that SARIF
+does not report diff-informed mode; main pushes and schedules also run full scans.
+Run `python -m unittest discover -s .github/scripts -p 'test_*.py'` for the
+inventory controls. No security issue may be suppressed merely to pass a gate.
+
+Sonar is **not restored**: its disabled legacy workflow is removed because its
+token exposure and unpinned tools are unsafe. Do not enable that old workflow or
+add its token while the old definition remains on main. Complete the owner setup
+and hardened successor in the [security plan](docs/security_analysis.md) first.
+Sonar findings will live in Sonar, not a duplicate GitHub SARIF export.
+
+Before claiming current security evidence, verify workflow activation and the
+exact commit of the latest analysis. Public scheduled workflows can be disabled
+after 60 inactive days; maintainers must re-enable and run a real current scan
+after inactivity. Never count skipped or unavailable analyses as passing scans.

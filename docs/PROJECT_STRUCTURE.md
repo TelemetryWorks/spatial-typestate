@@ -14,7 +14,8 @@
 - docs/: requirements/evidence, design, frame/coordinate/math conventions, safety,
   and the canonical remaining-work roadmap. Diagram files are placeholders.
 - .github/workflows/ci.yml: direct runtime, lint/docs, compatibility, dependency,
-  and bare-metal compilation gates. Existing CodeQL/Sonar configurations are separate.
+  and bare-metal compilation gates. codeql.yml separately analyzes Rust/Python/Actions.
+  Sonar is not restored and has no workflow; see [security status](security_analysis.md).
 - Cargo.toml/Cargo.lock: no normal dependencies; dev-only testing/benchmark tools.
 - rust-toolchain.toml: development pin 1.91.1. Manifest MSRV is 1.85; full UI tests
   and direct CI use Rust 1.99.0 for stable diagnostics.

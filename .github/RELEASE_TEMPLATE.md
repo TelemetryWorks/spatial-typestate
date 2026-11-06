@@ -40,7 +40,8 @@ cosign verify --key cosign.pub ghcr.io/TelemetryWorks/spatial-typestate:vX.Y.Z
 
 -
 -
-Static analysis and quality gates are enforced by [SonarCloud](https://sonarcloud.io/).
+Record exact-commit CodeQL and core/Python gate evidence. Sonar is not restored;
+do not claim a Sonar quality gate until real project analysis is available.
 
 ## SBOM and Metadata
 

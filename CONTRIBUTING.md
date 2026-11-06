@@ -148,6 +148,9 @@ Windows matrix jobs build separate candidates. No upload selects a release.
 CodeQL checks Rust (including python/native), Python and Actions using extended
 security queries. Its source-archive inventory and SARIF artifacts must show the
 intended files and query results; a green workflow alone is insufficient evidence.
+PR analyses are diff-informed (changed-line findings), not whole-source baselines.
+Use a manual run on the exact head for full-source review and confirm that SARIF
+does not report diff-informed mode; main pushes and schedules also run full scans.
 Run `python -m unittest discover -s .github/scripts -p 'test_*.py'` for the
 inventory controls. No security issue may be suppressed merely to pass a gate.
 

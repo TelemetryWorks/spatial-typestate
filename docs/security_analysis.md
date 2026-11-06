@@ -56,6 +56,13 @@ to override the checkout pin, and install rust-src for rust-analyzer on the runn
 query alerts/analysis metadata at the exact commit. If the Rust extractor misses
 the second manifest, correct extraction configuration rather than assume coverage.
 
+The pinned action uses diff-informed analysis for pull_request events: PR finding
+results cover changed lines, even when the complete source archive was extracted.
+They are not a whole-source baseline. Require a manual full run on the exact PR
+head before security-restoration approval, and confirm its SARIF incrementalMode
+is not diff-informed. Main pushes, schedules and manual runs provide full scans;
+retain their evidence separately from the PR's changed-line results.
+
 ## Proposed Sonar scope and trust boundaries
 
 This is a blocked follow-up, not a scan implemented by the first PR. Use three

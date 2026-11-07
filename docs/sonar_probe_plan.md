@@ -168,12 +168,12 @@ and add meaningful source-boundary, transport, pagination, stale-analysis and
 orchestration failure tests. No rules, gates, source coverage exclusions or
 issue dispositions are changed.
 
-Sonar's newly created main branch is named `master`, with no analysis. A second
-temporary, PR-10/explicit-variable-guarded helper is proposed to rename that exact
-unanalysed main branch to `main` through the documented main-branch rename API.
-It fails on different identity, existing analysis, extra branches or conflicts,
-then verifies the result publicly. It will be removed immediately after success.
-This aligns names; it does not create a second branch or alter a quality gate.
+One-time setup run 42426095543 at `9763ed8` renamed the exact unanalysed
+Sonar main branch from `master` to `main`, with HTTP statuses
+`[200, 200, 204, 200]`. A public branch read confirmed exactly one branch,
+`main` with `isMain=true`. The temporary helper/tests are removed in the next
+commit, and its repository guard is deleted. No second branch or quality-gate
+change was introduced.
 
 PR/non-main evidence is PARTIAL; complete hotspot inventory requires main.
 If PR analysis requires an initial main baseline, return for a deployment decision.

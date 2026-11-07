@@ -11,10 +11,11 @@ import sys
 import tempfile
 import textwrap
 import unittest
+import urllib.error
 from unittest import mock
 
-from sonar_evidence import collect, pages, task_properties
-from sonar_reports import clippy_outcome, normalize_clippy, normalize_lcov, normalize_python, generate
+from sonar_evidence import collect, pages, task_properties, evidence_output, public_json, NoRedirect, write_evidence, evidence_passes
+from sonar_reports import clippy_outcome, normalize_clippy, normalize_lcov, normalize_python, generate, source_path, run_phase
 
 
 WORKFLOW = Path(__file__).resolve().parents[1] / "workflows/sonar-analysis.yml"
@@ -372,8 +373,9 @@ class GuardAndWorkflowTests(unittest.TestCase):
             (root / 'cargo').write_text('nonexecuting completion')
             report = inline('SONAR_HOSTED_REMOVAL')['scan_tools'](root, guard)
             self.assertEqual(report['matches'], [])
+            scan_tools = inline('SONAR_HOSTED_REMOVAL')['scan_tools']
             with self.assertRaisesRegex(RuntimeError, 'timed out'):
-                inline('SONAR_HOSTED_REMOVAL')['scan_tools'](root, guard, timeout=-1)
+                scan_tools(root, guard, timeout=-1)
 
     @unittest.skipUnless(os.name == 'posix', 'native hosted POSIX find')
     def test_native_scan_finds_executable_symlink_and_prunes_exactly(self):
@@ -415,8 +417,10 @@ class GuardAndWorkflowTests(unittest.TestCase):
 class PaginationTests(unittest.TestCase):
     def server(self, gate="OK"):
         def get(endpoint, params):
-            if endpoint == "/api/ce/task":
-                return {"task": {"status": "SUCCESS", "componentKey": "p", "analysisId": "id"}}
+            if endpoint == "/api/components/show":
+                return {"component": {"key": "p", "organization": None, "visibility": "public"}}
+            if endpoint == "/api/project_pull_requests/list":
+                return {"pullRequests": [{"key": "12", "commit": {"sha": "a" * 40}, "analysisDate": "date"}]}
             if endpoint == "/api/qualitygates/project_status":
                 return {"projectStatus": {"status": gate}}
             if endpoint == "/api/project_branches/list":
@@ -441,8 +445,9 @@ class PaginationTests(unittest.TestCase):
             self.assertEqual(len(result["hotspots"]), 2)
 
     def test_wrong_analysis_revision_is_rejected(self):
+        server = self.server()
         with self.assertRaisesRegex(ValueError, "revision mismatch"):
-            collect(self.server(), "p", "b" * 40, "id", "main")
+            collect(server, "p", "b" * 40, "id", "main")
 
     def test_complete_pages(self):
         def get(endpoint, params):
@@ -474,8 +479,10 @@ class PaginationTests(unittest.TestCase):
 
     def test_pr_hotspot_completeness_is_not_fabricated(self):
         def get(endpoint, params):
-            if endpoint == "/api/ce/task":
-                return {"task": {"status": "SUCCESS", "componentKey": "p", "analysisId": "id"}}
+            if endpoint == "/api/components/show":
+                return {"component": {"key": "p", "organization": None, "visibility": "public"}}
+            if endpoint == "/api/project_pull_requests/list":
+                return {"pullRequests": [{"key": "12", "commit": {"sha": "a" * 40}, "analysisDate": "date"}]}
             if endpoint == "/api/qualitygates/project_status":
                 return {"projectStatus": {"status": "OK"}}
             if endpoint == "/api/project_branches/list":
@@ -488,3 +495,220 @@ class PaginationTests(unittest.TestCase):
         self.assertTrue(result["partial"])
         self.assertFalse(result["restoration_verified"])
         self.assertIn("PR/nonmain", result["hotspot_scope"])
+
+
+class EvidenceSecurityTests(unittest.TestCase):
+    def test_fixed_output_rejects_existing_file_and_symlink_without_writing(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            output = evidence_output(root)
+            self.assertEqual(output, root.resolve() / 'sonar-server-evidence.json')
+            output.write_text('preserve existing evidence')
+            with self.assertRaisesRegex(ValueError, 'already exists'):
+                evidence_output(root)
+            self.assertEqual(output.read_text(), 'preserve existing evidence')
+            with self.assertRaises(ValueError):
+                evidence_output(output)
+
+    @unittest.skipUnless(os.name == 'posix', 'symlink fixture without Windows privileges')
+    def test_output_symlink_cannot_overwrite_another_file(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            victim = root / 'victim'
+            victim.write_text('keep')
+            (root / 'sonar-server-evidence.json').symlink_to(victim)
+            with self.assertRaises(ValueError):
+                evidence_output(root)
+            self.assertEqual(victim.read_text(), 'keep')
+
+    def test_no_output_path_cli_remains(self):
+        source = (WORKFLOW.parents[1] / 'scripts/sonar_evidence.py').read_text()
+        self.assertNotIn('add_argument("--output"', source)
+        self.assertNotIn('--output "$RUNNER_TEMP/sonar-server-evidence.json"', WORKFLOW.read_text())
+
+    def test_public_transport_rejects_redirects_and_nonallowlisted_endpoints(self):
+        redirect = NoRedirect()
+        with self.assertRaises(ValueError):
+            redirect.redirect_request(None, None, 302, '', {}, 'https://evil.invalid')
+        for endpoint in ('https://evil.invalid/api/issues/search', '/api/x/../settings', '/api/X/settings'):
+            with self.subTest(endpoint=endpoint), self.assertRaises(ValueError):
+                public_json(endpoint, {})
+
+    def test_public_transport_caps_bytes_and_never_uses_proxy_or_token(self):
+        opener = mock.MagicMock()
+        response = opener.open.return_value.__enter__.return_value
+        response.read.return_value = b'{"ok":true}'
+        with mock.patch('sonar_evidence.urllib.request.build_opener', return_value=opener) as build:
+            self.assertEqual(public_json('/api/issues/search', {'componentKeys': 'p'}), {'ok': True})
+            self.assertEqual(build.call_args.args[0].proxies, {})
+            self.assertIsInstance(build.call_args.args[1], NoRedirect)
+            self.assertEqual(opener.open.call_args.args[0], 'https://sonarcloud.io/api/issues/search?componentKeys=p')
+            self.assertEqual(opener.open.call_args.kwargs['timeout'], 30)
+            response.read.return_value = b'x' * (32 * 1024 * 1024 + 1)
+            with self.assertRaisesRegex(ValueError, 'too large'):
+                public_json('/api/issues/search', {})
+
+    def test_pr_revision_and_mid_collection_race_fail_closed(self):
+        original = PaginationTests().server()
+        for change in ('revision', 'date', 'identity'):
+            calls = 0
+            def get(endpoint, params):
+                nonlocal calls
+                result = original(endpoint, params)
+                if endpoint == '/api/components/show' and change == 'identity':
+                    result['component']['key'] = 'other'
+                if endpoint == '/api/project_pull_requests/list':
+                    calls += 1
+                    if change == 'revision':
+                        result['pullRequests'][0]['commit']['sha'] = 'b' * 40
+                    if change == 'date' and calls == 2:
+                        result['pullRequests'][0]['analysisDate'] = 'new analysis'
+                return result
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                collect(get, 'p', 'a' * 40, 'id', 'main', '12')
+
+    def test_pagination_rejects_changing_totals_indices_and_overrun(self):
+        for response in ({'paging': {'total': -1, 'pageIndex': 1}, 'issues': []},
+                         {'paging': {'total': 1, 'pageIndex': 2}, 'issues': []},
+                         {'paging': {'total': 0, 'pageIndex': 1}, 'issues': [{'key': 'extra'}]}):
+            get = mock.Mock(return_value=response)
+            with self.assertRaises(ValueError):
+                pages(get, '/api/issues/search', {}, 'issues', 'key')
+        get = mock.Mock(side_effect=[{'paging': {'total': 2, 'pageIndex': 1}, 'issues': [{'key': 'one'}]},
+                                    {'paging': {'total': 3, 'pageIndex': 2}, 'issues': [{'key': 'two'}]}])
+        with self.assertRaisesRegex(ValueError, 'changed'):
+            pages(get, '/api/issues/search', {}, 'issues', 'key')
+
+    def test_task_fields_and_id_mismatch_rejected(self):
+        valid = ('projectKey=p\norganization=org\nserverUrl=https://sonarcloud.io\n'
+                 'dashboardUrl=https://sonarcloud.io/dashboard?id=p\nceTaskId=id\n'
+                 'ceTaskUrl=https://sonarcloud.io/api/ce/task?id=id\n')
+        changes = [valid + 'projectKey=p\n', valid + 'unknown=bad\n', valid.replace('id=id', 'id=other'),
+                   valid.replace('ceTaskId=id', 'ceTaskId=../bad'), valid.replace('projectKey=p', 'projectKey=other')]
+        with tempfile.TemporaryDirectory() as name:
+            path = Path(name) / 'report-task.txt'
+            for content in changes:
+                path.write_text(content)
+                with self.assertRaises(ValueError):
+                    task_properties(path, 'p', 'org')
+
+    def test_public_evidence_written_to_fixed_temp_file_preserves_real_gate(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            task = root / 'task'
+            task.mkdir()
+            (task / 'report-task.txt').write_text('projectKey=p\nserverUrl=https://sonarcloud.io\ndashboardUrl=https://sonarcloud.io/dashboard?id=p\nceTaskId=id\nceTaskUrl=https://sonarcloud.io/api/ce/task?id=id\n')
+            event = root / 'event.json'
+            event.write_text('{"number":12}')
+            env = {'RUNNER_TEMP': name, 'PROJECT_KEY': 'p', 'ORGANIZATION': None,
+                   'SOURCE_REVISION': 'a' * 40, 'GITHUB_EVENT_PATH': str(event),
+                   'GITHUB_EVENT_NAME': 'pull_request', 'GITHUB_REF': 'refs/pull/12/merge'}
+            result = write_evidence(task, env, PaginationTests().server('ERROR'))
+            self.assertFalse(evidence_passes(result))
+            self.assertEqual(json.loads((root / 'sonar-server-evidence.json').read_text())['gate']['projectStatus']['status'], 'ERROR')
+            self.assertTrue(result['partial'])
+            self.assertTrue(result['public_queries'])
+            (root / 'sonar-server-evidence.json').unlink()
+            (task / 'report-task.txt').unlink()
+            failed = write_evidence(task, env, PaginationTests().server())
+            self.assertFalse(evidence_passes(failed))
+            self.assertIn('blocker', failed)
+
+
+class ReportFailureTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name) / 'source'
+        self.root.mkdir()
+        (self.root / 'src').mkdir()
+        (self.root / 'src/value.rs').write_text('pub const VALUE: u8 = 1;\n')
+        (self.root / 'value.py').write_text('VALUE = 1\n')
+
+    def test_invalid_revisions_and_checkout_output_rejected_before_execution(self):
+        for revision, output in [('bad', Path(self.temp.name) / 'out'), ('a' * 40, self.root / 'out')]:
+            with mock.patch('sonar_reports.subprocess.run') as run:
+                with self.assertRaises(ValueError):
+                    generate(self.root, output, revision)
+                run.assert_not_called()
+
+    def test_source_boundaries_reject_hidden_directories_and_outside_files(self):
+        hidden = self.root / '.private'
+        hidden.mkdir()
+        (hidden / 'value.rs').write_text('hidden')
+        outside = Path(self.temp.name) / 'outside.rs'
+        outside.write_text('outside')
+        for path in (hidden / 'value.rs', outside, self.root / 'src'):
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                source_path(path, self.root)
+
+    def test_empty_wrong_language_and_empty_python_reports_rejected(self):
+        path = Path(self.temp.name) / 'report'
+        for data in ('', 'SF:value.py\nend_of_record\n'):
+            path.write_text(data)
+            with self.assertRaises(ValueError):
+                normalize_lcov(path, self.root)
+        path.write_text('<coverage><sources/></coverage>')
+        with self.assertRaises(ValueError):
+            normalize_python(path, self.root)
+
+    def test_clippy_nested_paths_manifest_and_target_preserved(self):
+        path = Path(self.temp.name) / 'clippy.jsonl'
+        span = {'file_name': str(self.root / 'src/value.rs')}
+        diagnostic = {'reason': 'compiler-message', 'manifest_path': 'value.py',
+                      'target': {'src_path': 'src/value.rs'},
+                      'message': {'spans': [span], 'children': [{'spans': [span.copy()]}]}}
+        path.write_text(json.dumps(diagnostic) + '\n{"reason":"build-finished","success":true}\n')
+        normalize_clippy(path, self.root, self.root)
+        normalized = json.loads(path.read_text().splitlines()[0])
+        self.assertEqual(normalized['message']['children'][0]['spans'][0]['file_name'], 'src/value.rs')
+        self.assertEqual(normalized['target']['src_path'], 'src/value.rs')
+        self.assertEqual(normalized['manifest_path'], 'value.py')
+        diagnostic['message']['spans'][0]['expansion'] = {'span': 'unreviewed'}
+        path.write_text(json.dumps(diagnostic) + '\n{"reason":"build-finished","success":true}\n')
+        with self.assertRaisesRegex(ValueError, 'macro expansion'):
+            normalize_clippy(path, self.root, self.root)
+        path.write_text('')
+        with self.assertRaisesRegex(ValueError, 'completion'):
+            normalize_clippy(path, self.root, self.root)
+
+    def test_missing_malformed_or_inconsistent_clippy_is_tool_failure(self):
+        path = Path(self.temp.name) / 'clippy.jsonl'
+        self.assertEqual(clippy_outcome(path, 1)['kind'], 'tool-error')
+        for data in ('not json', '', '{"reason":"build-finished","success":false}\n'):
+            path.write_text(data)
+            self.assertEqual(clippy_outcome(path, 0)['kind'], 'tool-error')
+
+    def test_missing_executable_records_127_instead_of_claiming_lint_success(self):
+        statuses = {}
+        with mock.patch('sonar_reports.subprocess.run', side_effect=OSError('missing')):
+            status = run_phase(self.root, {}, statuses, 'coverage', ['missing'])
+        self.assertEqual((status, statuses), (127, {'coverage': 127}))
+
+    def test_successful_report_orchestration_and_tool_version_guard(self):
+        def fake_run(args, **kwargs):
+            if 'llvm-cov' in args:
+                Path(args[args.index('--output-path') + 1]).write_text('SF:src/value.rs\nDA:1,1\nend_of_record\n')
+            elif 'clippy' in args:
+                kwargs['stdout'].write('{"reason":"build-finished","success":true}\n')
+            elif 'wheel' in args:
+                Path(args[-1], 'example.whl').write_bytes(b'fixture')
+            elif 'xml' in args:
+                Path(args[-1]).write_text('<coverage><sources><source>.</source></sources><packages><package><classes><class filename="value.py"><lines><line number="1" hits="1"/></lines></class></classes></package></packages></coverage>')
+            return subprocess.CompletedProcess(args, 0)
+        for version in ('cargo-llvm-cov 0.9.1', 'cargo-llvm-cov wrong'):
+            parent = Path(self.temp.name) / ('valid' if version.endswith('0.9.1') else 'wrong')
+            parent.mkdir()
+            output = parent / 'reports'
+            with mock.patch('sonar_reports.subprocess.run', side_effect=fake_run), \
+                 mock.patch('sonar_reports.subprocess.check_output', side_effect=['rustc 1.99.0', version, 'Coverage.py 7.17.2']):
+                if version.endswith('wrong'):
+                    with self.assertRaisesRegex(ValueError, 'reviewed pin'):
+                        generate(self.root, output, 'a' * 40)
+                else:
+                    generate(self.root, output, 'a' * 40)
+                    record = json.loads((output / 'report-inventory.json').read_text())
+                    self.assertEqual(len(record['generation_exit_codes']), 13)
+                    self.assertTrue(all(status == 0 for status in record['generation_exit_codes'].values()))
+                    self.assertEqual(record['source_paths']['python-coverage.xml'], ['value.py'])
+                    self.assertEqual(record['source_paths']['native.lcov'], ['src/value.rs'])

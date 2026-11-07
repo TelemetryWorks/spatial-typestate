@@ -172,6 +172,7 @@ jobs:
         shell: python
         run: |
           # BEGIN SONAR_ENVELOPE
+          CLIPPY_OUTCOMES = 'clippy_outcomes'
           import hashlib, json, os, re, shutil, stat
           from pathlib import Path
           import xml.etree.ElementTree as ET
@@ -195,19 +196,19 @@ jobs:
                   data[path.name] = path.read_bytes()
                   data[path.name].decode('utf-8')
               record = json.loads(data['report-inventory.json'])
-              if set(record) != {'schema', 'revision', 'generation_exit_codes', 'clippy_outcomes', 'reports', 'source_paths', 'tools', 'limitations'}:
+              if set(record) != {'schema', 'revision', 'generation_exit_codes', CLIPPY_OUTCOMES, 'reports', 'source_paths', 'tools', 'limitations'}:
                   raise ValueError('unexpected inventory fields')
               if record['schema'] != 1 or record['revision'] != revision or set(record['reports']) != set(REPORTS):
                   raise ValueError('report identity/schema mismatch')
               phases = {'core-std', 'core-no-std', 'native', 'clippy-core-std', 'clippy-core-no-std', 'clippy-native',
                         'wheel-build', 'wheel-install', 'python-packaging', 'python-pipeline', 'python-wheel', 'coverage-combine', 'coverage-xml'}
               clippy_phases = {'clippy-core-std', 'clippy-core-no-std', 'clippy-native'}
-              if set(record['clippy_outcomes']) != clippy_phases or set(record['generation_exit_codes']) != phases:
+              if set(record[CLIPPY_OUTCOMES]) != clippy_phases or set(record['generation_exit_codes']) != phases:
                   raise ValueError('missing phase status')
               for phase, status in record['generation_exit_codes'].items():
                   if type(status) is not int or (phase not in clippy_phases and status != 0):
                       raise ValueError('report transport failed; inspect phase diagnostics')
-                  if phase in clippy_phases and (record['clippy_outcomes'][phase]['exit_code'] != status or record['clippy_outcomes'][phase]['kind'] not in ('clean', 'lint-findings')):
+                  if phase in clippy_phases and (record[CLIPPY_OUTCOMES][phase]['exit_code'] != status or record[CLIPPY_OUTCOMES][phase]['kind'] not in ('clean', 'lint-findings')):
                       raise ValueError('Clippy tool/compile failure; diagnostics retained')
               for name in REPORTS:
                   if hashlib.sha256(data[name]).hexdigest() != record['reports'][name]:
@@ -263,7 +264,7 @@ jobs:
                       else:
                           raise ValueError('unexpected Clippy record')
                   phase = name.removesuffix('.jsonl')
-                  outcome = record['clippy_outcomes'][phase]
+                  outcome = record[CLIPPY_OUTCOMES][phase]
                   errors = [m for m in messages if m.get('level') == 'error']
                   warnings = [m for m in messages if m.get('level') == 'warning']
                   lint_exit = bool(errors) and all((m.get('code') or {}).get('code', '').startswith('clippy::') for m in errors)
@@ -634,7 +635,7 @@ jobs:
           PROJECT_KEY: ${{ needs.configuration.outputs.project }}
           ORGANIZATION: ${{ needs.configuration.outputs.organization }}
           SOURCE_REVISION: ${{ needs.configuration.outputs.revision }}
-        run: python3 .github/scripts/sonar_evidence.py --task-dir "$RUNNER_TEMP/sonar-task-evidence/sonar-task" --output "$RUNNER_TEMP/sonar-server-evidence.json"
+        run: python3 .github/scripts/sonar_evidence.py --task-dir "$RUNNER_TEMP/sonar-task-evidence/sonar-task"
       - name: Retain server evidence even when incomplete
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

@@ -11,9 +11,11 @@ import sys
 import xml.etree.ElementTree as ET
 
 
+PYTHON_COVERAGE = "python-coverage.xml"
+TOOLCHAIN = "+1.99.0"
 REPORTS = ("core-std.lcov", "core-no-std.lcov", "native.lcov",
            "clippy-core-std.jsonl", "clippy-core-no-std.jsonl", "clippy-native.jsonl",
-           "python-coverage.xml")
+           PYTHON_COVERAGE)
 
 
 def clippy_outcome(path, exit_code):
@@ -28,7 +30,11 @@ def clippy_outcome(path, exit_code):
     lint_exit = bool(errors) and all((m.get("code") or {}).get("code", "").startswith("clippy::") for m in errors)
     valid = len(finished) == 1 and ((exit_code == 0 and finished[0].get("success") is True and not errors)
                                    or (exit_code != 0 and lint_exit and finished[0].get("success") is False))
-    kind = "tool-error" if not valid else "lint-findings" if errors or warnings else "clean"
+    kind = "clean"
+    if not valid:
+        kind = "tool-error"
+    elif errors or warnings:
+        kind = "lint-findings"
     return {"exit_code": exit_code, "kind": kind, "warnings": len(warnings), "errors": len(errors)}
 
 
@@ -62,6 +68,15 @@ def normalize_lcov(path, root):
     return sorted(set(files))
 
 
+def map_spans(node, root, manifest_base):
+    for span in node.get("spans", []):
+        span["file_name"] = source_path(span["file_name"], root, manifest_base)
+        if span.get("expansion"):
+            raise ValueError("macro expansion span needs reviewed path mapping")
+    for child in node.get("children", []):
+        map_spans(child, root, manifest_base)
+
+
 def normalize_clippy(path, root, manifest_base):
     records = []
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -69,15 +84,7 @@ def normalize_clippy(path, root, manifest_base):
         # Cargo artifact/progress objects are not Clippy findings. Keep every
         # diagnostic and the actual final success value, without severity filters.
         if record.get("reason") == "compiler-message":
-            message = record["message"]
-            def map_spans(node):
-                for span in node.get("spans", []):
-                    span["file_name"] = source_path(span["file_name"], root, manifest_base)
-                    if span.get("expansion"):
-                        raise ValueError("macro expansion span needs reviewed path mapping")
-                for child in node.get("children", []):
-                    map_spans(child)
-            map_spans(message)
+            map_spans(record["message"], root, manifest_base)
             if "manifest_path" in record:
                 record["manifest_path"] = source_path(record["manifest_path"], root, manifest_base)
             if record.get("target", {}).get("src_path"):
@@ -90,6 +97,17 @@ def normalize_clippy(path, root, manifest_base):
     path.write_text("".join(json.dumps(r) + "\n" for r in records), encoding="utf-8")
 
 
+def python_source(value, root):
+    # Coverage aliases produce one of these checkout-relative spellings.
+    candidates = [root / value, root / "python" / value,
+                  root / "python/src" / value, root / "python/src/spatial_typestate" / value,
+                  root / "scripts" / value, root / ".github/scripts" / value]
+    resolved = {source_path(p, root) for p in candidates if p.is_file()}
+    if len(resolved) != 1:
+        raise ValueError("ambiguous/unmapped Python coverage source")
+    return resolved.pop()
+
+
 def normalize_python(path, root):
     data = path.read_text(encoding="utf-8")
     if "<!DOCTYPE" in data.upper() or "<!ENTITY" in data.upper():
@@ -97,15 +115,7 @@ def normalize_python(path, root):
     tree = ET.fromstring(data)
     files = []
     for node in tree.findall(".//class"):
-        value = node.attrib["filename"]
-        # Coverage aliases produce one of these checkout-relative spellings.
-        candidates = [root / value, root / "python" / value,
-                      root / "python/src" / value, root / "python/src/spatial_typestate" / value,
-                      root / "scripts" / value, root / ".github/scripts" / value]
-        resolved = {source_path(p, root) for p in candidates if p.is_file()}
-        if len(resolved) != 1:
-            raise ValueError("ambiguous/unmapped Python coverage source")
-        node.attrib["filename"] = resolved.pop()
+        node.attrib["filename"] = python_source(node.attrib["filename"], root)
         files.append(node.attrib["filename"])
     if not files:
         raise ValueError("Python coverage has no files")
@@ -115,6 +125,21 @@ def normalize_python(path, root):
         ET.SubElement(sources, "source").text = "."
     path.write_text(ET.tostring(tree, encoding="unicode") + "\n", encoding="utf-8")
     return sorted(set(files))
+
+
+def run_phase(root, env, statuses, name, args, destination=None, extra=None):
+    command_env = env | (extra or {})
+    try:
+        if destination:
+            with destination.open("w", encoding="utf-8") as stream:
+                result = subprocess.run(args, cwd=root, env=command_env, stdout=stream, check=False)
+        else:
+            result = subprocess.run(args, cwd=root, env=command_env, check=False)
+        status = result.returncode
+    except OSError:
+        status = 127
+    statuses[name] = status
+    return status
 
 
 def generate(root, output, revision):
@@ -128,27 +153,16 @@ def generate(root, output, revision):
     env = os.environ.copy()
     env.update(CARGO_BUILD_JOBS="2", RUSTUP_TOOLCHAIN="1.99.0", RUSTUP_AUTO_INSTALL="0")
     def run(name, args, destination=None, extra=None):
-        command_env = env | (extra or {})
-        try:
-            if destination:
-                with destination.open("w", encoding="utf-8") as stream:
-                    result = subprocess.run(args, cwd=root, env=command_env, stdout=stream, check=False)
-            else:
-                result = subprocess.run(args, cwd=root, env=command_env, check=False)
-            status = result.returncode
-        except OSError:
-            status = 127
-        statuses[name] = status
-        return status
+        return run_phase(root, env, statuses, name, args, destination, extra)
     for name, features, manifest in [
             ("core-std", ["--all-features"], []),
             ("core-no-std", ["--no-default-features", "--features", "no_std"], []),
             ("native", [], ["--manifest-path", "python/native/Cargo.toml"])]:
-        run(name, ["cargo", "+1.99.0", "llvm-cov", *manifest, "--locked", "--jobs", "2",
+        run(name, ["cargo", TOOLCHAIN, "llvm-cov", *manifest, "--locked", "--jobs", "2",
                    *features, "--lcov", "--output-path", str(output / (name + ".lcov")),
                    "--", "--test-threads=2"], extra={"RUSTFLAGS": "-Dwarnings"})
         status = run("clippy-" + name,
-            ["cargo", "+1.99.0", "clippy", *manifest, "--locked", "--jobs", "2",
+            ["cargo", TOOLCHAIN, "clippy", *manifest, "--locked", "--jobs", "2",
              "--all-targets", *features, "--message-format=json"],
             output / ("clippy-" + name + ".jsonl"), extra={"RUSTFLAGS": ""})
         # Report-only severity: an empty RUSTFLAGS intentionally removes the
@@ -166,15 +180,16 @@ def generate(root, output, revision):
         statuses["wheel-install"] = 1
     coverage_env = {"COVERAGE_FILE": str(output.parent / ".sonar-coverage")}
     config = str(root / ".github/security/coverage.ini")
+    coverage_config = "--rcfile=" + config
     for name, directory in [("packaging", "python/packaging_tests"),
                             ("pipeline", ".github/scripts"), ("wheel", "python/tests")]:
         run("python-" + name, [sys.executable, "-I", "-m", "coverage", "run",
-                              "--rcfile=" + config, "-m", "unittest", "discover", "-s", directory, "-v"],
+                              coverage_config, "-m", "unittest", "discover", "-s", directory, "-v"],
             extra=coverage_env)
-    run("coverage-combine", [sys.executable, "-m", "coverage", "combine", "--rcfile=" + config],
+    run("coverage-combine", [sys.executable, "-m", "coverage", "combine", coverage_config],
         extra=coverage_env)
-    run("coverage-xml", [sys.executable, "-m", "coverage", "xml", "--rcfile=" + config,
-                         "-o", str(output / "python-coverage.xml")], extra=coverage_env)
+    run("coverage-xml", [sys.executable, "-m", "coverage", "xml", coverage_config,
+                         "-o", str(output / PYTHON_COVERAGE)], extra=coverage_env)
     (output.parent / "generation-status.json").write_text(json.dumps(statuses, indent=2) + "\n", encoding="utf-8")
     (output.parent / "clippy-status.json").write_text(json.dumps(clippy, indent=2) + "\n", encoding="utf-8")
     if any(value != 0 for name, value in statuses.items() if name not in clippy) or any(outcome["kind"] == "tool-error" for outcome in clippy.values()):
@@ -185,9 +200,9 @@ def generate(root, output, revision):
     for name in REPORTS[3:6]:
         normalize_clippy(output / name, root,
                          root / "python/native" if name == "clippy-native.jsonl" else root)
-    paths["python-coverage.xml"] = normalize_python(output / "python-coverage.xml", root)
-    versions = {"rust": subprocess.check_output(["rustc", "+1.99.0", "-vV"], env=env, text=True),
-                "llvm_cov": subprocess.check_output(["cargo", "+1.99.0", "llvm-cov", "--version"], env=env, text=True),
+    paths[PYTHON_COVERAGE] = normalize_python(output / PYTHON_COVERAGE, root)
+    versions = {"rust": subprocess.check_output(["rustc", TOOLCHAIN, "-vV"], env=env, text=True),
+                "llvm_cov": subprocess.check_output(["cargo", TOOLCHAIN, "llvm-cov", "--version"], env=env, text=True),
                 "coverage": subprocess.check_output([sys.executable, "-m", "coverage", "--version"], env=env, text=True)}
     if "cargo-llvm-cov 0.9.1" not in versions["llvm_cov"] or "7.17.2" not in versions["coverage"]:
         raise ValueError("coverage tool version differs from reviewed pin")

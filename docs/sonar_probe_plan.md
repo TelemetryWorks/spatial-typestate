@@ -154,6 +154,27 @@ Public visibility makes issue and hotspot details public. The user and
 coordinator explicitly approved that disclosure for this public-source project;
 it is not an implicit helper side effect. Sonar remains **NOT restored** until
 real gate/issue/coverage evidence is reviewed.
+The public CE-task endpoint requires Execute Analysis permission even for a
+public project. Public evidence therefore validates the saved task metadata but
+makes no CE status claim. It binds PR results to the exact PR key/head SHA and
+rechecks both SHA and analysis date after collection; main uses the latest
+analysis revision/ID and rechecks it. Every gate condition is retained, including
+failures. Fixed output goes only to a new `sonar-server-evidence.json` under the
+runner-owned temporary directory; no caller-selected CLI destination remains.
+
+The first public PR gate failed security rating C and 70.7% new-code coverage.
+Focused fixes constrain evidence output, simplify report/metadata validation,
+and add meaningful source-boundary, transport, pagination, stale-analysis and
+orchestration failure tests. No rules, gates, source coverage exclusions or
+issue dispositions are changed.
+
+Sonar's newly created main branch is named `master`, with no analysis. A second
+temporary, PR-10/explicit-variable-guarded helper is proposed to rename that exact
+unanalysed main branch to `main` through the documented main-branch rename API.
+It fails on different identity, existing analysis, extra branches or conflicts,
+then verifies the result publicly. It will be removed immediately after success.
+This aligns names; it does not create a second branch or alter a quality gate.
+
 PR/non-main evidence is PARTIAL; complete hotspot inventory requires main.
 If PR analysis requires an initial main baseline, return for a deployment decision.
 Any Cargo requirement or degraded Rust analysis stops execution for reviewed

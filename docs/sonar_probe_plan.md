@@ -133,12 +133,33 @@ The credential step was skipped in that run.
 Official-host evidence is the zero REJECT counter together with a real Cloud
 server response and the trusted settings path. This proves precedence for the
 planted host settings, not which project or organization was used. Project and
-organization precedence rests on documented CLI precedence until authenticated
-server evidence confirms `telemetryworks` / `spatial-typestate`. Empty
+organization precedence was subsequently confirmed by authenticated run
+42424513286 at `6c010ae`: its log names `telemetryworks` / `spatial-typestate`. Empty
 `JDK_JAVA_OPTIONS` / `JAVA_TOOL_OPTIONS` notices on stderr are harmless.
 
-Actual Cargo-free analysis quality, source counts, per-file coverage import,
-Clippy import, hidden-path indexing and the quality gate remain **NOT RUN**.
+Run 42424513286 performed the first authenticated analysis: Python 17/17,
+GitHub Actions 4/4, Rust Enterprise and LCOV/Clippy import sensors ran without
+Cargo/Rust warnings or denied-tool attempts. Its real quality gate **FAILED**.
+Per-file Rust counts/coverage and the gate conditions remain unverified because
+public APIs return 404; the project visibility is not yet established.
+
+A temporary PR-10-only workflow, additionally gated by the explicit repository
+variable `SONAR_VISIBILITY_SETUP=pr-10-once`, is proposed for one-time setup.
+It has no checkout, runs isolated inline Python, and exposes the existing token
+only to that step. It reads the exact component identity/visibility, changes
+only `spatial-typestate` from private to public if its organization is exactly
+`telemetryworks`, then verifies authenticated and anonymous public reads.
+HTTP redirects, proxies, unexpected identities and missing permissions fail
+closed. Output contains only visibility/action/status codes, never API bodies.
+A 401/403 requires Project administer permission or a visibility change in Sonar;
+no alternate credential is sought. This exception is solely visibility setup,
+not a credentialed evidence collector. Remove the helper, its temporary tests
+and repository guard after success, then use the public evidence pipeline.
+
+Public visibility makes issue and hotspot details public. The user and
+coordinator explicitly approved that disclosure for this public-source project;
+it is not an implicit helper side effect. Sonar remains **NOT restored** until
+real gate/issue/coverage evidence is reviewed.
 PR/non-main evidence is PARTIAL; complete hotspot inventory requires main.
 If PR analysis requires an initial main baseline, return for a deployment decision.
 Any Cargo requirement or degraded Rust analysis stops execution for reviewed

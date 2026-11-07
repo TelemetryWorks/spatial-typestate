@@ -565,6 +565,7 @@ jobs:
           args: >-
             -Dsonar.log.level=INFO
             -Dsonar.verbose=false
+            -Dsonar.python.version=3.11,3.12,3.13,3.14
             -Dproject.settings=${{ runner.temp }}/sonar-settings.properties
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.scanner.sonarcloudUrl=https://sonarcloud.io
@@ -633,7 +634,7 @@ jobs:
           PROJECT_KEY: ${{ needs.configuration.outputs.project }}
           ORGANIZATION: ${{ needs.configuration.outputs.organization }}
           SOURCE_REVISION: ${{ needs.configuration.outputs.revision }}
-        run: python3 .github/scripts/sonar_evidence.py --task-dir "$RUNNER_TEMP/sonar-task-evidence" --output "$RUNNER_TEMP/sonar-server-evidence.json"
+        run: python3 .github/scripts/sonar_evidence.py --task-dir "$RUNNER_TEMP/sonar-task-evidence/sonar-task" --output "$RUNNER_TEMP/sonar-server-evidence.json"
       - name: Retain server evidence even when incomplete
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

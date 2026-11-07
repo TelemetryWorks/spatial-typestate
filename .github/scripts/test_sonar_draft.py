@@ -350,6 +350,12 @@ class GuardAndWorkflowTests(unittest.TestCase):
             with self.subTest(code=code, before=before, after=after), self.assertRaises(RuntimeError):
                 policy(code, text, '/tmp/settings', before, after)
 
+    def test_uploaded_task_common_root_matches_evidence_download_path(self):
+        text = WORKFLOW.read_text(encoding='utf-8')
+        self.assertIn('${{ runner.temp }}/sonar-task/report-task.txt', text)
+        self.assertIn('--task-dir "$RUNNER_TEMP/sonar-task-evidence/sonar-task"', text)
+        self.assertIn('-Dsonar.python.version=3.11,3.12,3.13,3.14', text)
+
     def test_probe_counter_reads_extended_iptables_row(self):
         function = inline('SONAR_PROBE')['counter']
         output = 'Chain SPATIAL_SONAR_PROBE (1 references)\n pkts bytes target prot opt in out source destination\n 0 0 REJECT all -- * * 0.0.0.0/0 192.0.2.1 reject-with icmp-port-unreachable\n'

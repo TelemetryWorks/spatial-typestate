@@ -345,6 +345,7 @@ class GuardAndWorkflowTests(unittest.TestCase):
         with mock.patch('subprocess.check_output', return_value=output):
             self.assertEqual(function(), 0)
 
+    @unittest.skipUnless(os.name == 'posix', 'native hosted POSIX find; no local tool installation')
     def test_filesystem_scan_ignores_nonexecutable_completion_and_stubs(self):
         with tempfile.TemporaryDirectory() as name:
             root = Path(name)
@@ -356,6 +357,42 @@ class GuardAndWorkflowTests(unittest.TestCase):
             self.assertEqual(report['matches'], [])
             with self.assertRaisesRegex(RuntimeError, 'timed out'):
                 inline('SONAR_HOSTED_REMOVAL')['scan_tools'](root, guard, timeout=-1)
+
+    @unittest.skipUnless(os.name == 'posix', 'native hosted POSIX find')
+    def test_native_scan_finds_executable_symlink_and_prunes_exactly(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            guard = root / 'guard'
+            guard.mkdir()
+            executable = root / 'cargo'
+            executable.write_text('test executable metadata only')
+            executable.chmod(0o755)
+            (root / 'rustc').symlink_to(executable)
+            for directory in ('proc', 'sys', 'dev', 'run', 'guard'):
+                (root / directory).mkdir(exist_ok=True)
+                (root / directory / 'cargo').symlink_to(executable)
+            result = inline('SONAR_HOSTED_REMOVAL')['scan_tools'](root, guard)
+            self.assertTrue(result['complete'])
+            self.assertEqual(set(result['matches']), {str(root / 'cargo'), str(root / 'rustc')})
+            self.assertEqual(result['exit_code'], 0)
+            self.assertIn('find', result['versions'])
+
+    @unittest.skipUnless(os.name == 'posix', 'native hosted POSIX find')
+    def test_native_scan_error_and_timeout_are_incomplete(self):
+        scope = inline('SONAR_HOSTED_REMOVAL')
+        original = subprocess.run
+        for status, error in [(1, b'Permission denied\n'), (124, b''), (137, b'')]:
+            def fake(command, **kwargs):
+                if command[0] != '/usr/bin/timeout':
+                    return original(command, **kwargs)
+                kwargs['stdout'].write(b'/partial/cargo\0')
+                kwargs['stderr'].write(error)
+                return subprocess.CompletedProcess(command, status)
+            with tempfile.TemporaryDirectory() as name, mock.patch('subprocess.run', side_effect=fake):
+                result = scope['scan_tools'](Path(name), Path(name) / 'guard')
+                self.assertFalse(result['complete'])
+                self.assertEqual(result['exit_code'], status)
+                self.assertEqual(result['matches'], ['/partial/cargo'])
 
 
 class PaginationTests(unittest.TestCase):

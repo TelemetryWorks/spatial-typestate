@@ -27,8 +27,9 @@ contracts and [math conventions](docs/math_conventions.md) before changing math.
 - docs/borrowed_validation.md: isolated borrowed/caller-local prototype, measurements
   and pending API/error/batch decisions; no production API promotion.
 - docs/ROADMAP.md: canonical remaining work; root ROADMAP.md points there.
-- .github/workflows/ci.yml: direct quality gates; CodeQL is separate. Sonar is
-  blocked pending owner setup and a hardened successor; see docs/security_analysis.md.
+- .github/workflows/ci.yml: direct quality gates; CodeQL is separate. The hardened
+  Sonar workflow requires real server/import/gate evidence before restoration is
+  claimed; see docs/security_analysis.md and docs/sonar_probe_plan.md.
 - Cargo.toml/Cargo.lock: no normal dependencies, dev-only tools; .cargo/config.toml
   denies warnings. rust-toolchain.toml pins development Rust 1.91.1.
 

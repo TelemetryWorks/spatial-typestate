@@ -4,6 +4,13 @@ Configuration checkpoint, 2026-11-05. No scan result is inferred from workflow
 success or absence of alerts. Core math/API, dependency graphs, pin/MSRV/no_std
 and Python provenance contracts stay unchanged.
 
+Update 2026-11-07: CodeQL was restored in PR #9. The hardened Sonar workflow is
+present for a reviewed first run with organization telemetryworks and project
+spatial-typestate in repository variables and SONAR_TOKEN as a secret. Sonar is
+NOT restored until actual analyzer/import/gate evidence passes review. The
+[probe delta](sonar_probe_plan.md) supersedes the historical owner-setup wait
+below; user authorization permits the first real scanner attempt.
+
 ## Verified baseline and access boundary
 
 - Clean main e22e269; CodeQL/Sonar workflows both disabled_inactivity.
@@ -18,7 +25,7 @@ and Python provenance contracts stay unchanged.
   logs expired; the unconditional scanner verification after gated installation
   is a configuration bug inferred from the file, not from recovered logs.
 
-Sonar is **not restored** until the owner confirms/imports the actual project,
+Historical setup requirement: Sonar is **not restored** until the owner confirms/imports the actual project,
 its key/organization, grants project-scoped Execute Analysis capability and
 securely configures SONAR_TOKEN in GitHub Actions. Project/org identifiers are
 non-secret configuration; use repository variables SONAR_PROJECT_KEY and
@@ -129,8 +136,10 @@ Record workflow activation, exact run/commit, scanner versions/query counts,
 extracted paths/file counts, alerts/issues and coverage. All active/external
 checks plus independent exact-head review must pass before merge, followed by
 post-merge verification. Sonar access does not hold up the independent CodeQL PR;
-state Sonar NOT restored and deliver its hardened successor only when owner setup
-allows real analysis and gate evidence. Never manufacture green. No releases/version changes.
+state Sonar NOT restored until real analysis and gate evidence pass review.
+The successor now proceeds under explicit first-run authorization; record actual
+Cloud provisioning/access errors rather than assume Server behavior.
+Never manufacture green. No releases/version changes.
 
 Public scheduled workflows can be disabled after 60 inactive days. Document a
 maintainer check of workflow activation/last analysis before merging or declaring

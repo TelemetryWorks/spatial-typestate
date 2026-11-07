@@ -45,8 +45,8 @@ on 1.85.0 and 1.91.1 in three feature modes. A runner installs thumbv7em-none-ea
 and cross-builds no_std thumb debug/release and MUSL library code; these are compile-only checks, not device runtime validation.
 CI target installation is authorized on the runner, not on the local computer.
 The redundant old Clippy/Rustfmt files were consolidated. CodeQL has a separate
-three-language workflow. Sonar is not restored and has no workflow; owner access
-and a hardened successor are pending. No new secrets are configured.
+three-language workflow. The hardened Sonar workflow is present; Sonar is NOT
+restored until actual analyzer/import/gate evidence is reviewed.
 Local PASS does not claim remote CI PASS; wait for the actual GitHub checks.
 
 ## Review and maintenance
@@ -154,10 +154,10 @@ does not report diff-informed mode; main pushes and schedules also run full scan
 Run `python -m unittest discover -s .github/scripts -p 'test_*.py'` for the
 inventory controls. No security issue may be suppressed merely to pass a gate.
 
-Sonar is **not restored**: its disabled legacy workflow is removed because its
-token exposure and unpinned tools are unsafe. Do not enable that old workflow or
-add its token while the old definition remains on main. Complete the owner setup
-and hardened successor in the [security plan](docs/security_analysis.md) first.
+Sonar is **not restored**: its unsafe legacy workflow was removed; the hardened
+successor uses confirmed nonsecret identifiers and a scoped token secret.
+Do not enable the old workflow. The [probe plan](docs/sonar_probe_plan.md) and
+actual server/analyzer/import/gate evidence govern restoration.
 Sonar findings will live in Sonar, not a duplicate GitHub SARIF export.
 
 Before claiming current security evidence, verify workflow activation and the

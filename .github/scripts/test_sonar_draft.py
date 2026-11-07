@@ -238,7 +238,7 @@ class GuardAndWorkflowTests(unittest.TestCase):
                        "GITHUB_WORKSPACE": "/home/runner/work/project/project", "RUNNER_TEMP": "/home/runner/work/_temp"}
         with mock.patch("shutil.rmtree") as remove:
             homes, files = namespace["removal_plan"](environment, "Linux")
-            self.assertEqual(homes, ["/home/runner/.cargo", "/home/runner/.rustup"])
+            self.assertEqual(homes, ["/home/runner/.cargo", "/home/runner/.rustup", "/etc/skel/.cargo", "/etc/skel/.rustup"])
             self.assertEqual(len(files), 6)
             remove.assert_not_called()
         for updates, system in [({"RUNNER_ENVIRONMENT": "self-hosted"}, "Linux"), ({}, "Windows"),
@@ -275,7 +275,7 @@ class GuardAndWorkflowTests(unittest.TestCase):
             self.assertFalse(marker.exists())
             # This does not prove PATH resolution, absolute-path denial or analyzer behavior.
 
-    def test_secret_and_execution_hold_invariants(self):
+    def test_secret_and_execution_gate_invariants(self):
         text = WORKFLOW.read_text()
         self.assertEqual(text.count("SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}"), 1)
         self.assertIn("TOKEN_PRESENT: ${{ secrets.SONAR_TOKEN != '' }}", text)
@@ -286,9 +286,41 @@ class GuardAndWorkflowTests(unittest.TestCase):
         self.assertNotIn("continue-on-error", text)
         self.assertNotIn("scannerBinariesUrl:", text)
         self.assertIn("skipSignatureVerification: false", text)
-        self.assertIn("LOCAL DRAFT: absolute-tool/isolation boundary unapproved", text)
+        self.assertNotIn("LOCAL DRAFT: absolute-tool/isolation boundary unapproved", text)
         self.assertIn("Denied tool attempts remain failures", text)
-        self.assertLess(text.index('LOCAL DRAFT: absolute-tool/isolation boundary unapproved'), text.index('Remove Rust tools (DISPOSABLE'))
+        self.assertLess(text.index('Remove Rust tools (DISPOSABLE'), text.index('Token-free precedence and authentication probe'))
+        self.assertLess(text.index('Token-free precedence and authentication probe'), text.index('Official credential-bearing scanner'))
+        self.assertLess(text.index('planted.unlink()'), text.index('Official credential-bearing scanner'))
+        self.assertIn('RUNNER_DEBUG: \'0\'', text)
+
+    def test_probe_requires_auth_failure_precedence_and_zero_counters(self):
+        policy = inline('SONAR_PROBE')['probe_result']
+        log = 'INFO Project root configuration file: /tmp/settings\nERROR https://api.sonarcloud.io failed: HTTP 401\n'
+        self.assertTrue(policy(1, log, '/tmp/settings', 0, 0)['expected_authentication_failure'])
+        self.assertTrue(policy(1, log + 'ERROR Re-run with full debug logging.\n', '/tmp/settings', 0, 0)['expected_authentication_failure'])
+        for code, text, before, after in [(0, log, 0, 0), (1, log, 0, 1), (1, log, 1, 1),
+                                          (1, log + 'DEBUG internal', 0, 0),
+                                          (1, 'ERROR unrelated failure', 0, 0)]:
+            with self.subTest(code=code, before=before, after=after), self.assertRaises(RuntimeError):
+                policy(code, text, '/tmp/settings', before, after)
+
+    def test_probe_counter_reads_extended_iptables_row(self):
+        function = inline('SONAR_PROBE')['counter']
+        output = 'Chain SPATIAL_SONAR_PROBE (1 references)\n pkts bytes target prot opt in out source destination\n 0 0 REJECT all -- * * 0.0.0.0/0 192.0.2.1 reject-with icmp-port-unreachable\n'
+        with mock.patch('subprocess.check_output', return_value=output):
+            self.assertEqual(function(), 0)
+
+    def test_filesystem_scan_ignores_nonexecutable_completion_and_stubs(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            guard = root / 'guard'
+            guard.mkdir()
+            (guard / 'cargo').write_text('guard')
+            (root / 'cargo').write_text('nonexecuting completion')
+            report = inline('SONAR_HOSTED_REMOVAL')['scan_tools'](root, guard)
+            self.assertEqual(report['matches'], [])
+            with self.assertRaisesRegex(RuntimeError, 'timed out'):
+                inline('SONAR_HOSTED_REMOVAL')['scan_tools'](root, guard, timeout=-1)
 
 
 class PaginationTests(unittest.TestCase):

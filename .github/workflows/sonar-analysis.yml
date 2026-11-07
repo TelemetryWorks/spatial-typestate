@@ -1,6 +1,5 @@
-# LOCAL DIAGNOSTIC DRAFT: do not publish/run with a token without boundary review.
-# The scanner preparation deliberately fails before credentials are available.
-name: Sonar analysis (unreviewed local draft)
+# Credential-bearing execution requires the preceding token-free checks to pass.
+name: Sonar analysis
 
 on:
   pull_request:
@@ -150,7 +149,7 @@ jobs:
           retention-days: 14
 
   scan:
-    name: Sonar scanner (execution boundary UNAPPROVED)
+    name: Sonar scanner
     needs: [configuration, reports]
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -296,7 +295,7 @@ jobs:
                   (destination / name).write_bytes(contents)
               (temporary / 'sonar-settings.properties').write_text('# Trusted empty settings; all parameters are explicit CLI inputs.\n')
           # END SONAR_ENVELOPE
-      - name: Prepare diagnostic guards and hold token execution
+      - name: Prepare diagnostic guards
         shell: python
         run: |
           # BEGIN SONAR_GUARD
@@ -323,17 +322,14 @@ jobs:
               known += [Path('/usr/bin/cargo'), Path('/usr/local/bin/cargo')]
               accessible = sorted({str(path) for path in known if path.is_file()})
               (temporary / 'scanner-boundary.json').write_text(json.dumps({'known_accessible_absolute_tools': accessible,
-                  'sandbox': False, 'execution_approved': False}, indent=2) + '\n')
-              # Deliberate local-draft hold. Requires a reviewed code change,
-              # not a repository variable, before any credential-bearing scan.
-              raise RuntimeError('LOCAL DRAFT: absolute-tool/isolation boundary unapproved; token execution blocked')
+                  'sandbox': False}, indent=2) + '\n')
           # END SONAR_GUARD
-      - name: Remove Rust tools (DISPOSABLE HOSTED RUNNER ONLY; behind hold)
+      - name: Remove Rust tools (DISPOSABLE HOSTED RUNNER ONLY)
         shell: bash
         run: |
           sudo --preserve-env=GITHUB_ACTIONS,RUNNER_ENVIRONMENT,RUNNER_OS,GITHUB_WORKSPACE,RUNNER_TEMP /usr/bin/python3 - <<'PY'
           # BEGIN SONAR_HOSTED_REMOVAL
-          import json, os, platform, shutil
+          import json, os, platform, shutil, stat, time
           from pathlib import Path, PurePosixPath
 
           def removal_plan(environment, system_name):
@@ -344,9 +340,36 @@ jobs:
                   raise RuntimeError('unexpected hosted workspace')
               if environment.get('RUNNER_TEMP') != '/home/runner/work/_temp':
                   raise RuntimeError('unexpected hosted temporary path')
-              homes = ['/home/runner/.cargo', '/home/runner/.rustup']
+              homes = ['/home/runner/.cargo', '/home/runner/.rustup', '/etc/skel/.cargo', '/etc/skel/.rustup']
               files = [directory + '/' + tool for directory in ('/usr/bin', '/usr/local/bin') for tool in ('cargo', 'rustc', 'rustup')]
               return homes, files
+
+          def scan_tools(root, guard, timeout=180):
+              start = time.monotonic()
+              skipped = {root / name for name in ('proc', 'sys', 'dev', 'run')} | {guard}
+              matches, errors = [], []
+              directories = 0
+              def error(value):
+                  errors.append(str(value.filename))
+              for directory, children, files in os.walk(root, topdown=True, followlinks=False, onerror=error):
+                  if time.monotonic() - start > timeout:
+                      raise RuntimeError('Rust tool filesystem scan timed out; incomplete')
+                  parent = Path(directory)
+                  directories += 1
+                  children[:] = [name for name in children if parent / name not in skipped]
+                  for name in children + files:
+                      if name not in ('cargo', 'rustc', 'rustup', 'cargo-clippy', 'clippy-driver'):
+                          continue
+                      path = parent / name
+                      try:
+                          info = path.lstat()
+                          if stat.S_ISLNK(info.st_mode) or (stat.S_ISREG(info.st_mode) and info.st_mode & 0o111):
+                              matches.append(str(path))
+                      except OSError:
+                          errors.append(str(path))
+              if errors:
+                  raise RuntimeError('Rust tool filesystem scan had unreadable paths; incomplete')
+              return {'matches': matches, 'directories': directories, 'skipped': sorted(map(str, skipped)), 'timeout_seconds': timeout}
 
           if __name__ == '__main__':
               homes, files = removal_plan(os.environ, platform.system())
@@ -379,12 +402,120 @@ jobs:
               remaining += [value for value in audit['known_accessible_absolute_tools'] if os.path.exists(value)]
               if remaining:
                   raise RuntimeError('known Rust tool paths remain accessible')
-              (temporary / 'rust-tools-removal.json').write_text(json.dumps({'hosted_only': True, 'removed_allowlist': homes + files, 'remaining_known_paths': remaining, 'sandbox': False}, indent=2) + '\n')
+              scanned = scan_tools(Path('/'), temporary / 'sonar-guard')
+              (temporary / 'rust-tools-removal.json').write_text(json.dumps({'hosted_only': True, 'removed_allowlist': homes + files, 'remaining_known_paths': remaining, 'scan': scanned, 'sandbox': False}, indent=2) + '\n')
+              if scanned['matches']:
+                  raise RuntimeError('Rust tools remain outside removal allowlist; no unrestricted fallback')
           # END SONAR_HOSTED_REMOVAL
           PY
-      - name: Official scanner (unreachable until boundary hold is reviewed)
+      - name: Protect and plant token-free settings probe
+        shell: python
+        run: |
+          import os, subprocess
+          from pathlib import Path
+          def iptables(*args):
+              subprocess.run(['sudo', '/usr/sbin/iptables', *args], check=True)
+          iptables('-N', 'SPATIAL_SONAR_PROBE')
+          iptables('-A', 'SPATIAL_SONAR_PROBE', '-d', '192.0.2.1/32', '-j', 'REJECT')
+          iptables('-I', 'OUTPUT', '1', '-d', '192.0.2.1/32', '-j', 'SPATIAL_SONAR_PROBE')
+          iptables('-C', 'OUTPUT', '-d', '192.0.2.1/32', '-j', 'SPATIAL_SONAR_PROBE')
+          iptables('-C', 'SPATIAL_SONAR_PROBE', '-d', '192.0.2.1/32', '-j', 'REJECT')
+          planted = Path(os.environ['GITHUB_WORKSPACE']) / 'sonar-project.properties'
+          if planted.exists() or planted.is_symlink():
+              raise RuntimeError('settings probe refuses to replace existing source configuration')
+          planted.write_text('sonar.host.url=http://192.0.2.1\nsonar.scanner.sonarcloudUrl=http://192.0.2.1\nsonar.scanner.apiBaseUrl=http://192.0.2.1\nsonar.projectKey=UNTRUSTED_PROBE\nsonar.organization=UNTRUSTED_PROBE\n')
+
+      - name: Install signed official scanner without credentials
         uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
         env:
+          RUNNER_DEBUG: '0'
+          SONAR_TOKEN: ''
+        with:
+          scannerVersion: 8.3.1.16491
+          skipSignatureVerification: false
+          args: --version
+
+      - name: Token-free precedence and authentication probe
+        env:
+          PROJECT_KEY: ${{ needs.configuration.outputs.project }}
+          ORGANIZATION: ${{ needs.configuration.outputs.organization }}
+          RUNNER_DEBUG: '0'
+          SONAR_TOKEN: ''
+          SONARCLOUD_URL: ''
+          SONAR_ROOT_CERT: ''
+          SONAR_SCANNER_JSON_PARAMS: '{}'
+          SONAR_SCANNER_OPTS: ''
+          SONAR_SCANNER_JAVA_OPTS: ''
+          JAVA_TOOL_OPTIONS: ''
+          JDK_JAVA_OPTIONS: ''
+          HTTP_PROXY: ''
+          HTTPS_PROXY: ''
+          ALL_PROXY: ''
+          http_proxy: ''
+          https_proxy: ''
+          all_proxy: ''
+        shell: python
+        run: |
+          # BEGIN SONAR_PROBE
+          import hashlib, json, os, re, shutil, subprocess
+          from pathlib import Path
+
+          def counter():
+              output = subprocess.check_output(['sudo', '/usr/sbin/iptables', '-nvx', '-L', 'SPATIAL_SONAR_PROBE'], text=True)
+              rows = [line.split() for line in output.splitlines() if line.split() and line.split()[0].isdigit()]
+              if len(rows) != 1 or rows[0][2] != 'REJECT' or rows[0][8].split('/')[0] != '192.0.2.1':
+                  raise RuntimeError('unreadable/unexpected probe firewall counter')
+              return int(rows[0][0])
+
+          def unsafe_log(log):
+              return bool(re.search(r'(?m)^(?:\d{2}:\d{2}:\d{2}(?:\.\d+)?\s+)?(?:DEBUG|TRACE)(?:\s|:|$)', log, re.I)
+                          or re.search(r'Authorization\s*:|Environment variables:', log, re.I))
+
+          def probe_result(code, log, settings, before, after):
+              if before != 0 or after != 0:
+                  raise RuntimeError('planted host was contacted; token step forbidden')
+              if unsafe_log(log):
+                  raise RuntimeError('unsafe probe logging; token step forbidden')
+              if code == 0 or not re.search(r'\b401\b|not authori[sz]ed|unauthori[sz]ed', log, re.I):
+                  raise RuntimeError('probe did not produce expected authentication failure')
+              if 'sonarcloud.io' not in log or settings not in log:
+                  raise RuntimeError('official host/settings precedence not demonstrated')
+              return {'expected_authentication_failure': True, 'before_packets': before, 'after_packets': after}
+
+          if __name__ == '__main__':
+              temporary = Path(os.environ['RUNNER_TEMP'])
+              cli = Path(shutil.which('sonar-scanner') or '').resolve(strict=True)
+              if not cli.is_file() or not any(cli.is_relative_to(Path(os.environ[key]).resolve()) for key in ('RUNNER_TEMP', 'RUNNER_TOOL_CACHE')):
+                  raise RuntimeError('scanner CLI outside signed-action installation roots')
+              settings = str(temporary / 'sonar-settings.properties')
+              args = [str(cli), '-Dproject.settings=' + settings, '-Dsonar.projectBaseDir=' + os.environ['GITHUB_WORKSPACE'],
+                      '-Dsonar.host.url=https://sonarcloud.io', '-Dsonar.scanner.sonarcloudUrl=https://sonarcloud.io',
+                      '-Dsonar.scanner.apiBaseUrl=https://api.sonarcloud.io', '-Dsonar.projectKey=' + os.environ['PROJECT_KEY'],
+                      '-Dsonar.organization=' + os.environ['ORGANIZATION'], '-Dsonar.log.level=INFO', '-Dsonar.verbose=false']
+              env = os.environ.copy()
+              env.pop('SONAR_TOKEN', None)
+              env.update(PATH=str(temporary / 'sonar-guard') + ':/usr/bin:/bin', CARGO=str(temporary / 'sonar-guard/cargo'),
+                         RUSTC=str(temporary / 'sonar-guard/rustc'), CARGO_HOME=str(temporary / 'sonar-neutral-cargo'),
+                         RUSTUP_HOME=str(temporary / 'sonar-neutral-rustup'), RUSTUP_AUTO_INSTALL='0', RUSTUP_TOOLCHAIN='1.99.0')
+              before = counter()
+              result = subprocess.run(args, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, timeout=600)
+              after = counter()
+              if unsafe_log(result.stdout):
+                  raise RuntimeError('unsafe token-free probe logging; output withheld')
+              print(result.stdout)  # Token-free INFO output; keep every WARN/ERROR reviewable.
+              record = probe_result(result.returncode, result.stdout, settings, before, after)
+              record['cli_sha256'] = hashlib.sha256(cli.read_bytes()).hexdigest()
+              (temporary / 'precedence-probe.json').write_text(json.dumps(record, indent=2) + '\n')
+              planted = Path(os.environ['GITHUB_WORKSPACE']) / 'sonar-project.properties'
+              if planted.is_symlink() or not planted.read_text().startswith('sonar.host.url=http://192.0.2.1\n'):
+                  raise RuntimeError('planted settings changed unexpectedly')
+              planted.unlink()  # Do not index a probe-only file in the real analysis.
+          # END SONAR_PROBE
+
+      - name: Official credential-bearing scanner
+        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
+        env:
+          RUNNER_DEBUG: '0'
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
           SONAR_REGION: ''
@@ -417,6 +548,8 @@ jobs:
           skipSignatureVerification: false
           projectBaseDir: ${{ github.workspace }}
           args: >-
+            -Dsonar.log.level=INFO
+            -Dsonar.verbose=false
             -Dproject.settings=${{ runner.temp }}/sonar-settings.properties
             -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.scanner.sonarcloudUrl=https://sonarcloud.io
@@ -443,6 +576,11 @@ jobs:
           attempts = Path(os.environ['RUNNER_TEMP']) / 'sonar-tool-attempts.txt'
           if attempts.exists() and attempts.stat().st_size:
               raise RuntimeError('Analyzer attempted a denied tool; no supported-analysis claim')
+          import subprocess
+          output = subprocess.check_output(['sudo', '/usr/sbin/iptables', '-nvx', '-L', 'SPATIAL_SONAR_PROBE'], text=True)
+          rows = [line.split() for line in output.splitlines() if line.split() and line.split()[0].isdigit()]
+          if len(rows) != 1 or rows[0][2] != 'REJECT' or int(rows[0][0]) != 0:
+              raise RuntimeError('probe firewall counter missing/nonzero; analysis is not validated')
       - name: Retain scanner diagnostic/task evidence without credentials
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -452,6 +590,7 @@ jobs:
             ${{ runner.temp }}/sonar-task/report-task.txt
             ${{ runner.temp }}/scanner-boundary.json
             ${{ runner.temp }}/rust-tools-removal.json
+            ${{ runner.temp }}/precedence-probe.json
             ${{ runner.temp }}/sonar-tool-attempts.txt
           if-no-files-found: warn
           retention-days: 14

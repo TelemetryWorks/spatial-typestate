@@ -4,6 +4,11 @@
 
 ### Changed
 
+- Add a pinned Sonar workflow with isolated token-free reports and precedence
+  probe, hosted-runner Rust-tool checks and a credential-bearing official scanner
+  step. Sonar restoration requires actual server/import/gate evidence; configured
+  identifiers alone are not a passing analysis. No runtime/API change.
+
 - Restore CodeQL for Rust, Python and Actions with pinned actions, extended
   security queries and retained extraction evidence. Remove the disabled unsafe
   Sonar workflow and its duplicate SARIF exporter; Sonar is **not restored**

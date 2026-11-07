@@ -1,6 +1,14 @@
 # Hardened Sonar successor: local design and draft
 
-Status: design checkpoint, not deployed, not a scan. Sonar is **NOT restored**.
+Status, 2026-11-07: implementation prepared for reviewed deployment and the first
+real scan. Sonar is **NOT restored** until actual evidence passes review.
+The user authorized organization telemetryworks / project spatial-typestate;
+these nonsecret repository variables are verified. SONAR_TOKEN remains secret.
+The workflow now replaces the local hold with the reviewed token-free probe and
+hosted-only tool checks. The sections below record the original diagnostic design;
+the executable workflow and [probe delta](sonar_probe_plan.md) govern the run.
+
+Original offline checkpoint:
 Based on clean main 53685087860332e38a6f6553f879b2e9c4399750 after PR #9.
 No project/org identity or credential is configured. This work stays uncommitted
 locally until the coordinator reviews the publication boundary. No branch,

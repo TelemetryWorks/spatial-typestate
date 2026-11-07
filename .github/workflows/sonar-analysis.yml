@@ -451,9 +451,6 @@ jobs:
           HTTP_PROXY: ''
           HTTPS_PROXY: ''
           ALL_PROXY: ''
-          http_proxy: ''
-          https_proxy: ''
-          all_proxy: ''
         shell: python
         run: |
           # BEGIN SONAR_PROBE
@@ -494,6 +491,10 @@ jobs:
                       '-Dsonar.organization=' + os.environ['ORGANIZATION'], '-Dsonar.log.level=INFO', '-Dsonar.verbose=false']
               env = os.environ.copy()
               env.pop('SONAR_TOKEN', None)
+              for key in ('http_proxy', 'https_proxy', 'all_proxy', 'no_proxy'):
+                  if os.environ.get(key):
+                      raise RuntimeError('unexpected inherited proxy; credential step forbidden')
+                  env.pop(key, None)
               env.update(PATH=str(temporary / 'sonar-guard') + ':/usr/bin:/bin', CARGO=str(temporary / 'sonar-guard/cargo'),
                          RUSTC=str(temporary / 'sonar-guard/rustc'), CARGO_HOME=str(temporary / 'sonar-neutral-cargo'),
                          RUSTUP_HOME=str(temporary / 'sonar-neutral-rustup'), RUSTUP_AUTO_INSTALL='0', RUSTUP_TOOLCHAIN='1.99.0')
@@ -531,10 +532,6 @@ jobs:
           HTTPS_PROXY: ''
           ALL_PROXY: ''
           NO_PROXY: ''
-          http_proxy: ''
-          https_proxy: ''
-          all_proxy: ''
-          no_proxy: ''
           CARGO_HOME: ${{ runner.temp }}/sonar-neutral-cargo
           RUSTUP_HOME: ${{ runner.temp }}/sonar-neutral-rustup
           CARGO: ${{ runner.temp }}/sonar-guard/cargo

@@ -232,6 +232,24 @@ class EnvelopeTests(unittest.TestCase):
 
 
 class GuardAndWorkflowTests(unittest.TestCase):
+    def test_github_env_keys_have_no_case_insensitive_duplicates(self):
+        import re
+        indent, keys = None, set()
+        for line in WORKFLOW.read_text().splitlines():
+            if not line.strip() or line.lstrip().startswith('#'):
+                continue
+            width = len(line) - len(line.lstrip())
+            if indent is not None and width <= indent:
+                indent, keys = None, set()
+            if line.strip() == 'env:':
+                indent, keys = width, set()
+            elif indent is not None and width == indent + 2:
+                match = re.match(r'\s*([A-Za-z_][A-Za-z0-9_-]*):', line)
+                self.assertIsNotNone(match)
+                key = match[1].casefold()
+                self.assertNotIn(key, keys, 'GitHub rejects case-insensitive env duplicates')
+                keys.add(key)
+
     def test_removal_plan_is_hosted_only_and_literal_without_deleting(self):
         namespace = inline("SONAR_HOSTED_REMOVAL")
         environment = {"GITHUB_ACTIONS": "true", "RUNNER_ENVIRONMENT": "github-hosted", "RUNNER_OS": "Linux",

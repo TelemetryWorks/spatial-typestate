@@ -182,6 +182,23 @@ class EnvelopeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             normalize_python(path, self.root)
 
+    def test_python_coverage_script_roots_and_ambiguity(self):
+        for directory in ('scripts', '.github/scripts'):
+            (self.root / directory).mkdir(parents=True)
+        (self.root / 'scripts/study.py').write_text('value = 1\n')
+        (self.root / '.github/scripts/pipeline.py').write_text('value = 1\n')
+        path = self.directory / 'python-coverage.xml'
+        path.write_text('<coverage><sources><source>.github/scripts</source><source>scripts</source></sources><packages><package><classes>'
+                        '<class filename="study.py"><lines><line number="1" hits="3"/></lines></class>'
+                        '<class filename="pipeline.py"><lines><line number="1" hits="2"/></lines></class>'
+                        '</classes></package></packages></coverage>')
+        self.assertEqual(normalize_python(path, self.root), ['.github/scripts/pipeline.py', 'scripts/study.py'])
+        self.assertIn('hits="3"', path.read_text())
+        (self.root / 'python/pipeline.py').write_text('duplicate = 1\n')
+        path.write_text(self.xml.replace('python/example.py', 'pipeline.py'))
+        with self.assertRaisesRegex(ValueError, 'ambiguous/unmapped'):
+            normalize_python(path, self.root)
+
     def test_clippy_keeps_all_diagnostics_without_severity_filter(self):
         path = self.directory / "clippy-core-std.jsonl"
         rows = [{"reason": "compiler-message", "message": {"level": level,

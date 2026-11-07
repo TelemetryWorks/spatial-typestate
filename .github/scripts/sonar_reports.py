@@ -100,7 +100,8 @@ def normalize_python(path, root):
         value = node.attrib["filename"]
         # Coverage aliases produce one of these checkout-relative spellings.
         candidates = [root / value, root / "python" / value,
-                      root / "python/src" / value, root / "python/src/spatial_typestate" / value]
+                      root / "python/src" / value, root / "python/src/spatial_typestate" / value,
+                      root / "scripts" / value, root / ".github/scripts" / value]
         resolved = {source_path(p, root) for p in candidates if p.is_file()}
         if len(resolved) != 1:
             raise ValueError("ambiguous/unmapped Python coverage source")

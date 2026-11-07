@@ -120,26 +120,30 @@ SONAR_TOKEN stays an Actions secret, untouched. No token request in chat.
    real gate decides the PR. Private APIs needing access require a new reviewed
    evidence-access boundary, not another token scope silently added to scripts.
 
-## Offline work and remaining decisions
+## Execution checkpoint and remaining evidence
 
-The preserved executable draft still has its reviewed hold and known-path-only
-audit. The filesystem walk, network rule, settings probe and hold removal above
-are proposals, not implemented or tested behavior. No credentials are needed to
-review them. Before code changes, reviewer/coordinator must settle the exact
-filesystem plan, narrow firewall mechanism, token-free probe and launch event
-after the owner confirms identity/visibility. There is no throwaway-project
-authorization and no permission to weaken CI or accept findings. Reviewer launch
-proposal, not yet approved: a reviewed PR probe with PARTIAL evidence, explicit
-merge authorization under "Sonar NOT restored", then first full main analysis
-and restoration decision from that evidence. If PR analysis requires an initial
-main baseline, return for a decision. A fail-closed main/scheduled analysis must
-remain red on real failure; owner/coordinator must accept that delivery boundary.
-Private-project evidence access is a separate unresolved decision.
+The reviewed execution delta removed the hold. Run 42423706104 at `8014a4b`
+passed the hosted-only removal and full filesystem absence check, firewall and
+signed scanner installation. The token-free scanner loaded the trusted external
+settings file, logged `Communicating with SonarQube Cloud`, provisioned its JRE,
+and returned `Not authorized or organization not found`. Its INFO log does not
+print the host URL; the probe now accepts that exact Cloud connection marker.
+The credential step was skipped in that run.
 
-Local review can validate target/scan planning and failure cases with temporary
-fixtures only. Real Cargo-free quality, GPG/bootstrap behavior, settings precedence,
-metadata fields, hidden indexing, coverage import and the quality gate remain
-**NOT RUN**. A green workflow alone never closes these checks.
+Official-host evidence is the zero REJECT counter together with a real Cloud
+server response and the trusted settings path. This proves precedence for the
+planted host settings, not which project or organization was used. Project and
+organization precedence rests on documented CLI precedence until authenticated
+server evidence confirms `telemetryworks` / `spatial-typestate`. Empty
+`JDK_JAVA_OPTIONS` / `JAVA_TOOL_OPTIONS` notices on stderr are harmless.
+
+Actual Cargo-free analysis quality, source counts, per-file coverage import,
+Clippy import, hidden-path indexing and the quality gate remain **NOT RUN**.
+PR/non-main evidence is PARTIAL; complete hotspot inventory requires main.
+If PR analysis requires an initial main baseline, return for a deployment decision.
+Any Cargo requirement or degraded Rust analysis stops execution for reviewed
+isolation changes; no unrestricted fallback is authorized. Sonar is **NOT restored**.
+A green workflow alone never closes these checks.
 
 Primary references: [mandatory token and logging parameters](https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/analysis-parameters/parameters-not-settable-in-ui),
 [scanner settings precedence](https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/analysis-parameters/configuration-overview),

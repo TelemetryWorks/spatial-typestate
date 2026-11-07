@@ -488,9 +488,14 @@ jobs:
                   raise RuntimeError('unsafe probe logging; token step forbidden')
               if code == 0 or not re.search(r'\b401\b|not authori[sz]ed|unauthori[sz]ed', log, re.I):
                   raise RuntimeError('probe did not produce expected authentication failure')
-              if 'sonarcloud.io' not in log or settings not in log:
+              # CLI 8.3 reports the Cloud product name at INFO, not its URL.
+              official_host = ('sonarcloud.io' in log or bool(re.search(
+                  r'(?m)^(?:\d{2}:\d{2}:\d{2}(?:\.\d+)?\s+)?INFO\s+Communicating with SonarQube Cloud\s*$', log)))
+              if not official_host or settings not in log:
                   raise RuntimeError('official host/settings precedence not demonstrated')
-              return {'expected_authentication_failure': True, 'before_packets': before, 'after_packets': after}
+              return {'expected_authentication_failure': True, 'before_packets': before, 'after_packets': after,
+                      'official_host_evidence': 'zero REJECT counter, real Cloud server response, trusted settings path',
+                      'project_organization_precedence': 'documented CLI precedence; requires authenticated server confirmation'}
 
           if __name__ == '__main__':
               temporary = Path(os.environ['RUNNER_TEMP'])

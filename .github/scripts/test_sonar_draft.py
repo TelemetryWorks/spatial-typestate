@@ -334,6 +334,16 @@ class GuardAndWorkflowTests(unittest.TestCase):
         log = 'INFO Project root configuration file: /tmp/settings\nERROR https://api.sonarcloud.io failed: HTTP 401\n'
         self.assertTrue(policy(1, log, '/tmp/settings', 0, 0)['expected_authentication_failure'])
         self.assertTrue(policy(1, log + 'ERROR Re-run with full debug logging.\n', '/tmp/settings', 0, 0)['expected_authentication_failure'])
+        actual = ('23:12:00.123 INFO  Project root configuration file: /tmp/settings\n'
+                  '23:12:02.494 INFO  Communicating with SonarQube Cloud\n'
+                  '23:12:09.336 ERROR Fail to load the list of plugins installed on the server: '
+                  'Not authorized or organization not found\n')
+        self.assertTrue(policy(1, actual, '/tmp/settings', 0, 0)['expected_authentication_failure'])
+        for invalid in (actual.replace('SonarQube Cloud', 'SonarQube Server'),
+                        actual.replace('/tmp/settings', '/untrusted/settings'),
+                        actual.replace('INFO  Communicating', 'ERROR Communicating')):
+            with self.assertRaises(RuntimeError):
+                policy(1, invalid, '/tmp/settings', 0, 0)
         for code, text, before, after in [(0, log, 0, 0), (1, log, 0, 1), (1, log, 1, 1),
                                           (1, log + 'DEBUG internal', 0, 0),
                                           (1, 'ERROR unrelated failure', 0, 0)]:

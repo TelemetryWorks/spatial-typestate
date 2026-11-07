@@ -273,7 +273,8 @@ class GuardAndWorkflowTests(unittest.TestCase):
                        "GITHUB_WORKSPACE": "/home/runner/work/project/project", "RUNNER_TEMP": "/home/runner/work/_temp"}
         with mock.patch("shutil.rmtree") as remove:
             homes, files = namespace["removal_plan"](environment, "Linux")
-            self.assertEqual(homes, ["/home/runner/.cargo", "/home/runner/.rustup", "/etc/skel/.cargo", "/etc/skel/.rustup"])
+            self.assertEqual(homes, ["/home/runner/.cargo", "/home/runner/.rustup", "/etc/skel/.cargo", "/etc/skel/.rustup", "/home/packer/.cargo", "/home/packer/.rustup"])
+            self.assertNotIn('/home/packer', homes)
             self.assertEqual(len(files), 6)
             remove.assert_not_called()
         for updates, system in [({"RUNNER_ENVIRONMENT": "self-hosted"}, "Linux"), ({}, "Windows"),

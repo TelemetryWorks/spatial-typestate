@@ -340,7 +340,7 @@ jobs:
                   raise RuntimeError('unexpected hosted workspace')
               if environment.get('RUNNER_TEMP') != '/home/runner/work/_temp':
                   raise RuntimeError('unexpected hosted temporary path')
-              homes = ['/home/runner/.cargo', '/home/runner/.rustup', '/etc/skel/.cargo', '/etc/skel/.rustup']
+              homes = ['/home/runner/.cargo', '/home/runner/.rustup', '/etc/skel/.cargo', '/etc/skel/.rustup', '/home/packer/.cargo', '/home/packer/.rustup']
               files = [directory + '/' + tool for directory in ('/usr/bin', '/usr/local/bin') for tool in ('cargo', 'rustc', 'rustup')]
               return homes, files
 

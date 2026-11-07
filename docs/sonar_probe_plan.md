@@ -1,0 +1,187 @@
+# Sonar probe delta: design only
+
+Updated 2026-11-07. User now authorizes actual reviewed deployment/scan with
+organization telemetryworks and project spatial-typestate. Both nonsecret
+repository variables are verified; redundant identity secrets were removed only
+after verification, and SONAR_TOKEN is untouched. The implementation replaces
+the saved hold with the probe/tool gates below, subject to exact-delta review
+before publication or execution. No new owner dashboard/URL wait is imposed.
+Sonar remains **NOT restored** pending real evidence. No visibility scanner
+property is invented; Cloud project creation/visibility is not inferred from
+Server behavior. Record actual first-run provisioning/errors and public API
+result, and review any documented public-creation API boundary if needed.
+
+The following records the original 2026-11-06 design and its accepted boundaries.
+
+## Configuration facts and launch gate
+
+- Explicitly labeled GitHub metadata: zero repository variables; three Actions
+  secrets named SONAR_ORGANIZATION, SONAR_PROJECT_KEY and SONAR_TOKEN.
+- No secret value was read. A mistaken attempt to read a nonexistent token
+  variable failed before any value was obtained; no configuration changed.
+- Public organization search returns key telemetryworks and display name
+  Telemetry Works; the uppercase search has no matching organization.
+- Public component lookups for spatial-typestate and
+  TelemetryWorks_spatial-typestate return 404. This does not distinguish an
+  absent project from an inaccessible/private one. No actual project URL or
+  visibility is confirmed. Do not create/import one as a scanner side effect.
+
+Owner must provide the actual Sonar project URL and public/private status, and
+confirm exact project/organization keys, GitHub binding, CI analysis method,
+quality gate and PR capability. Only then set the two nonsecret repository
+variables, verify them, and remove redundant identity secrets. Do not read identity
+secrets to work around missing variables or send them through masked job outputs.
+SONAR_TOKEN stays an Actions secret, untouched. No token request in chat.
+
+## Proposed reviewed execution delta
+
+1. **Approval before publication.** Reviewer and coordinator approve the exact
+   identity, launch event, source SHA and hold-removal diff before a same-repo
+   branch/PR or probe is published. Publishing a PR can run its workflow with
+   secrets. Do not assume a new manual workflow is already dispatchable. The
+   launch mechanism depends on the confirmed project/PR baseline and GitHub
+   workflow registration; do not merge merely to initialize a scanner.
+2. **Cargo remains absent.** Keep the disposable-hosted-runner/literal-target
+   removal guards. Add a privileged, metadata-only filesystem walk after removal,
+   without executing or reading candidate binaries. Check cargo/rustc/rustup and
+   Clippy executable regular files and symlinks by name, outside only the exact
+   diagnostic stub directory; non-executable completion files do not count.
+   Propose adding only the literal /etc/skel/.cargo and /etc/skel/.rustup template
+   roots to the existing deletion allowlist, subject to the same resolved-target
+   review. No runtime expansion. Unexpected remnants fail.
+   Record scan roots, explicitly skipped virtual filesystems (/proc, /sys, /dev,
+   /run), unreadable paths, timeout and matches. Unreadable nonvirtual subtrees,
+   timeout (180 seconds) or an incomplete scan fail closed. Do not follow
+   directory symlinks. No broad /usr, /opt or tool-cache deletion.
+   A future implementation must state those limits instead of calling this an
+   unrestricted whole-machine proof. No local removal or scan of user tools.
+3. **No sandbox claim.** Known tool removal and frontdoor stubs do not prove an
+   arbitrary-process boundary: renamed binaries, interpreter paths and other
+   analyzers' children remain outside that claim. Scanner children inherit its
+   token. Retain the attempt-file check even when the scanner swallows a failure.
+   If Cargo is required, a Rust warning appears, files are skipped or coverage
+   degrades, stop for reviewed isolation/support decisions. No tool-restoration
+   fallback, rule suppression or reduced-Rust success claim.
+4. **Token-free settings precedence probe first.** After a network safety review, plant a temporary
+   untracked sonar-project.properties containing a distinct bogus project/org,
+   sonar.host.url, sonar.scanner.sonarcloudUrl and sonar.scanner.apiBaseUrl at an
+   HTTP endpoint in TEST-NET-1 (192.0.2.1). Before any token exists in a step,
+   install and verify an outbound REJECT rule for that exact IP on the disposable
+   runner; absence of the firewall tool or failed verification blocks the probe.
+   Do not rely on a reserved address alone to protect a credential. Keep the
+   trusted settings file outside checkout and fixed official host/bootstrap/API
+   CLI arguments. Run the same pinned scanner with SONAR_TOKEN absent first;
+   classify only the expected authentication failure, not a successful anonymous
+   analysis or an unrelated error, as a probe outcome. Require readable REJECT
+   counters equal to zero before and after, and observable official-host/settings
+   evidence. Otherwise stop before the token step. Keep the firewall rule for
+   both invocations and check it again afterward. Later require the confirmed
+   authenticated server project/org/revision. This proves only the planted keys
+   for which evidence exists; never infer unobserved effective settings. This is
+   a proposed narrow probe rule, not an approved
+   egress sandbox. No packet contents or authentication headers are captured.
+5. **Final token/log boundary.** Use the pinned official action
+   token-free with `args: --version` to install/GPG-verify the pinned CLI; verify
+   its installed path/version/hash. Reviewed inline Python may invoke that same
+   CLI ONLY for the token-free authentication probe, permitting expected-failure
+   classification without continue-on-error. It must preserve all WARN/ERROR
+   evidence and confirm INFO format with no DEBUG output or sensitive settings
+   before any credential-bearing step. If that evidence is insufficient, stop.
+   The token-bearing scan stays on the pinned official action with normal INFO
+   logs; no custom credential-owning wrapper, buffering or warning filter.
+   SONAR_TOKEN stays only in that official step's environment. No checked-out
+   script runs with it. No token argv/file, shell
+   trace, environment dump, scanner-context dump or HTTP header logging. Force
+   RUNNER_DEBUG=0, sonar.log.level=INFO and sonar.verbose=false; retain the existing
+   cleared proxy/certificate/JSON/JVM settings. Recheck the pinned action's token
+   handling and scanner logging contract before executing; never use GitHub
+   "re-run with debug logging" for this workflow. The token-free probe confirms
+   the log level/format; do not add an in-job token-bearing wrapper merely to
+   inspect the authenticated log. Keep all unexpected Rust/Cargo WARN/ERROR lines
+   reviewable in the official action log. The earlier proposed DEBUG post-check
+   is replaced by token-free confirmation plus forced step-level debug-off.
+   GitHub masking is secondary to INFO/no dumps/no credential argv and verified
+   vendor handling. Unexpected token-like output blocks the run and evidence
+   retention; the owner rotates the token before retry. Do not paste the output
+   or request a replacement credential in chat.
+6. **Retain allowlisted evidence, not raw debug logs.** Upload only validated
+   task metadata, tool/removal/scan summaries, report hashes and public server
+   responses for 14 days. No raw scanner debug log artifact, full scanner context,
+   process environment or unrestricted .scannerwork archive. GitHub's platform
+   job-log retention is separate and is not changed or claimed as 14 days here.
+   Review required log facts without echoing credentials. INFO/raw platform logs
+   are not pre-certified secret-free: do not publish excerpts if a leak is suspected.
+7. **Actual analysis evidence.** Require successful signature verification,
+   correct task/source identity, no denied tools or Rust/Cargo warning, server
+   Rust/Python indexed paths, imported per-file coverage, Clippy diagnostics and
+   gate conditions/status. Source/test sets remain disjoint; .github analysis is
+   unproven until the server shows it. Retain full issue inventories and complete
+   main-branch hotspots. PR/non-main evidence stays explicitly PARTIAL and the
+   real gate decides the PR. Private APIs needing access require a new reviewed
+   evidence-access boundary, not another token scope silently added to scripts.
+
+## Execution checkpoint and remaining evidence
+
+The reviewed execution delta removed the hold. Run 42423706104 at `8014a4b`
+passed the hosted-only removal and full filesystem absence check, firewall and
+signed scanner installation. The token-free scanner loaded the trusted external
+settings file, logged `Communicating with SonarQube Cloud`, provisioned its JRE,
+and returned `Not authorized or organization not found`. Its INFO log does not
+print the host URL; the probe now accepts that exact Cloud connection marker.
+The credential step was skipped in that run.
+
+Official-host evidence is the zero REJECT counter together with a real Cloud
+server response and the trusted settings path. This proves precedence for the
+planted host settings, not which project or organization was used. Project and
+organization precedence was subsequently confirmed by authenticated run
+42424513286 at `6c010ae`: its log names `telemetryworks` / `spatial-typestate`. Empty
+`JDK_JAVA_OPTIONS` / `JAVA_TOOL_OPTIONS` notices on stderr are harmless.
+
+Run 42424513286 performed the first authenticated analysis: Python 17/17,
+GitHub Actions 4/4, Rust Enterprise and LCOV/Clippy import sensors ran without
+Cargo/Rust warnings or denied-tool attempts. Its real quality gate **FAILED**.
+Per-file Rust counts/coverage and the gate conditions remain unverified because
+public APIs return 404; the project visibility is not yet established.
+
+One-time setup run 42425310487 at `d51b510` confirmed the exact project was
+private, changed only its visibility to public, then verified authenticated and
+anonymous reads: HTTP statuses `[200, 204, 200, 200]`. The temporary helper and
+its tests were removed in the next commit; its repository activation variable
+is removed after that commit. The existing public-only evidence collector is
+retained; no credentialed evidence collector was introduced.
+
+Public visibility makes issue and hotspot details public. The user and
+coordinator explicitly approved that disclosure for this public-source project;
+it is not an implicit helper side effect. Sonar remains **NOT restored** until
+real gate/issue/coverage evidence is reviewed.
+The public CE-task endpoint requires Execute Analysis permission even for a
+public project. Public evidence therefore validates the saved task metadata but
+makes no CE status claim. It binds PR results to the exact PR key/head SHA and
+rechecks both SHA and analysis date after collection; main uses the latest
+analysis revision/ID and rechecks it. Every gate condition is retained, including
+failures. Fixed output goes only to a new `sonar-server-evidence.json` under the
+runner-owned temporary directory; no caller-selected CLI destination remains.
+
+The first public PR gate failed security rating C and 70.7% new-code coverage.
+Focused fixes constrain evidence output, simplify report/metadata validation,
+and add meaningful source-boundary, transport, pagination, stale-analysis and
+orchestration failure tests. No rules, gates, source coverage exclusions or
+issue dispositions are changed.
+
+One-time setup run 42426095543 at `9763ed8` renamed the exact unanalysed
+Sonar main branch from `master` to `main`, with HTTP statuses
+`[200, 200, 204, 200]`. A public branch read confirmed exactly one branch,
+`main` with `isMain=true`. The temporary helper/tests are removed in the next
+commit, and its repository guard is deleted. No second branch or quality-gate
+change was introduced.
+
+PR/non-main evidence is PARTIAL; complete hotspot inventory requires main.
+If PR analysis requires an initial main baseline, return for a deployment decision.
+Any Cargo requirement or degraded Rust analysis stops execution for reviewed
+isolation changes; no unrestricted fallback is authorized. Sonar is **NOT restored**.
+A green workflow alone never closes these checks.
+
+Primary references: [mandatory token and logging parameters](https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/analysis-parameters/parameters-not-settable-in-ui),
+[scanner settings precedence](https://docs.sonarsource.com/sonarqube-cloud/analyzing-source-code/analysis-parameters/configuration-overview),
+[TEST-NET address reservation (RFC 5737)](https://www.rfc-editor.org/rfc/rfc5737),
+[preserved local draft design](sonar_successor.md).

@@ -1,0 +1,714 @@
+"""Offline contracts only: these fixtures cannot prove analyzer compatibility."""
+
+import copy
+import fnmatch
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import textwrap
+import unittest
+import urllib.error
+from unittest import mock
+
+from sonar_evidence import collect, pages, task_properties, evidence_output, public_json, NoRedirect, write_evidence, evidence_passes
+from sonar_reports import clippy_outcome, normalize_clippy, normalize_lcov, normalize_python, generate, source_path, run_phase
+
+
+WORKFLOW = Path(__file__).resolve().parents[1] / "workflows/sonar-analysis.yml"
+
+
+def inline(name):
+    text = WORKFLOW.read_text(encoding="utf-8")
+    begin = "          # BEGIN " + name + "\n"
+    end = "          # END " + name
+    code = text.split(begin, 1)[1].split(end, 1)[0]
+    namespace = {"__name__": "offline_contract"}
+    exec(compile(textwrap.dedent(code), str(WORKFLOW) + ":" + name, "exec"), namespace)
+    return namespace
+
+
+class PolicyTests(unittest.TestCase):
+    def setUp(self):
+        self.policy = inline("SONAR_POLICY")["policy"]
+        self.pr = {"number": 12, "pull_request": {
+            "user": {"login": "maintainer"},
+            "head": {"repo": {"full_name": "owner/project"}, "ref": "fix/branch", "sha": "a" * 40},
+            "base": {"ref": "main"}}}
+
+    def call(self, event=None, **overrides):
+        args = {"event_name": "pull_request", "event": event or self.pr,
+                "repository": "owner/project", "sha": "b" * 40, "ref": "refs/pull/12/merge",
+                "project": "owner_project", "organization": "owner", "token_present": "true"}
+        return self.policy(**(args | overrides))
+
+    def test_explicit_head_revision_and_pr_args(self):
+        result = self.call()
+        self.assertEqual(result["revision"], "a" * 40)
+        self.assertIn("-Dsonar.pullrequest.key=12", result["scm_args"])
+        self.assertIn("-Dsonar.scm.revision=" + "a" * 40, result["scm_args"])
+        self.assertNotIn("b" * 40, result["scm_args"])
+
+    def test_fork_and_dependabot_author_are_not_scans(self):
+        for author, repo in [("maintainer", "fork/project"), ("dependabot[bot]", "owner/project")]:
+            event = copy.deepcopy(self.pr)
+            event["pull_request"]["user"]["login"] = author
+            event["pull_request"]["head"]["repo"]["full_name"] = repo
+            self.assertEqual(self.call(event, token_present="false"), {"eligible": "false"})
+
+    def test_missing_or_redirecting_configuration_fails(self):
+        for updates in ({"token_present": "false"}, {"project": ""}, {"organization": "https://evil"},
+                        {"project": "p\n-Dsonar.host.url=evil"}, {"organization": "x y"}):
+            with self.subTest(updates=updates), self.assertRaises(ValueError):
+                self.call(**updates)
+
+    def test_ref_argument_injection_and_invalid_revision_fail(self):
+        for value in ['x -Dsonar.host.url=evil', '"bad"', '-x', 'x/../y', 'x\nnext', 'café']:
+            event = copy.deepcopy(self.pr)
+            event["pull_request"]["head"]["ref"] = value
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                self.call(event)
+        with self.assertRaises(ValueError):
+            self.call(event_name="push", ref="refs/heads/main", sha="not-a-sha")
+
+    def test_main_manual_schedule_and_unsupported_events(self):
+        for name in ("push", "workflow_dispatch", "schedule"):
+            self.assertEqual(self.call(event_name=name, ref="refs/heads/main")["revision"], "b" * 40)
+        for name in ("pull_request_target", "workflow_run"):
+            with self.assertRaises(ValueError):
+                self.call(event_name=name)
+
+
+class EnvelopeTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name) / "source"
+        self.root.mkdir()
+        (self.root / "src").mkdir()
+        (self.root / "src/math.rs").write_text("fn example() {}\n")
+        (self.root / "python").mkdir()
+        (self.root / "python/example.py").write_text("value = 1\n")
+        self.directory = Path(self.temp.name) / "reports"
+        self.directory.mkdir()
+        self.scope = inline("SONAR_ENVELOPE")
+        self.validate = self.scope["validate"]
+        for name in self.scope["REPORTS"][:3]:
+            (self.directory / name).write_text("SF:src/math.rs\nDA:1,3\nend_of_record\n")
+        for name in self.scope["REPORTS"][3:6]:
+            (self.directory / name).write_text('{"reason":"build-finished","success":true}\n')
+        self.xml = '<coverage><sources><source>.</source></sources><packages><package><classes><class filename="python/example.py"><lines><line number="1" hits="2"/></lines></class></classes></package></packages></coverage>'
+        (self.directory / "python-coverage.xml").write_text(self.xml)
+        self.rehash()
+
+    def rehash(self):
+        phases = ('core-std', 'core-no-std', 'native', 'clippy-core-std', 'clippy-core-no-std', 'clippy-native',
+                  'wheel-build', 'wheel-install', 'python-packaging', 'python-pipeline', 'python-wheel', 'coverage-combine', 'coverage-xml')
+        record = {"schema": 1, "revision": "a" * 40, "generation_exit_codes": dict.fromkeys(phases, 0),
+                  "clippy_outcomes": {phase: {"exit_code": 0, "kind": "clean", "errors": 0, "warnings": 0} for phase in phases if phase.startswith("clippy-")},
+                  "source_paths": {}, "tools": {}, "limitations": [],
+                  "reports": {n: hashlib.sha256((self.directory / n).read_bytes()).hexdigest() for n in self.scope["REPORTS"]}}
+        (self.directory / "report-inventory.json").write_text(json.dumps(record))
+
+    def check(self):
+        return self.validate(self.directory, self.root, "a" * 40)
+
+    def test_valid_reports_preserve_bytes(self):
+        result = self.check()
+        self.assertEqual(result["python-coverage.xml"], self.xml.encode())
+        self.assertIn(b"DA:1,3", result["core-std.lcov"])
+
+    def test_extra_missing_or_hash_mismatch_fail(self):
+        extra = self.directory / "sonar-project.properties"
+        extra.write_text("sonar.host.url=evil")
+        with self.assertRaises(ValueError):
+            self.check()
+        extra.unlink()
+        (self.directory / "core-std.lcov").write_text("tampered")
+        with self.assertRaises(ValueError):
+            self.check()
+
+    def test_unsafe_source_and_xml_entities_fail_even_when_rehashed(self):
+        path = self.directory / "core-std.lcov"
+        original = path.read_text()
+        for value in ("/etc/passwd", "../outside.rs", "https://evil/source.rs"):
+            path.write_text("SF:" + value + "\nend_of_record\n")
+            self.rehash()
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                self.check()
+        path.write_text(original)
+        (self.directory / "python-coverage.xml").write_text('<!DOCTYPE coverage [<!ENTITY x SYSTEM "file:///etc/passwd">]>' + self.xml)
+        self.rehash()
+        with self.assertRaises(ValueError):
+            self.check()
+
+    def test_failed_generation_and_wrong_revision_fail(self):
+        record_path = self.directory / "report-inventory.json"
+        record = json.loads(record_path.read_text())
+        record["generation_exit_codes"]["core-std"] = 1
+        record_path.write_text(json.dumps(record))
+        with self.assertRaisesRegex(ValueError, "transport failed"):
+            self.check()
+        self.rehash()
+        with self.assertRaisesRegex(ValueError, "identity"):
+            self.validate(self.directory, self.root, "b" * 40)
+
+    def test_directory_and_oversize_reports_fail(self):
+        path = self.directory / "core-std.lcov"
+        path.unlink()
+        path.mkdir()
+        with self.assertRaises(ValueError):
+            self.check()
+        path.rmdir()
+        with path.open("wb") as file:
+            file.truncate(64 * 1024 * 1024 + 1)
+        with self.assertRaisesRegex(ValueError, "bounded regular"):
+            self.check()
+
+    def test_lcov_normalization_preserves_counters(self):
+        path = self.directory / "core-std.lcov"
+        path.write_text("SF:" + str(self.root / "src/math.rs") + "\nDA:1,3\nBRDA:1,0,0,2\nend_of_record\n")
+        normalize_lcov(path, self.root)
+        self.assertEqual(path.read_text(), "SF:src/math.rs\nDA:1,3\nBRDA:1,0,0,2\nend_of_record\n")
+
+    def test_python_mapping_preserves_hits_and_rejects_entities(self):
+        path = self.directory / "python-coverage.xml"
+        path.write_text(self.xml.replace("python/example.py", "example.py"))
+        self.assertEqual(normalize_python(path, self.root), ["python/example.py"])
+        self.assertIn('hits="2"', path.read_text())
+        path.write_text("<!DOCTYPE coverage>" + self.xml)
+        with self.assertRaises(ValueError):
+            normalize_python(path, self.root)
+
+    def test_python_coverage_script_roots_and_ambiguity(self):
+        for directory in ('scripts', '.github/scripts'):
+            (self.root / directory).mkdir(parents=True)
+        (self.root / 'scripts/study.py').write_text('value = 1\n')
+        (self.root / '.github/scripts/pipeline.py').write_text('value = 1\n')
+        path = self.directory / 'python-coverage.xml'
+        path.write_text('<coverage><sources><source>.github/scripts</source><source>scripts</source></sources><packages><package><classes>'
+                        '<class filename="study.py"><lines><line number="1" hits="3"/></lines></class>'
+                        '<class filename="pipeline.py"><lines><line number="1" hits="2"/></lines></class>'
+                        '</classes></package></packages></coverage>')
+        self.assertEqual(normalize_python(path, self.root), ['.github/scripts/pipeline.py', 'scripts/study.py'])
+        self.assertIn('hits="3"', path.read_text())
+        (self.root / 'python/pipeline.py').write_text('duplicate = 1\n')
+        path.write_text(self.xml.replace('python/example.py', 'pipeline.py'))
+        with self.assertRaisesRegex(ValueError, 'ambiguous/unmapped'):
+            normalize_python(path, self.root)
+
+    def test_clippy_keeps_all_diagnostics_without_severity_filter(self):
+        path = self.directory / "clippy-core-std.jsonl"
+        rows = [{"reason": "compiler-message", "message": {"level": level,
+                  "spans": [{"file_name": "src/math.rs"}], "children": []}}
+                for level in ("warning", "error")]
+        rows.append({"reason": "build-finished", "success": False})
+        path.write_text("\n".join(map(json.dumps, rows)))
+        normalize_clippy(path, self.root, self.root)
+        self.assertEqual([json.loads(x)["message"]["level"] for x in path.read_text().splitlines()[:-1]], ["warning", "error"])
+
+    def test_clippy_lint_exit_imports_but_compiler_failure_does_not(self):
+        path = self.directory / "clippy-core-std.jsonl"
+        for code, expected in [("clippy::example", "lint-findings"), ("E0382", "tool-error")]:
+            rows = [{"reason": "compiler-message", "message": {"level": "error", "code": {"code": code},
+                    "spans": [{"file_name": "src/math.rs"}], "children": []}},
+                    {"reason": "build-finished", "success": False}]
+            path.write_text("\n".join(map(json.dumps, rows)))
+            outcome = clippy_outcome(path, 101)
+            self.assertEqual(outcome["kind"], expected)
+            self.assertEqual(outcome["exit_code"], 101)
+            self.rehash()
+            record_path = self.directory / "report-inventory.json"
+            record = json.loads(record_path.read_text())
+            record["generation_exit_codes"]["clippy-core-std"] = 101
+            record["clippy_outcomes"]["clippy-core-std"] = outcome
+            record_path.write_text(json.dumps(record))
+            if expected == "lint-findings":
+                self.assertIn("clippy-core-std.jsonl", self.check())
+            else:
+                with self.assertRaisesRegex(ValueError, "tool/compile failure"):
+                    self.check()
+
+    def test_warning_is_a_finding_without_failed_exit(self):
+        path = self.directory / "clippy-core-std.jsonl"
+        path.write_text(json.dumps({"reason": "compiler-message", "message": {"level": "warning", "code": {"code": "clippy::example"}, "spans": []}})
+                        + '\n{"reason":"build-finished","success":true}\n')
+        self.assertEqual(clippy_outcome(path, 0), {"exit_code": 0, "kind": "lint-findings", "warnings": 1, "errors": 0})
+
+    def test_generation_records_failures_without_running_real_builds(self):
+        output = Path(self.temp.name) / "failed-generation"
+        with mock.patch("sonar_reports.subprocess.run", return_value=subprocess.CompletedProcess([], 1)):
+            with self.assertRaisesRegex(RuntimeError, "report generation failed"):
+                generate(self.root, output, "a" * 40)
+        statuses = json.loads((output.parent / "generation-status.json").read_text())
+        self.assertEqual(statuses["clippy-core-std"], 1)
+        self.assertEqual(statuses["wheel-install"], 1)
+        self.assertNotIn("report-inventory.json", [p.name for p in output.iterdir()])
+
+
+class GuardAndWorkflowTests(unittest.TestCase):
+    def test_github_env_keys_have_no_case_insensitive_duplicates(self):
+        import re
+        indent, keys = None, set()
+        for line in WORKFLOW.read_text().splitlines():
+            if not line.strip() or line.lstrip().startswith('#'):
+                continue
+            width = len(line) - len(line.lstrip())
+            if indent is not None and width <= indent:
+                indent, keys = None, set()
+            if line.strip() == 'env:':
+                indent, keys = width, set()
+            elif indent is not None and width == indent + 2:
+                match = re.match(r'\s*([A-Za-z_][A-Za-z0-9_-]*):', line)
+                self.assertIsNotNone(match)
+                key = match[1].casefold()
+                self.assertNotIn(key, keys, 'GitHub rejects case-insensitive env duplicates')
+                keys.add(key)
+
+    def test_removal_plan_is_hosted_only_and_literal_without_deleting(self):
+        namespace = inline("SONAR_HOSTED_REMOVAL")
+        environment = {"GITHUB_ACTIONS": "true", "RUNNER_ENVIRONMENT": "github-hosted", "RUNNER_OS": "Linux",
+                       "GITHUB_WORKSPACE": "/home/runner/work/project/project", "RUNNER_TEMP": "/home/runner/work/_temp"}
+        with mock.patch("shutil.rmtree") as remove:
+            homes, files = namespace["removal_plan"](environment, "Linux")
+            self.assertEqual(homes, ["/home/runner/.cargo", "/home/runner/.rustup", "/etc/skel/.cargo", "/etc/skel/.rustup", "/home/packer/.cargo", "/home/packer/.rustup"])
+            self.assertNotIn('/home/packer', homes)
+            self.assertEqual(len(files), 6)
+            remove.assert_not_called()
+        for updates, system in [({"RUNNER_ENVIRONMENT": "self-hosted"}, "Linux"), ({}, "Windows"),
+                                ({"RUNNER_TEMP": "/tmp"}, "Linux"), ({"GITHUB_WORKSPACE": "/home/runner/work/../private"}, "Linux")]:
+            with self.subTest(updates=updates), self.assertRaises(RuntimeError):
+                namespace["removal_plan"](environment | updates, system)
+
+    def test_source_test_classification_has_no_overlap(self):
+        import re
+        text = WORKFLOW.read_text()
+        tests = re.search(r'-Dsonar.test.inclusions=(\S+)', text)[1].split(',')
+        exclusions = re.search(r'-Dsonar.exclusions=(\S+)', text)[1].split(',')
+        self.assertTrue(set(tests).issubset(exclusions))
+        for path in ('tests/test.rs', 'python/tests/test_api.py', 'python/packaging_tests/test_backend.py', '.github/scripts/test_sonar_draft.py'):
+            self.assertTrue(any(fnmatch.fnmatchcase(path, pattern) for pattern in tests))
+            self.assertTrue(any(fnmatch.fnmatchcase(path, pattern) for pattern in exclusions))
+        self.assertFalse(any(fnmatch.fnmatchcase('src/transform.rs', pattern) for pattern in exclusions))
+
+    def test_frontdoor_guard_records_and_never_invokes_planted_wrapper(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            source = root / "checkout"
+            (source / ".cargo").mkdir(parents=True)
+            marker = root / "wrapper-executed"
+            wrapper = root / "wrapper.py"
+            wrapper.write_text("from pathlib import Path\nPath(" + repr(str(marker)) + ").write_text('ran')")
+            (source / ".cargo/config.toml").write_text('[build]\nrustc-wrapper="' + wrapper.as_posix() + '"\n')
+            attempts = root / "attempts.txt"
+            guard = root / "guard"
+            inline("SONAR_GUARD")["guard_files"](guard, attempts)
+            result = subprocess.run([sys.executable, str(guard / "cargo"), "metadata"], cwd=source, check=False)
+            self.assertEqual(result.returncode, 126)
+            self.assertEqual(attempts.read_text(), "cargo\n")
+            self.assertFalse(marker.exists())
+            # This does not prove PATH resolution, absolute-path denial or analyzer behavior.
+
+    def test_secret_and_execution_gate_invariants(self):
+        text = WORKFLOW.read_text()
+        self.assertEqual(text.count("SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}"), 1)
+        self.assertIn("TOKEN_PRESENT: ${{ secrets.SONAR_TOKEN != '' }}", text)
+        self.assertNotIn("${{ github.head_ref }}", text)
+        self.assertNotIn("pull_request_target:", text)
+        self.assertNotIn("workflow_run:", text)
+        self.assertNotIn("GITHUB_ENV", text)
+        self.assertNotIn("continue-on-error", text)
+        self.assertNotIn("scannerBinariesUrl:", text)
+        self.assertIn("skipSignatureVerification: false", text)
+        self.assertNotIn("LOCAL DRAFT: absolute-tool/isolation boundary unapproved", text)
+        self.assertIn("Denied tool attempts remain failures", text)
+        self.assertLess(text.index('Remove Rust tools (DISPOSABLE'), text.index('Token-free precedence and authentication probe'))
+        self.assertLess(text.index('Token-free precedence and authentication probe'), text.index('Official credential-bearing scanner'))
+        self.assertLess(text.index('planted.unlink()'), text.index('Official credential-bearing scanner'))
+        self.assertIn('RUNNER_DEBUG: \'0\'', text)
+
+    def test_probe_requires_auth_failure_precedence_and_zero_counters(self):
+        policy = inline('SONAR_PROBE')['probe_result']
+        log = 'INFO Project root configuration file: /tmp/settings\nERROR https://api.sonarcloud.io failed: HTTP 401\n'
+        self.assertTrue(policy(1, log, '/tmp/settings', 0, 0)['expected_authentication_failure'])
+        self.assertTrue(policy(1, log + 'ERROR Re-run with full debug logging.\n', '/tmp/settings', 0, 0)['expected_authentication_failure'])
+        actual = ('23:12:00.123 INFO  Project root configuration file: /tmp/settings\n'
+                  '23:12:02.494 INFO  Communicating with SonarQube Cloud\n'
+                  '23:12:09.336 ERROR Fail to load the list of plugins installed on the server: '
+                  'Not authorized or organization not found\n')
+        self.assertTrue(policy(1, actual, '/tmp/settings', 0, 0)['expected_authentication_failure'])
+        for invalid in (actual.replace('SonarQube Cloud', 'SonarQube Server'),
+                        actual.replace('/tmp/settings', '/untrusted/settings'),
+                        actual.replace('INFO  Communicating', 'ERROR Communicating')):
+            with self.assertRaises(RuntimeError):
+                policy(1, invalid, '/tmp/settings', 0, 0)
+        for code, text, before, after in [(0, log, 0, 0), (1, log, 0, 1), (1, log, 1, 1),
+                                          (1, log + 'DEBUG internal', 0, 0),
+                                          (1, 'ERROR unrelated failure', 0, 0)]:
+            with self.subTest(code=code, before=before, after=after), self.assertRaises(RuntimeError):
+                policy(code, text, '/tmp/settings', before, after)
+
+    def test_uploaded_task_common_root_matches_evidence_download_path(self):
+        text = WORKFLOW.read_text(encoding='utf-8')
+        self.assertIn('${{ runner.temp }}/sonar-task/report-task.txt', text)
+        self.assertIn('--task-dir "$RUNNER_TEMP/sonar-task-evidence/sonar-task"', text)
+        self.assertIn('-Dsonar.python.version=3.11,3.12,3.13,3.14', text)
+
+    def test_probe_counter_reads_extended_iptables_row(self):
+        function = inline('SONAR_PROBE')['counter']
+        output = 'Chain SPATIAL_SONAR_PROBE (1 references)\n pkts bytes target prot opt in out source destination\n 0 0 REJECT all -- * * 0.0.0.0/0 192.0.2.1 reject-with icmp-port-unreachable\n'
+        with mock.patch('subprocess.check_output', return_value=output):
+            self.assertEqual(function(), 0)
+
+    @unittest.skipUnless(os.name == 'posix', 'native hosted POSIX find; no local tool installation')
+    def test_filesystem_scan_ignores_nonexecutable_completion_and_stubs(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            guard = root / 'guard'
+            guard.mkdir()
+            (guard / 'cargo').write_text('guard')
+            (root / 'cargo').write_text('nonexecuting completion')
+            report = inline('SONAR_HOSTED_REMOVAL')['scan_tools'](root, guard)
+            self.assertEqual(report['matches'], [])
+            scan_tools = inline('SONAR_HOSTED_REMOVAL')['scan_tools']
+            with self.assertRaisesRegex(RuntimeError, 'timed out'):
+                scan_tools(root, guard, timeout=-1)
+
+    @unittest.skipUnless(os.name == 'posix', 'native hosted POSIX find')
+    def test_native_scan_finds_executable_symlink_and_prunes_exactly(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            guard = root / 'guard'
+            guard.mkdir()
+            executable = root / 'cargo'
+            executable.write_text('test executable metadata only')
+            executable.chmod(0o755)
+            (root / 'rustc').symlink_to(executable)
+            for directory in ('proc', 'sys', 'dev', 'run', 'guard'):
+                (root / directory).mkdir(exist_ok=True)
+                (root / directory / 'cargo').symlink_to(executable)
+            result = inline('SONAR_HOSTED_REMOVAL')['scan_tools'](root, guard)
+            self.assertTrue(result['complete'])
+            self.assertEqual(set(result['matches']), {str(root / 'cargo'), str(root / 'rustc')})
+            self.assertEqual(result['exit_code'], 0)
+            self.assertIn('find', result['versions'])
+
+    @unittest.skipUnless(os.name == 'posix', 'native hosted POSIX find')
+    def test_native_scan_error_and_timeout_are_incomplete(self):
+        scope = inline('SONAR_HOSTED_REMOVAL')
+        original = subprocess.run
+        for status, error in [(1, b'Permission denied\n'), (124, b''), (137, b'')]:
+            def fake(command, **kwargs):
+                if command[0] != '/usr/bin/timeout' or command[1] == '--version':
+                    return original(command, **kwargs)
+                kwargs['stdout'].write(b'/partial/cargo\0')
+                kwargs['stderr'].write(error)
+                return subprocess.CompletedProcess(command, status)
+            with tempfile.TemporaryDirectory() as name, mock.patch('subprocess.run', side_effect=fake):
+                result = scope['scan_tools'](Path(name), Path(name) / 'guard')
+                self.assertFalse(result['complete'])
+                self.assertEqual(result['exit_code'], status)
+                self.assertEqual(result['matches'], ['/partial/cargo'])
+
+
+class PaginationTests(unittest.TestCase):
+    def server(self, gate="OK"):
+        def get(endpoint, params):
+            if endpoint == "/api/components/show":
+                return {"component": {"key": "p", "organization": None, "visibility": "public"}}
+            if endpoint == "/api/project_pull_requests/list":
+                return {"pullRequests": [{"key": "12", "commit": {"sha": "a" * 40}, "analysisDate": "date"}]}
+            if endpoint == "/api/qualitygates/project_status":
+                return {"projectStatus": {"status": gate}}
+            if endpoint == "/api/project_branches/list":
+                return {"branches": [{"name": "main", "isMain": True}]}
+            if endpoint == "/api/measures/component":
+                return {"component": {"measures": [{"metric": "coverage", "value": "60"}]}}
+            records = {"/api/measures/component_tree": ("components", []),
+                       "/api/project_analyses/search": ("analyses", [{"key": "id", "revision": "a" * 40}]),
+                       "/api/issues/search": ("issues", [{"key": "issue-" + params.get("resolved", "")}]),
+                       "/api/hotspots/search": ("hotspots", [{"key": "hotspot-" + params.get("status", "")}])}
+            field, items = records[endpoint]
+            return {"paging": {"total": len(items), "pageIndex": 1}, field: items}
+        return get
+
+    def test_complete_main_inventory_keeps_all_states_and_real_gate(self):
+        for gate in ("OK", "ERROR"):
+            result = collect(self.server(gate), "p", "a" * 40, "id", "main")
+            self.assertTrue(result["complete"])
+            self.assertFalse(result["restoration_verified"])
+            self.assertEqual(result["gate"]["projectStatus"]["status"], gate)
+            self.assertEqual(len(result["issues"]), 2)
+            self.assertEqual(len(result["hotspots"]), 2)
+
+    def test_wrong_analysis_revision_is_rejected(self):
+        server = self.server()
+        with self.assertRaisesRegex(ValueError, "revision mismatch"):
+            collect(server, "p", "b" * 40, "id", "main")
+
+    def test_complete_pages(self):
+        def get(endpoint, params):
+            return {"paging": {"total": 2, "pageIndex": params["p"]},
+                    "issues": [{"key": str(params["p"])}]}
+        self.assertEqual(len(pages(get, "/api/issues/search", {}, "issues", "key")), 2)
+
+    def test_incomplete_duplicate_and_excessive_pages_fail(self):
+        for total, items in [(1, []), (10001, []), (2, [{"key": "same"}])]:
+            def get(endpoint, params):
+                return {"paging": {"total": total, "pageIndex": params["p"]}, "issues": items}
+            with self.subTest(total=total), self.assertRaises(ValueError):
+                pages(get, "/api/issues/search", {}, "issues", "key")
+
+    def test_task_host_redirection_fails(self):
+        with tempfile.TemporaryDirectory() as name:
+            path = Path(name) / "report-task.txt"
+            path.write_text("projectKey=p\nserverUrl=https://sonarcloud.io\ndashboardUrl=https://evil/\nceTaskId=id\nceTaskUrl=https://sonarcloud.io/api/ce/task?id=id\n")
+            with self.assertRaisesRegex(ValueError, "foreign task URL"):
+                task_properties(path, "p")
+
+    def test_task_organization_is_identity_not_redirect_configuration(self):
+        with tempfile.TemporaryDirectory() as name:
+            path = Path(name) / "report-task.txt"
+            path.write_text("projectKey=p\norganization=org\nserverUrl=https://sonarcloud.io\ndashboardUrl=https://sonarcloud.io/dashboard?id=p\nceTaskId=id\nceTaskUrl=https://sonarcloud.io/api/ce/task?id=id\n")
+            self.assertEqual(task_properties(path, "p", "org")["organization"], "org")
+            with self.assertRaisesRegex(ValueError, "organization mismatch"):
+                task_properties(path, "p", "other")
+
+    def test_pr_hotspot_completeness_is_not_fabricated(self):
+        def get(endpoint, params):
+            if endpoint == "/api/components/show":
+                return {"component": {"key": "p", "organization": None, "visibility": "public"}}
+            if endpoint == "/api/project_pull_requests/list":
+                return {"pullRequests": [{"key": "12", "commit": {"sha": "a" * 40}, "analysisDate": "date"}]}
+            if endpoint == "/api/qualitygates/project_status":
+                return {"projectStatus": {"status": "OK"}}
+            if endpoint == "/api/project_branches/list":
+                return {"branches": [{"name": "main", "isMain": True}]}
+            if endpoint == "/api/measures/component":
+                return {"component": {}}
+            return {"paging": {"total": 0, "pageIndex": 1}, "components": [], "issues": []}
+        result = collect(get, "p", "a" * 40, "id", "main", "12")
+        self.assertFalse(result["complete"])
+        self.assertTrue(result["partial"])
+        self.assertFalse(result["restoration_verified"])
+        self.assertIn("PR/nonmain", result["hotspot_scope"])
+
+
+class EvidenceSecurityTests(unittest.TestCase):
+    def test_fixed_output_rejects_existing_file_and_symlink_without_writing(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            output = evidence_output(root)
+            self.assertEqual(output, root.resolve() / 'sonar-server-evidence.json')
+            output.write_text('preserve existing evidence')
+            with self.assertRaisesRegex(ValueError, 'already exists'):
+                evidence_output(root)
+            self.assertEqual(output.read_text(), 'preserve existing evidence')
+            with self.assertRaises(ValueError):
+                evidence_output(output)
+
+    @unittest.skipUnless(os.name == 'posix', 'symlink fixture without Windows privileges')
+    def test_output_symlink_cannot_overwrite_another_file(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            victim = root / 'victim'
+            victim.write_text('keep')
+            (root / 'sonar-server-evidence.json').symlink_to(victim)
+            with self.assertRaises(ValueError):
+                evidence_output(root)
+            self.assertEqual(victim.read_text(), 'keep')
+
+    def test_no_output_path_cli_remains(self):
+        source = (WORKFLOW.parents[1] / 'scripts/sonar_evidence.py').read_text()
+        self.assertNotIn('add_argument("--output"', source)
+        self.assertNotIn('--output "$RUNNER_TEMP/sonar-server-evidence.json"', WORKFLOW.read_text())
+
+    def test_public_transport_rejects_redirects_and_nonallowlisted_endpoints(self):
+        redirect = NoRedirect()
+        with self.assertRaises(ValueError):
+            redirect.redirect_request(None, None, 302, '', {}, 'https://evil.invalid')
+        for endpoint in ('https://evil.invalid/api/issues/search', '/api/x/../settings', '/api/X/settings'):
+            with self.subTest(endpoint=endpoint), self.assertRaises(ValueError):
+                public_json(endpoint, {})
+
+    def test_public_transport_caps_bytes_and_never_uses_proxy_or_token(self):
+        opener = mock.MagicMock()
+        response = opener.open.return_value.__enter__.return_value
+        response.read.return_value = b'{"ok":true}'
+        with mock.patch('sonar_evidence.urllib.request.build_opener', return_value=opener) as build:
+            self.assertEqual(public_json('/api/issues/search', {'componentKeys': 'p'}), {'ok': True})
+            self.assertEqual(build.call_args.args[0].proxies, {})
+            self.assertIsInstance(build.call_args.args[1], NoRedirect)
+            self.assertEqual(opener.open.call_args.args[0], 'https://sonarcloud.io/api/issues/search?componentKeys=p')
+            self.assertEqual(opener.open.call_args.kwargs['timeout'], 30)
+            response.read.return_value = b'x' * (32 * 1024 * 1024 + 1)
+            with self.assertRaisesRegex(ValueError, 'too large'):
+                public_json('/api/issues/search', {})
+
+    def test_pr_revision_and_mid_collection_race_fail_closed(self):
+        original = PaginationTests().server()
+        for change in ('revision', 'date', 'identity'):
+            calls = 0
+            def get(endpoint, params):
+                nonlocal calls
+                result = original(endpoint, params)
+                if endpoint == '/api/components/show' and change == 'identity':
+                    result['component']['key'] = 'other'
+                if endpoint == '/api/project_pull_requests/list':
+                    calls += 1
+                    if change == 'revision':
+                        result['pullRequests'][0]['commit']['sha'] = 'b' * 40
+                    if change == 'date' and calls == 2:
+                        result['pullRequests'][0]['analysisDate'] = 'new analysis'
+                return result
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                collect(get, 'p', 'a' * 40, 'id', 'main', '12')
+
+    def test_pagination_rejects_changing_totals_indices_and_overrun(self):
+        for response in ({'paging': {'total': -1, 'pageIndex': 1}, 'issues': []},
+                         {'paging': {'total': 1, 'pageIndex': 2}, 'issues': []},
+                         {'paging': {'total': 0, 'pageIndex': 1}, 'issues': [{'key': 'extra'}]}):
+            get = mock.Mock(return_value=response)
+            with self.assertRaises(ValueError):
+                pages(get, '/api/issues/search', {}, 'issues', 'key')
+        get = mock.Mock(side_effect=[{'paging': {'total': 2, 'pageIndex': 1}, 'issues': [{'key': 'one'}]},
+                                    {'paging': {'total': 3, 'pageIndex': 2}, 'issues': [{'key': 'two'}]}])
+        with self.assertRaisesRegex(ValueError, 'changed'):
+            pages(get, '/api/issues/search', {}, 'issues', 'key')
+
+    def test_task_fields_and_id_mismatch_rejected(self):
+        valid = ('projectKey=p\norganization=org\nserverUrl=https://sonarcloud.io\n'
+                 'dashboardUrl=https://sonarcloud.io/dashboard?id=p\nceTaskId=id\n'
+                 'ceTaskUrl=https://sonarcloud.io/api/ce/task?id=id\n')
+        changes = [valid + 'projectKey=p\n', valid + 'unknown=bad\n', valid.replace('id=id', 'id=other'),
+                   valid.replace('ceTaskId=id', 'ceTaskId=../bad'), valid.replace('projectKey=p', 'projectKey=other')]
+        with tempfile.TemporaryDirectory() as name:
+            path = Path(name) / 'report-task.txt'
+            for content in changes:
+                path.write_text(content)
+                with self.assertRaises(ValueError):
+                    task_properties(path, 'p', 'org')
+
+    def test_public_evidence_written_to_fixed_temp_file_preserves_real_gate(self):
+        with tempfile.TemporaryDirectory() as name:
+            root = Path(name)
+            task = root / 'task'
+            task.mkdir()
+            (task / 'report-task.txt').write_text('projectKey=p\nserverUrl=https://sonarcloud.io\ndashboardUrl=https://sonarcloud.io/dashboard?id=p\nceTaskId=id\nceTaskUrl=https://sonarcloud.io/api/ce/task?id=id\n')
+            event = root / 'event.json'
+            event.write_text('{"number":12}')
+            env = {'RUNNER_TEMP': name, 'PROJECT_KEY': 'p', 'ORGANIZATION': None,
+                   'SOURCE_REVISION': 'a' * 40, 'GITHUB_EVENT_PATH': str(event),
+                   'GITHUB_EVENT_NAME': 'pull_request', 'GITHUB_REF': 'refs/pull/12/merge'}
+            result = write_evidence(task, env, PaginationTests().server('ERROR'))
+            self.assertFalse(evidence_passes(result))
+            self.assertEqual(json.loads((root / 'sonar-server-evidence.json').read_text())['gate']['projectStatus']['status'], 'ERROR')
+            self.assertTrue(result['partial'])
+            self.assertTrue(result['public_queries'])
+            (root / 'sonar-server-evidence.json').unlink()
+            (task / 'report-task.txt').unlink()
+            failed = write_evidence(task, env, PaginationTests().server())
+            self.assertFalse(evidence_passes(failed))
+            self.assertIn('blocker', failed)
+
+
+class ReportFailureTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name) / 'source'
+        self.root.mkdir()
+        (self.root / 'src').mkdir()
+        (self.root / 'src/value.rs').write_text('pub const VALUE: u8 = 1;\n')
+        (self.root / 'value.py').write_text('VALUE = 1\n')
+
+    def test_invalid_revisions_and_checkout_output_rejected_before_execution(self):
+        for revision, output in [('bad', Path(self.temp.name) / 'out'), ('a' * 40, self.root / 'out')]:
+            with mock.patch('sonar_reports.subprocess.run') as run:
+                with self.assertRaises(ValueError):
+                    generate(self.root, output, revision)
+                run.assert_not_called()
+
+    def test_source_boundaries_reject_hidden_directories_and_outside_files(self):
+        hidden = self.root / '.private'
+        hidden.mkdir()
+        (hidden / 'value.rs').write_text('hidden')
+        outside = Path(self.temp.name) / 'outside.rs'
+        outside.write_text('outside')
+        for path in (hidden / 'value.rs', outside, self.root / 'src'):
+            with self.subTest(path=path), self.assertRaises(ValueError):
+                source_path(path, self.root)
+
+    def test_empty_wrong_language_and_empty_python_reports_rejected(self):
+        path = Path(self.temp.name) / 'report'
+        for data in ('', 'SF:value.py\nend_of_record\n'):
+            path.write_text(data)
+            with self.assertRaises(ValueError):
+                normalize_lcov(path, self.root)
+        path.write_text('<coverage><sources/></coverage>')
+        with self.assertRaises(ValueError):
+            normalize_python(path, self.root)
+
+    def test_clippy_nested_paths_manifest_and_target_preserved(self):
+        path = Path(self.temp.name) / 'clippy.jsonl'
+        span = {'file_name': str(self.root / 'src/value.rs')}
+        diagnostic = {'reason': 'compiler-message', 'manifest_path': 'value.py',
+                      'target': {'src_path': 'src/value.rs'},
+                      'message': {'spans': [span], 'children': [{'spans': [span.copy()]}]}}
+        path.write_text(json.dumps(diagnostic) + '\n{"reason":"build-finished","success":true}\n')
+        normalize_clippy(path, self.root, self.root)
+        normalized = json.loads(path.read_text().splitlines()[0])
+        self.assertEqual(normalized['message']['children'][0]['spans'][0]['file_name'], 'src/value.rs')
+        self.assertEqual(normalized['target']['src_path'], 'src/value.rs')
+        self.assertEqual(normalized['manifest_path'], 'value.py')
+        diagnostic['message']['spans'][0]['expansion'] = {'span': 'unreviewed'}
+        path.write_text(json.dumps(diagnostic) + '\n{"reason":"build-finished","success":true}\n')
+        with self.assertRaisesRegex(ValueError, 'macro expansion'):
+            normalize_clippy(path, self.root, self.root)
+        path.write_text('')
+        with self.assertRaisesRegex(ValueError, 'completion'):
+            normalize_clippy(path, self.root, self.root)
+
+    def test_missing_malformed_or_inconsistent_clippy_is_tool_failure(self):
+        path = Path(self.temp.name) / 'clippy.jsonl'
+        self.assertEqual(clippy_outcome(path, 1)['kind'], 'tool-error')
+        for data in ('not json', '', '{"reason":"build-finished","success":false}\n'):
+            path.write_text(data)
+            self.assertEqual(clippy_outcome(path, 0)['kind'], 'tool-error')
+
+    def test_missing_executable_records_127_instead_of_claiming_lint_success(self):
+        statuses = {}
+        with mock.patch('sonar_reports.subprocess.run', side_effect=OSError('missing')):
+            status = run_phase(self.root, {}, statuses, 'coverage', ['missing'])
+        self.assertEqual((status, statuses), (127, {'coverage': 127}))
+
+    def test_successful_report_orchestration_and_tool_version_guard(self):
+        def fake_run(args, **kwargs):
+            if 'llvm-cov' in args:
+                Path(args[args.index('--output-path') + 1]).write_text('SF:src/value.rs\nDA:1,1\nend_of_record\n')
+            elif 'clippy' in args:
+                kwargs['stdout'].write('{"reason":"build-finished","success":true}\n')
+            elif 'wheel' in args:
+                Path(args[-1], 'example.whl').write_bytes(b'fixture')
+            elif 'xml' in args:
+                Path(args[-1]).write_text('<coverage><sources><source>.</source></sources><packages><package><classes><class filename="value.py"><lines><line number="1" hits="1"/></lines></class></classes></package></packages></coverage>')
+            return subprocess.CompletedProcess(args, 0)
+        for version in ('cargo-llvm-cov 0.9.1', 'cargo-llvm-cov wrong'):
+            parent = Path(self.temp.name) / ('valid' if version.endswith('0.9.1') else 'wrong')
+            parent.mkdir()
+            output = parent / 'reports'
+            with mock.patch('sonar_reports.subprocess.run', side_effect=fake_run), \
+                 mock.patch('sonar_reports.subprocess.check_output', side_effect=['rustc 1.99.0', version, 'Coverage.py 7.17.2']):
+                if version.endswith('wrong'):
+                    with self.assertRaisesRegex(ValueError, 'reviewed pin'):
+                        generate(self.root, output, 'a' * 40)
+                else:
+                    generate(self.root, output, 'a' * 40)
+                    record = json.loads((output / 'report-inventory.json').read_text())
+                    self.assertEqual(len(record['generation_exit_codes']), 13)
+                    self.assertTrue(all(status == 0 for status in record['generation_exit_codes'].values()))
+                    self.assertEqual(record['source_paths']['python-coverage.xml'], ['value.py'])
+                    self.assertEqual(record['source_paths']['native.lcov'], ['src/value.rs'])

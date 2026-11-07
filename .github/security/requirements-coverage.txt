@@ -1,0 +1,3 @@
+# Hosted Linux CPython 3.11 coverage tool only; no runtime/wheel dependency.
+coverage==7.17.2 \
+    --hash=sha256:01303d9e68b6e6bdc5459b54e3bd0e3539c94c25b50ac7362b7cbcacbc815fbc

@@ -383,7 +383,7 @@ class GuardAndWorkflowTests(unittest.TestCase):
         original = subprocess.run
         for status, error in [(1, b'Permission denied\n'), (124, b''), (137, b'')]:
             def fake(command, **kwargs):
-                if command[0] != '/usr/bin/timeout':
+                if command[0] != '/usr/bin/timeout' or command[1] == '--version':
                     return original(command, **kwargs)
                 kwargs['stdout'].write(b'/partial/cargo\0')
                 kwargs['stderr'].write(error)

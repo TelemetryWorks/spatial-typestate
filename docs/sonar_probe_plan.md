@@ -143,18 +143,12 @@ Cargo/Rust warnings or denied-tool attempts. Its real quality gate **FAILED**.
 Per-file Rust counts/coverage and the gate conditions remain unverified because
 public APIs return 404; the project visibility is not yet established.
 
-A temporary PR-10-only workflow, additionally gated by the explicit repository
-variable `SONAR_VISIBILITY_SETUP=pr-10-once`, is proposed for one-time setup.
-It has no checkout, runs isolated inline Python, and exposes the existing token
-only to that step. It reads the exact component identity/visibility, changes
-only `spatial-typestate` from private to public if its organization is exactly
-`telemetryworks`, then verifies authenticated and anonymous public reads.
-HTTP redirects, proxies, unexpected identities and missing permissions fail
-closed. Output contains only visibility/action/status codes, never API bodies.
-A 401/403 requires Project administer permission or a visibility change in Sonar;
-no alternate credential is sought. This exception is solely visibility setup,
-not a credentialed evidence collector. Remove the helper, its temporary tests
-and repository guard after success, then use the public evidence pipeline.
+One-time setup run 42425310487 at `d51b510` confirmed the exact project was
+private, changed only its visibility to public, then verified authenticated and
+anonymous reads: HTTP statuses `[200, 204, 200, 200]`. The temporary helper and
+its tests were removed in the next commit; its repository activation variable
+is removed after that commit. The existing public-only evidence collector is
+retained; no credentialed evidence collector was introduced.
 
 Public visibility makes issue and hotspot details public. The user and
 coordinator explicitly approved that disclosure for this public-source project;

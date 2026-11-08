@@ -44,56 +44,23 @@ def peak_rss():
     return amount if sys.platform == "darwin" else amount * 1024
 
 
-def worker(stage, size):
-    from spatial_typestate import Frame, METERS, FEET, Points, Quaternion, Transform
-    source, target = Frame("Sensor"), Frame("World")
-    q = Quaternion(target, 0., 0., 1., 1.)
-    transform = Transform.from_rotation_translation(source, target, METERS, q, (10., 20., 30.))
-    # array repetition fills one contiguous payload; no retained Python float per row.
-    raw = array.array("d", [2., 3., 4.]) * size
-    if stage.startswith("memory_"):
-        gc.collect()
-        before = peak_rss()
-        tracemalloc.start()
-        result = Points.from_buffer(raw, source, METERS)
-        view = result.view() if stage == "memory_viewed" else None
-        current, peak = tracemalloc.get_traced_memory()
-        after = peak_rss()
-        tracemalloc.stop()
-        return {"stage": stage, "rows": size, "peak_rss_before_bytes": before,
-                "peak_rss_after_bytes": after, "python_traced_current_bytes": current,
-                "python_traced_peak_bytes": peak, "payload_bytes": size*3*8,
-                "viewed": view is not None}
-    points = Points.from_buffer(raw, source, METERS)
-    def scalar_calls():
-        # Same checked FFI operation per row: intentionally many small batches.
-        out = array.array("d")
-        for _ in range(size):
-            one = Points.from_buffer(array.array("d", [2., 3., 4.]), source, METERS)
-            out.frombytes(transform.apply_points(one).view().cast("B"))
-        return out
-    def end_to_end():
-        return transform.apply_points(Points.from_buffer(raw, source, METERS)).view()
-    def setup():
-        frame = Frame("Target")
-        return Transform.from_rotation_translation(source, frame, METERS,
-                    Quaternion(frame, 0., 0., 1., 1.), (10., 20., 30.))
-    actions = {
-        "import": lambda: Points.from_buffer(raw, source, METERS),
-        "apply": lambda: transform.apply_points(points),
-        "convert": lambda: points.convert_to(FEET),
-        "export_cached": points.view,
-        "end_to_end": end_to_end,
-        "scalar_calls": scalar_calls,
-        "setup": setup,
-    }
-    if stage == "export_cached":
-        points.view()
-    cold_fn = Points.from_buffer(raw, source, METERS).view if stage == "export_first" else actions[stage]
-    started = time.perf_counter_ns()
-    cold_result = cold_fn()
-    cold_ns = time.perf_counter_ns() - started
-    del cold_result, cold_fn
+def memory_worker(stage, size, raw, source, points_type, unit):
+    gc.collect()
+    before = peak_rss()
+    tracemalloc.start()
+    result = points_type.from_buffer(raw, source, unit)
+    view = result.view() if stage == "memory_viewed" else None
+    current, peak = tracemalloc.get_traced_memory()
+    after = peak_rss()
+    tracemalloc.stop()
+    return {"stage": stage, "rows": size, "peak_rss_before_bytes": before,
+            "peak_rss_after_bytes": after, "python_traced_current_bytes": current,
+            "python_traced_peak_bytes": peak, "payload_bytes": size*3*8,
+            "viewed": view is not None}
+
+
+def sample_calls(stage, raw, source, actions, cold_ns):
+    from spatial_typestate import Points, METERS
     iterations = min(4096, max(1, math.ceil(2_000_000 / max(1, cold_ns))))
     calibration = []
     for _ in range(8):
@@ -125,9 +92,10 @@ def worker(stage, size):
         # Bound memory/time while moving short samples toward >=1 ms.
         if total < 1_000_000:
             iterations = min(4096, iterations * 2)
-    # Fresh retained result, with before/after process high-water marks. RSS deltas
-    # are floors obscured by allocator reuse; report absolute values as well.
-    fn = Points.from_buffer(raw, source, METERS).view if stage == "export_first" else actions[stage]
+    return samples, iteration_counts, totals, calibration
+
+
+def retained_memory(fn):
     before = peak_rss()
     tracemalloc.start()
     snapshot = tracemalloc.take_snapshot()
@@ -137,14 +105,64 @@ def worker(stage, size):
     python_current, python_peak = tracemalloc.get_traced_memory()
     after = peak_rss()
     tracemalloc.stop()
+    # Release only after both tracemalloc and RSS observed the retained result.
+    del result
+    return {"peak_rss_before_bytes": before, "peak_rss_after_bytes": after,
+            "retained_python_blocks": retained_python_blocks,
+            "python_traced_current_bytes": python_current, "python_traced_peak_bytes": python_peak}
+
+
+def worker(stage, size):
+    from spatial_typestate import Frame, METERS, FEET, Points, Quaternion, Transform
+    source, target = Frame("Sensor"), Frame("World")
+    q = Quaternion(target, 0., 0., 1., 1.)
+    transform = Transform.from_rotation_translation(source, target, METERS, q, (10., 20., 30.))
+    # array repetition fills one contiguous payload; no retained Python float per row.
+    raw = array.array("d", [2., 3., 4.]) * size
+    if stage.startswith("memory_"):
+        return memory_worker(stage, size, raw, source, Points, METERS)
+    points = Points.from_buffer(raw, source, METERS)
+    def scalar_calls():
+        # Same checked FFI operation per row: intentionally many small batches.
+        out = array.array("d")
+        for _ in range(size):
+            one = Points.from_buffer(array.array("d", [2., 3., 4.]), source, METERS)
+            out.frombytes(transform.apply_points(one).view().cast("B"))
+        return out
+    def end_to_end():
+        return transform.apply_points(Points.from_buffer(raw, source, METERS)).view()
+    def setup():
+        frame = Frame("Target")
+        return Transform.from_rotation_translation(source, frame, METERS,
+                    Quaternion(frame, 0., 0., 1., 1.), (10., 20., 30.))
+    actions = {
+        "import": lambda: Points.from_buffer(raw, source, METERS),
+        "apply": lambda: transform.apply_points(points),
+        "convert": lambda: points.convert_to(FEET),
+        "export_cached": points.view,
+        "end_to_end": end_to_end,
+        "scalar_calls": scalar_calls,
+        "setup": setup,
+    }
+    if stage == "export_cached":
+        points.view()
+    cold_fn = Points.from_buffer(raw, source, METERS).view if stage == "export_first" else actions[stage]
+    started = time.perf_counter_ns()
+    cold_result = cold_fn()
+    cold_ns = time.perf_counter_ns() - started
+    del cold_result, cold_fn
+    samples, iteration_counts, totals, calibration = sample_calls(
+        stage, raw, source, actions, cold_ns)
+    # Fresh retained result, with before/after process high-water marks. RSS deltas
+    # are floors obscured by allocator reuse; report absolute values as well.
+    fn = Points.from_buffer(raw, source, METERS).view if stage == "export_first" else actions[stage]
+    memory = retained_memory(fn)
     # Rust Vec allocations are NOT traced by tracemalloc. A batch keeps its Vec
     # and, after first view, its cached bytes until the batch is dropped.
     return {"stage": stage, "rows": size, "samples_ns": samples,
             "iterations_per_sample": iteration_counts, "sample_totals_ns": totals,
             "cold_single_call_ns": cold_ns, "calibration": calibration, "median_ns": statistics.median(samples), "min_ns": min(samples), "max_ns": max(samples),
-            "peak_rss_before_bytes": before, "peak_rss_after_bytes": after,
-            "retained_python_blocks": retained_python_blocks,
-            "python_traced_current_bytes": python_current, "python_traced_peak_bytes": python_peak}
+            **memory}
 
 
 def main():

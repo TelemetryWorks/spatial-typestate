@@ -8,6 +8,8 @@ import zipfile
 from verify_artifacts import sdist_report
 
 
+WHEEL_PATTERN = "*.whl"
+
 def wheel(path):
     with zipfile.ZipFile(path) as z:
         metadata=BytesParser().parsebytes(z.read(next(n for n in z.namelist() if n.endswith(".dist-info/METADATA"))))
@@ -17,14 +19,14 @@ def wheel(path):
 
 def verify_prepared(directory):
     prepared=BytesParser().parsebytes(next((directory/"prepared").rglob("METADATA")).read_bytes())
-    built,_=wheel(next(directory.glob("*.whl")))
+    built,_=wheel(next(directory.glob(WHEEL_PATTERN)))
     for key in set(prepared.keys())|set(built.keys()):
         if sorted(prepared.get_all(key,[]))!=sorted(built.get_all(key,[])):
             raise ValueError("prepared/wheel metadata mismatch: "+key)
     if prepared.get_payload()!=built.get_payload():
         raise ValueError("prepared/wheel README mismatch")
     info=next((directory/"prepared").iterdir())
-    with zipfile.ZipFile(next(directory.glob("*.whl"))) as z:
+    with zipfile.ZipFile(next(directory.glob(WHEEL_PATTERN))) as z:
         prepared_files={info.name+"/"+p.relative_to(info).as_posix() for p in info.rglob("*") if p.is_file()}
         wheel_files={name for name in z.namelist() if name.startswith(info.name+"/") and not name.endswith("/")} - {info.name+"/RECORD"}
         if prepared_files!=wheel_files:
@@ -33,6 +35,16 @@ def verify_prepared(directory):
             if path.is_file() and z.read(info.name+"/"+path.relative_to(info).as_posix())!=path.read_bytes():
                 raise ValueError("prepared/wheel file mismatch: "+path.name)
     print("PASS prepared/build wheel metadata parity")
+
+
+def compare_static_metadata(info, metadata):
+    dynamic={s.lower() for s in info.get_all("Dynamic",[])}
+    for key in set(info.keys())|set(metadata.keys()):
+        if key.lower() not in dynamic and key.lower()!="dynamic":
+            if sorted(info.get_all(key,[]))!=sorted(metadata.get_all(key,[])):
+                raise ValueError("sdist/wheel metadata mismatch: "+key)
+    if info.get_payload()!=metadata.get_payload():
+        raise ValueError("sdist/wheel README mismatch")
 
 
 def verify(directory):
@@ -49,19 +61,13 @@ def verify(directory):
             raise ValueError("sdist must contain source identity only")
         if any("_compiler_notices" in n for n in names):
             raise ValueError("compiler build notices in source archive")
-    rebuilt=next((directory/"from-sdist").glob("*.whl"))
+    rebuilt=next((directory/"from-sdist").glob(WHEEL_PATTERN))
     metadata,provenance=wheel(rebuilt)
     if provenance["source_origin"]!="sdist" or provenance["source"]!=source["source"]:
         raise ValueError("source rebuild changed identity")
-    if wheel(next(directory.glob("*.whl")))[1]["source"]!=source["source"]:
+    if wheel(next(directory.glob(WHEEL_PATTERN)))[1]["source"]!=source["source"]:
         raise ValueError("checkout wheel/source archive differ")
-    dynamic={s.lower() for s in info.get_all("Dynamic",[])}
-    for key in set(info.keys())|set(metadata.keys()):
-        if key.lower() not in dynamic and key.lower()!="dynamic":
-            if sorted(info.get_all(key,[]))!=sorted(metadata.get_all(key,[])):
-                raise ValueError("sdist/wheel metadata mismatch: "+key)
-    if info.get_payload()!=metadata.get_payload():
-        raise ValueError("sdist/wheel README mismatch")
+    compare_static_metadata(info, metadata)
     print("PASS source identity, intentional archive contents and all static metadata (including licenses)")
 
 

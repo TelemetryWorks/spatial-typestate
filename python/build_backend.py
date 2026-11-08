@@ -20,6 +20,8 @@ import tarfile
 
 WRAPPER_VERSION = "1"
 RESOURCE = "_provenance.json"
+PYPROJECT = "pyproject.toml"
+CARGO_MANIFEST = "Cargo.toml"
 TEXT_SUFFIXES = {".rs", ".toml", ".lock", ".py", ".pyi", ".md", ".txt", ".json"}
 
 
@@ -41,9 +43,9 @@ def text_bytes(path):
 
 def layout(project):
     project = Path(project).resolve()
-    config = tomllib.loads((project / "pyproject.toml").read_text(encoding="utf-8"))
+    config = tomllib.loads((project / PYPROJECT).read_text(encoding="utf-8"))
     native = (project / config["tool"]["maturin"]["manifest-path"]).resolve().parent
-    native_config = tomllib.loads((native / "Cargo.toml").read_text(encoding="utf-8"))
+    native_config = tomllib.loads((native / CARGO_MANIFEST).read_text(encoding="utf-8"))
     dependency = native_config["dependencies"]["spatial-typestate"]
     if set(dependency) != {"path"}:
         raise ValueError("core dependency must be the vendored path only")
@@ -57,28 +59,47 @@ def layout(project):
     return project, core, native, package, config, native_config
 
 
+def add_rust_input(paths, label, base, path, core, package):
+    if path.suffix != ".rs":
+        # In an extracted sdist the Python package shares core/src.
+        if base == core and path.is_relative_to(package):
+            return
+        raise ValueError("unreviewed non-Rust compile input")
+    raw = text_bytes(path)
+    if re.search(rb"\b(?:include|include_str|include_bytes|env|option_env)\s*!|#\s*\[\s*path\s*=", raw):
+        raise ValueError("extend the inventory before using external compile inputs")
+    paths[f"{label}/{path.relative_to(base).as_posix()}"] = path
+
+
+def rust_inputs(label, base, core, package):
+    paths = {}
+    manifest = tomllib.loads((base / CARGO_MANIFEST).read_text(encoding="utf-8"))
+    if manifest["package"].get("build") or manifest.get("lib", {}).get("path", "src/lib.rs") != "src/lib.rs":
+        raise ValueError("extend inventory for redirected Cargo compile inputs")
+    for path in sorted((base / "src").rglob("*")):
+        if path.is_file():
+            add_rust_input(paths, label, base, path, core, package)
+    if (base / "build.rs").exists():
+        raise ValueError("build.rs requires an extended inventory")
+    for name in (CARGO_MANIFEST, "Cargo.lock"):
+        paths[f"{label}/{name}"] = base / name
+    return paths
+
+
+def hash_inputs(paths, inventory):
+    for name, path in paths.items():
+        if path.is_symlink() or not path.is_file():
+            raise ValueError("missing or linked source input: " + name)
+        if path.suffix not in TEXT_SUFFIXES and path.name != "py.typed" and not path.name.startswith(("LICENSE", "NOTICE", "COPYING")):
+            raise ValueError("unreviewed text suffix: " + name)
+        inventory[name] = digest(text_bytes(path))
+
+
 def inputs(project):
     project, core, native, package, config, native_config = layout(project)
     paths = {}
     for label, base in (("core", core), ("native", native)):
-        manifest = tomllib.loads((base / "Cargo.toml").read_text(encoding="utf-8"))
-        if manifest["package"].get("build") or manifest.get("lib", {}).get("path", "src/lib.rs") != "src/lib.rs":
-            raise ValueError("extend inventory for redirected Cargo compile inputs")
-        for path in sorted((base / "src").rglob("*")):
-            if path.is_file():
-                if path.suffix != ".rs":
-                    # In an extracted sdist the Python package shares core/src.
-                    if base == core and path.is_relative_to(package):
-                        continue
-                    raise ValueError("unreviewed non-Rust compile input")
-                raw = text_bytes(path)
-                if re.search(rb"\b(?:include|include_str|include_bytes|env|option_env)\s*!|#\s*\[\s*path\s*=", raw):
-                    raise ValueError("extend the inventory before using external compile inputs")
-                paths[f"{label}/{path.relative_to(base).as_posix()}"] = path
-        if (base / "build.rs").exists():
-            raise ValueError("build.rs requires an extended inventory")
-        for name in ("Cargo.toml", "Cargo.lock"):
-            paths[f"{label}/{name}"] = base / name
+        paths.update(rust_inputs(label, base, core, package))
     for path in sorted(package.rglob("*")):
         if path.is_file() and (path.suffix in {".py", ".pyi"} or path.name == "py.typed"):
             paths[f"package/{path.relative_to(package).as_posix()}"] = path
@@ -92,13 +113,8 @@ def inputs(project):
     normalized["tool"]["maturin"]["manifest-path"] = "<native>/Cargo.toml"
     normalized["tool"]["maturin"]["python-source"] = "<package-parent>"
     inventory = {"project/config": digest(canonical(normalized))}
-    for name, path in paths.items():
-        if path.is_symlink() or not path.is_file():
-            raise ValueError("missing or linked source input: " + name)
-        if path.suffix not in TEXT_SUFFIXES and path.name != "py.typed" and not path.name.startswith(("LICENSE", "NOTICE", "COPYING")):
-            raise ValueError("unreviewed text suffix: " + name)
-        inventory[name] = digest(text_bytes(path))
-    core_config = tomllib.loads((core / "Cargo.toml").read_text(encoding="utf-8"))
+    hash_inputs(paths, inventory)
+    core_config = tomllib.loads((core / CARGO_MANIFEST).read_text(encoding="utf-8"))
     versions = {"core": core_config["package"]["version"], "python": config["project"]["version"],
                 "native": native_config["package"]["version"]}
     if versions["python"] != versions["native"]:
@@ -139,6 +155,21 @@ def git_identity(core):
         return {"base_commit": None, "state": "unknown"}
 
 
+def frozen_source(frozen, actual):
+    data = json.loads(frozen.read_text(encoding="utf-8"))
+    if set(data) != {"schema", "artifact_kind", "source"} or data["schema"] != 1 or data["artifact_kind"] != "sdist":
+        raise ValueError("not a frozen sdist source record")
+    source = data["source"]
+    if set(source) != set(actual) | {"git"} or any(source[k] != v for k, v in actual.items()):
+        raise ValueError("sdist source provenance mismatch")
+    git = source["git"]
+    if set(git) != {"base_commit", "state"} or git["state"] not in {"clean", "dirty", "unknown"}:
+        raise ValueError("invalid source state")
+    if (git["state"] == "unknown" and git["base_commit"] is not None) or (git["state"] != "unknown" and not re.fullmatch(r"[0-9a-f]{40}", git["base_commit"] or "")):
+        raise ValueError("invalid source commit")
+    return source
+
+
 def source_record(project):
     _, core, _, package, _, _ = layout(project)
     _, actual = inputs(project)
@@ -146,17 +177,7 @@ def source_record(project):
     if frozen.exists():
         if (core / ".git").exists() or not (project / "PKG-INFO").is_file():
             raise ValueError("frozen record is only valid in an extracted sdist, never a Git checkout")
-        data = json.loads(frozen.read_text(encoding="utf-8"))
-        if set(data) != {"schema", "artifact_kind", "source"} or data["schema"] != 1 or data["artifact_kind"] != "sdist":
-            raise ValueError("not a frozen sdist source record")
-        source = data["source"]
-        if set(source) != set(actual) | {"git"} or any(source[k] != v for k, v in actual.items()):
-            raise ValueError("sdist source provenance mismatch")
-        git = source["git"]
-        if set(git) != {"base_commit", "state"} or git["state"] not in {"clean", "dirty", "unknown"}:
-            raise ValueError("invalid source state")
-        if (git["state"] == "unknown" and git["base_commit"] is not None) or (git["state"] != "unknown" and not re.fullmatch(r"[0-9a-f]{40}", git["base_commit"] or "")):
-            raise ValueError("invalid source commit")
+        source = frozen_source(frozen, actual)
         origin = "sdist"
     else:
         source = dict(actual, git=git_identity(core))
@@ -167,14 +188,19 @@ def source_record(project):
     return source, origin
 
 
-def check_paths(raw, prefixes=()):
+def encoded_prefixes(prefixes):
     for prefix in prefixes:
         if len(prefix) > 3:
             for candidate in {prefix, prefix.replace("\\", "/"), prefix.replace("/", "\\")}:
                 for separator in ("/", "\\"):
                     text = candidate.rstrip("/\\") + separator
-                    if text.encode().lower() in raw.lower() or text.encode("utf-16-le").lower() in raw.lower():
-                        raise ValueError("local build path in package")
+                    yield text.encode().lower(), text.encode("utf-16-le").lower()
+
+
+def check_paths(raw, prefixes=()):
+    for utf8, utf16 in encoded_prefixes(prefixes):
+        if utf8 in raw.lower() or utf16 in raw.lower():
+            raise ValueError("local build path in package")
     generic = (rb"(?i)([a-z]:[\\/](?:users|git)[\\/]|/" + rb"home/[^/\x00\s]+/|/" +
                rb"Users/[^/\x00\s]+/|/github/" + rb"workspace|/runner/" + rb"work/)")
     if re.search(generic, raw):
@@ -247,7 +273,7 @@ def compiler_notices(sysroot):
 
 @contextmanager
 def staging(project, source):
-    project, core, native, package, _, _ = layout(project)
+    project, core, _, _, _, _ = layout(project)
     paths, _ = inputs(project)
     with tempfile.TemporaryDirectory(prefix="spatial-build-") as temporary:
         root = Path(temporary)
@@ -256,7 +282,7 @@ def staging(project, source):
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path, target)
         staged_project = root / project.relative_to(core)
-        shutil.copyfile(project / "pyproject.toml", staged_project / "pyproject.toml")
+        shutil.copyfile(project / PYPROJECT, staged_project / PYPROJECT)
         shutil.copyfile(core / "README.md", root / "README.md")
         # Explicit [[bench]] in the unmodified core manifest must remain valid.
         if (core / "benches").exists():
@@ -333,32 +359,31 @@ def build_wheel(wheel_directory, config_settings=None, metadata_directory=None):
     image = os.environ.get("SPATIAL_BUILD_IMAGE")
     if image and not re.fullmatch(r"quay\.io/pypa/manylinux_2_28_x86_64@sha256:[0-9a-f]{64}", image):
         raise ValueError("unreviewed build image identifier")
-    with staging(project, source) as (staged_project, root):
-        with build_environment(core, root, origin) as (sysroot, prefixes, deny):
-            rust = run("rustc", "--version", "--verbose")
-            tools = tool_hashes(sysroot)
-            native_tools = linux_tools()
-            notices, notice_record = compiler_notices(sysroot)
-            name = maturin.build_wheel(output, config, metadata_directory)
-            path = Path(output) / name
-            with zipfile.ZipFile(path) as wheel:
-                tags = [line[5:] for line in wheel.read(next(n for n in wheel.namelist() if n.endswith(".dist-info/WHEEL"))).decode().splitlines() if line.startswith("Tag: ")]
-                for member in wheel.namelist():
-                    check_paths(wheel.read(member), prefixes)
-            record = {"schema": 1, "artifact_kind": "wheel", "source_origin": origin, "source": source,
-                      "build": {"wrapper_version": WRAPPER_VERSION, "maturin": run("maturin", "--version"),
-                                "rustc": rust, "cargo": run("cargo", "--version"),
-                                "tool_sha256": tools,
-                                "native_tools": native_tools,
-                                "container_image": image,
-                                "target": next(line[6:] for line in rust.splitlines() if line.startswith("host: ")),
-                                "python": __import__("platform").python_version(), "profile": "release",
-                                "features": ["pyo3/extension-module"], "locked": True, "deny_warnings": deny,
-                                "path_remapping": "checkout-home-cargo-rustup-staging-v1",
-                                "settings": config, "tags": tags, "compiler_notices": notice_record}}
-            raw = canonical(record) + b"\n"
-            check_paths(raw, prefixes)
-            rewrite_wheel(path, dict(notices, **{"spatial_typestate/" + RESOURCE: raw}))
+    with staging(project, source) as (staged_project, root), build_environment(core, root, origin) as (sysroot, prefixes, deny):
+        rust = run("rustc", "--version", "--verbose")
+        tools = tool_hashes(sysroot)
+        native_tools = linux_tools()
+        notices, notice_record = compiler_notices(sysroot)
+        name = maturin.build_wheel(output, config, metadata_directory)
+        path = Path(output) / name
+        with zipfile.ZipFile(path) as wheel:
+            tags = [line[5:] for line in wheel.read(next(n for n in wheel.namelist() if n.endswith(".dist-info/WHEEL"))).decode().splitlines() if line.startswith("Tag: ")]
+            for member in wheel.namelist():
+                check_paths(wheel.read(member), prefixes)
+        record = {"schema": 1, "artifact_kind": "wheel", "source_origin": origin, "source": source,
+                  "build": {"wrapper_version": WRAPPER_VERSION, "maturin": run("maturin", "--version"),
+                            "rustc": rust, "cargo": run("cargo", "--version"),
+                            "tool_sha256": tools,
+                            "native_tools": native_tools,
+                            "container_image": image,
+                            "target": next(line[6:] for line in rust.splitlines() if line.startswith("host: ")),
+                            "python": __import__("platform").python_version(), "profile": "release",
+                            "features": ["pyo3/extension-module"], "locked": True, "deny_warnings": deny,
+                            "path_remapping": "checkout-home-cargo-rustup-staging-v1",
+                            "settings": config, "tags": tags, "compiler_notices": notice_record}}
+        raw = canonical(record) + b"\n"
+        check_paths(raw, prefixes)
+        rewrite_wheel(path, dict(notices, **{"spatial_typestate/" + RESOURCE: raw}))
     if source_record(project)[0] != source:
         raise ValueError("source changed during build")
     return name
@@ -403,10 +428,10 @@ def build_sdist(sdist_directory, config_settings=None):
             info.mode = 0o755 if info.isdir() else 0o644
             return info
         import gzip
-        with archive.open("wb") as file:
-            with gzip.GzipFile(filename="", mode="wb", fileobj=file, mtime=0) as compressed:
-                with tarfile.open(fileobj=compressed, mode="w") as tar:
-                    tar.add(tree, arcname=tree.name, filter=normalized_header)
+        with (archive.open("wb") as file,
+              gzip.GzipFile(filename="", mode="wb", fileobj=file, mtime=0) as compressed,
+              tarfile.open(fileobj=compressed, mode="w") as tar):
+            tar.add(tree, arcname=tree.name, filter=normalized_header)
     if source_record(project)[0] != source:
         raise ValueError("source changed during sdist build")
     return name
@@ -439,11 +464,10 @@ def prepare_metadata_for_build_wheel(metadata_directory, config_settings=None):
     metadata_args = "--locked --compatibility " + compatibility
     if "--auditwheel" in tokens:
         metadata_args += " --auditwheel " + tokens[tokens.index("--auditwheel") + 1]
-    with staging(project, source) as (_, root):
-        with build_environment(core, root, origin):
-            name = maturin.prepare_metadata_for_build_wheel(output, {"build-args": metadata_args})
-            project_prepared_tag(Path(output)/name/"WHEEL",compatibility,__import__("sys").platform)
-            return name
+    with staging(project, source) as (_, root), build_environment(core, root, origin):
+        name = maturin.prepare_metadata_for_build_wheel(output, {"build-args": metadata_args})
+        project_prepared_tag(Path(output)/name/"WHEEL",compatibility,__import__("sys").platform)
+        return name
 
 
 def get_requires_for_build_wheel(config_settings=None):

@@ -121,8 +121,9 @@ class BatchTests(unittest.TestCase):
                 with self.assertRaises((TypeError, ValueError, BufferError)):
                     Points.from_buffer(value, self.a, METERS)
         endian_type = ctypes.c_double.__ctype_be__ if sys.byteorder == "little" else ctypes.c_double.__ctype_le__
+        endian_data = (endian_type * 3)(1., 2., 3.)
         with self.assertRaises((TypeError, ValueError, BufferError)):
-            Points.from_buffer((endian_type * 3)(1., 2., 3.), self.a, METERS)
+            Points.from_buffer(endian_data, self.a, METERS)
         empty = Points.from_buffer(triples([]), self.a, METERS)
         self.assertEqual(empty.shape, (0, 3))
         self.assertEqual(len(empty), 0)

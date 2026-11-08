@@ -15,6 +15,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "target" / "performance-study"
+RESULT_FILE = "result.json"
 CARGO = ["cargo", "+1.99.0-x86_64-pc-windows-msvc"]
 CONFIGS = {
     "lto-std": ([], {}),
@@ -88,7 +89,7 @@ def collect(home, label, metadata):
     if not rows:
         raise RuntimeError("No Criterion estimates found; refusing an empty result")
     result = {"metadata": metadata, "estimates": rows, "samples": samples}
-    (home.parent / "result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
+    (home.parent / RESULT_FILE).write_text(json.dumps(result, indent=2), encoding="utf-8")
 
 
 def criterion_filter(value):
@@ -96,6 +97,48 @@ def criterion_filter(value):
     if value is not None and value.startswith("-"):
         raise ValueError("Criterion filter must not start with '-'; use a regex such as '^amortization'")
     return value
+
+
+def run_profile(study, config, repeat, manifest, selected_filter, analysis_threads):
+    label = config + "-r" + str(repeat)
+    folder = OUT / study / label
+    if (folder / RESULT_FILE).exists():
+        saved = json.loads((folder / RESULT_FILE).read_text())
+        if saved["metadata"]["fingerprint"] != manifest["fingerprint"]:
+            raise RuntimeError("Completed result has another fingerprint; use a fresh study")
+        print("RESUME skip " + label, flush=True)
+        return
+    folder.mkdir(parents=True, exist_ok=True)
+    # Each attempt gets a fresh directory, including after interruption.
+    # Preserve partial evidence without mixing it into a resumed run.
+    home = folder / ("criterion-" + str(time.time_ns()))
+    env = os.environ.copy()
+    env["CRITERION_HOME"] = str(home)
+    env["SPATIAL_BENCH_SEED"] = "5573589319906701683"
+    if analysis_threads is not None:
+        env["RAYON_NUM_THREADS"] = str(analysis_threads)
+    # Reverse candidate registration, not benchmark IDs or inputs.
+    env.pop("SPATIAL_BENCH_REVERSE", None)
+    if repeat % 2 == 0:
+        env["SPATIAL_BENCH_REVERSE"] = "1"
+    command = [manifest["configs"][config]["executable"], "--bench", "--noplot"]
+    if selected_filter:
+        command.append(selected_filter)
+    elif config.startswith("nolto"):
+        command.append(SUBSET)
+    metadata = {"config": config, "repeat": repeat, "command": command,
+                "seed": env["SPATIAL_BENCH_SEED"], "reverse": repeat % 2 == 0,
+                "utc_start": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "fingerprint": manifest["fingerprint"],
+                "analysis_threads": env.get("RAYON_NUM_THREADS")}
+    print("MEASURE " + label, flush=True)
+    start = time.monotonic()
+    with (folder / "console.log").open("w", encoding="utf-8") as log:
+        subprocess.run(command, cwd=ROOT, env=env, stdout=log,
+                       stderr=subprocess.STDOUT, check=True)
+    metadata["seconds"] = time.monotonic() - start
+    collect(home, label, metadata)
+    print("DONE " + label + " %.1fs" % metadata["seconds"], flush=True)
 
 
 def run(study, configs, selected_filter, analysis_threads):
@@ -121,45 +164,7 @@ def run(study, configs, selected_filter, analysis_threads):
         if len(configs) != len(CONFIGS):
             order = list(configs) if repeat % 2 else list(reversed(configs))
         for config in order:
-            label = config + "-r" + str(repeat)
-            folder = OUT / study / label
-            if (folder / "result.json").exists():
-                saved = json.loads((folder / "result.json").read_text())
-                if saved["metadata"]["fingerprint"] != manifest["fingerprint"]:
-                    raise RuntimeError("Completed result has another fingerprint; use a fresh study")
-                print("RESUME skip " + label, flush=True)
-                continue
-            folder.mkdir(parents=True, exist_ok=True)
-            # Each attempt gets a fresh directory, including after interruption.
-            # Preserve partial evidence without mixing it into a resumed run.
-            home = folder / ("criterion-" + str(time.time_ns()))
-            env = os.environ.copy()
-            env["CRITERION_HOME"] = str(home)
-            env["SPATIAL_BENCH_SEED"] = "5573589319906701683"
-            if analysis_threads is not None:
-                env["RAYON_NUM_THREADS"] = str(analysis_threads)
-            # Reverse candidate registration, not benchmark IDs or inputs.
-            env.pop("SPATIAL_BENCH_REVERSE", None)
-            if repeat % 2 == 0:
-                env["SPATIAL_BENCH_REVERSE"] = "1"
-            command = [manifest["configs"][config]["executable"], "--bench", "--noplot"]
-            if selected_filter:
-                command.append(selected_filter)
-            elif config.startswith("nolto"):
-                command.append(SUBSET)
-            metadata = {"config": config, "repeat": repeat, "command": command,
-                        "seed": env["SPATIAL_BENCH_SEED"], "reverse": repeat % 2 == 0,
-                        "utc_start": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                        "fingerprint": manifest["fingerprint"],
-                        "analysis_threads": env.get("RAYON_NUM_THREADS")}
-            print("MEASURE " + label, flush=True)
-            start = time.monotonic()
-            with (folder / "console.log").open("w", encoding="utf-8") as log:
-                subprocess.run(command, cwd=ROOT, env=env, stdout=log,
-                               stderr=subprocess.STDOUT, check=True)
-            metadata["seconds"] = time.monotonic() - start
-            collect(home, label, metadata)
-            print("DONE " + label + " %.1fs" % metadata["seconds"], flush=True)
+            run_profile(study, config, repeat, manifest, selected_filter, analysis_threads)
     export(study)
 
 

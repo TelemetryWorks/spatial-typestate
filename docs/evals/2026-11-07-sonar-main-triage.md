@@ -32,6 +32,15 @@ values, refuses foreign/partial state, and verifies both keys. It changes no
 gate, rule, threshold or issue status. Real verification still requires a
 nonempty period and real conditions on a subsequent main analysis.
 
+Reviewed one-time setup run [42429835320](https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42429835320)
+at `7992202` succeeded: fixed date `2026-11-07`, type `date`, statuses
+`[200, 200, 200, 204, 204, 200]`. The authenticated pre-read was unset;
+exact readback verified both project values. No inherited/foreign override was
+needed. The helper/tests were removed in the next commit and its activation
+variable deleted. No gate, threshold, rule, issue status or organization setting
+was changed. The subsequent natural main scan must still prove the period and
+gate; helper success is not analysis evidence.
+
 ## Four security findings and decisions
 
 - `AaG4bQQtnDi6kOcnr-A9`, `python:S5443`, `python/package_ci.py:91`:

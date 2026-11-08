@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Validate the main-only Sonar task `branch` field against the expected branch,
+  while rejecting it in PR task metadata.
+- Run installed-wheel container tests from a fresh private temporary directory,
+  with isolated Python startup, instead of shared `/tmp`.
+- Reject option-like Criterion filters before preparation or execution. Normal
+  regex filters, including `^amortization`, remain unchanged.
+
 ### Changed
 
 - Add a pinned Sonar workflow with isolated token-free reports and precedence
@@ -11,8 +20,7 @@
 
 - Restore CodeQL for Rust, Python and Actions with pinned actions, extended
   security queries and retained extraction evidence. Remove the disabled unsafe
-  Sonar workflow and its duplicate SARIF exporter; Sonar is **not restored**
-  pending owner project/access setup. Future Sonar findings belong in Sonar,
+  Sonar workflow and its duplicate SARIF exporter. Sonar findings belong in Sonar,
   not GitHub Security. See [security status and plan](docs/security_analysis.md).
 
 - Python build interface now uses the private PEP 517 backend for readiness

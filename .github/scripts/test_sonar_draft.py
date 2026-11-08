@@ -477,6 +477,16 @@ class PaginationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "organization mismatch"):
                 task_properties(path, "p", "other")
 
+    def test_task_branch_matches_expected_main_and_is_forbidden_on_pr(self):
+        with tempfile.TemporaryDirectory() as name:
+            path = Path(name) / 'report-task.txt'
+            path.write_text('projectKey=p\norganization=org\nbranch=main\nserverUrl=https://sonarcloud.io\ndashboardUrl=https://sonarcloud.io/dashboard?id=p&branch=main\nceTaskId=id\nceTaskUrl=https://sonarcloud.io/api/ce/task?id=id\n')
+            self.assertEqual(task_properties(path, 'p', 'org', 'main')['branch'], 'main')
+            with self.assertRaisesRegex(ValueError, 'branch mismatch'):
+                task_properties(path, 'p', 'org', 'other')
+            with self.assertRaisesRegex(ValueError, 'branch mismatch'):
+                task_properties(path, 'p', 'org')
+
     def test_pr_hotspot_completeness_is_not_fabricated(self):
         def get(endpoint, params):
             if endpoint == "/api/components/show":

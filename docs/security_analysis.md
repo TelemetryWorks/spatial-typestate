@@ -4,12 +4,16 @@ Configuration checkpoint, 2026-11-05. No scan result is inferred from workflow
 success or absence of alerts. Core math/API, dependency graphs, pin/MSRV/no_std
 and Python provenance contracts stay unchanged.
 
-Update 2026-11-07: CodeQL was restored in PR #9. The hardened Sonar workflow is
-present for a reviewed first run with organization telemetryworks and project
-spatial-typestate in repository variables and SONAR_TOKEN as a secret. Sonar is
-NOT restored until actual analyzer/import/gate evidence passes review. The
-[probe delta](sonar_probe_plan.md) supersedes the historical owner-setup wait
-below; user authorization permits the first real scanner attempt.
+Update 2026-11-07: CodeQL was restored in PR #9. PR #10 deployed the hardened
+Sonar workflow. The first full main analysis indexed all 47 tracked Rust files
+and imported core/native/Python coverage without Cargo warnings. Its first gate
+is NONE (new-code baseline), not a pass; the second main analysis must give a
+real result. [Exact findings, coverage and CLI triage](evals/2026-11-07-sonar-main-triage.md)
+record four vulnerabilities and 24 old maintainability findings. Two concrete
+fixes proceed; two operator-controlled path risks remain OPEN for owner review.
+No false-positive/Accept mutation is authorized. Sonar is NOT fully restored
+until the actual gate and remaining risks pass review. The
+[probe record](sonar_probe_plan.md) supersedes the historical setup wait below.
 
 ## Verified baseline and access boundary
 

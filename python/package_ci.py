@@ -88,8 +88,10 @@ def runtime(out, version):
                 command=["docker","run","--rm","--platform","linux/amd64",
                     "--mount",f"type=bind,src={wheel.parent},dst=/wheels,readonly",
                     "--mount",f"type=bind,src={assets},dst=/test-root,readonly",
-                    "--workdir","/tmp",image,executable,"-c",
-                    "import ctypes,subprocess,sys,json,hashlib,pathlib;lib=ctypes.CDLL(None);lib.gnu_get_libc_version.restype=ctypes.c_char_p;"
+                    "--workdir","/",image,executable,"-I","-c",
+                    "import ctypes,subprocess,sys,json,hashlib,pathlib,tempfile,os;"
+                    "work=tempfile.TemporaryDirectory(prefix='spatial-runtime-');os.chdir(work.name);"
+                    "lib=ctypes.CDLL(None);lib.gnu_get_libc_version.restype=ctypes.c_char_p;"
                     f"assert lib.gnu_get_libc_version().decode()=={glibc!r};"
                     f"assert sys.version_info[:2]=={tuple(map(int,version.split('.')))!r};"
                     f"print('SPATIAL_RUNTIME='+json.dumps(dict(glibc=lib.gnu_get_libc_version().decode(),python=sys.version,sha256=hashlib.sha256(pathlib.Path('/wheels/{wheel.name}').read_bytes()).hexdigest())),flush=True);"

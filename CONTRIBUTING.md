@@ -154,8 +154,10 @@ does not report diff-informed mode; main pushes and schedules also run full scan
 Run `python -m unittest discover -s .github/scripts -p 'test_*.py'` for the
 inventory controls. No security issue may be suppressed merely to pass a gate.
 
-Sonar is **not restored**: its unsafe legacy workflow was removed; the hardened
-successor uses confirmed nonsecret identifiers and a scoped token secret.
+Sonar is restored: its unsafe legacy workflow was removed; the hardened
+successor uses confirmed nonsecret identifiers and a scoped token secret. See
+[current verified status](docs/security_analysis.md); restoration is based on
+actual analysis and gate evidence, not merely a green workflow.
 Do not enable the old workflow. The [probe plan](docs/sonar_probe_plan.md) and
 actual server/analyzer/import/gate evidence govern restoration.
 Sonar findings will live in Sonar, not a duplicate GitHub SARIF export.
@@ -164,3 +166,24 @@ Before claiming current security evidence, verify workflow activation and the
 exact commit of the latest analysis. Public scheduled workflows can be disabled
 after 60 inactive days; maintainers must re-enable and run a real current scan
 after inactivity. Never count skipped or unavailable analyses as passing scans.
+
+## Main branch protection
+
+GitHub requires a PR, strict up-to-date app-bound checks and administrator
+compliance for `main`, with force pushes and deletion blocked. The approval
+count is zero so the sole maintainer is not locked out; this does not replace
+the project's review/coordinator process. See the [exact policy and dated
+before/after audit](docs/evals/2026-11-08-main-protection.md).
+
+All Rust, Python, CodeQL and four Sonar prerequisite/result contexts are required,
+including the separate CodeQL security-results check. Changing job or matrix
+names requires a coordinated protection update; never leave a required context
+that the workflows no longer emit. Keep a PR current with main because Python
+and Sonar inspect the head while core CI and CodeQL inspect the merge ref.
+
+A skipped Sonar job is not an analysis. For fork or Dependabot contributions,
+review/port the change to an owned branch and obtain a real Sonar gate and
+evidence run before merge. Do not treat GitHub's skipped-check satisfaction as
+scanner evidence. Sonar outages or expired/revoked credentials block merges;
+repair the service or renew the secret securely. Any emergency protection edit
+must be separately authorized and recorded, never an unrecorded admin bypass.

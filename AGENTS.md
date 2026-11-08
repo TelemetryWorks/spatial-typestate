@@ -148,9 +148,11 @@ is implied. Releases/version bumps/tags require an assigned task.
 
 ## Git conventions
 
-Treat main as protected by workflow. Use branches/PRs and merge commits; do not
-assume GitHub enforces this. Check status before branch changes; preserve all
-existing work. Editing approval does not imply commit/push/PR/merge/release
+Main has GitHub PR, strict app-bound status-check and admin protections; see the
+[policy/audit](docs/evals/2026-11-08-main-protection.md) for exact contexts and
+fork/Dependabot skip limits. Check the live policy before publishing. Use
+branches/PRs and merge commits; preserve all existing work and check status
+before branch changes. Editing approval does not imply commit/push/PR/merge/release
 approval; leave work uncommitted when requested. The coordinator owns publishing
 for the current task.
 

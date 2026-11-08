@@ -1,0 +1,127 @@
+{
+  "required_status_checks": {
+    "strict": true,
+    "checks": [
+      {
+        "context": "CodeQL",
+        "app_id": 57789
+      },
+      {
+        "context": "CodeQL (actions)",
+        "app_id": 15368
+      },
+      {
+        "context": "CodeQL (python)",
+        "app_id": 15368
+      },
+      {
+        "context": "CodeQL (rust)",
+        "app_id": 15368
+      },
+      {
+        "context": "Library (1.85.0, )",
+        "app_id": 15368
+      },
+      {
+        "context": "Library (1.85.0, --all-features)",
+        "app_id": 15368
+      },
+      {
+        "context": "Library (1.85.0, --no-default-features)",
+        "app_id": 15368
+      },
+      {
+        "context": "Library (1.91.1, )",
+        "app_id": 15368
+      },
+      {
+        "context": "Library (1.91.1, --all-features)",
+        "app_id": 15368
+      },
+      {
+        "context": "Library (1.91.1, --no-default-features)",
+        "app_id": 15368
+      },
+      {
+        "context": "Public Sonar evidence (no scanner token)",
+        "app_id": 15368
+      },
+      {
+        "context": "Python (ubuntu-latest, 3.11)",
+        "app_id": 15368
+      },
+      {
+        "context": "Python (ubuntu-latest, 3.14)",
+        "app_id": 15368
+      },
+      {
+        "context": "Python (windows-latest, 3.11)",
+        "app_id": 15368
+      },
+      {
+        "context": "Python (windows-latest, 3.14)",
+        "app_id": 15368
+      },
+      {
+        "context": "Sonar eligibility/configuration (not an analysis)",
+        "app_id": 15368
+      },
+      {
+        "context": "Sonar scanner",
+        "app_id": 15368
+      },
+      {
+        "context": "Tests (ubuntu-latest, all-features)",
+        "app_id": 15368
+      },
+      {
+        "context": "Tests (ubuntu-latest, default)",
+        "app_id": 15368
+      },
+      {
+        "context": "Tests (ubuntu-latest, no-std)",
+        "app_id": 15368
+      },
+      {
+        "context": "Tests (windows-latest, all-features)",
+        "app_id": 15368
+      },
+      {
+        "context": "Tests (windows-latest, default)",
+        "app_id": 15368
+      },
+      {
+        "context": "Tests (windows-latest, no-std)",
+        "app_id": 15368
+      },
+      {
+        "context": "Token-free Sonar reports (not a server analysis)",
+        "app_id": 15368
+      },
+      {
+        "context": "bare-metal",
+        "app_id": 15368
+      },
+      {
+        "context": "quality (--all-features)",
+        "app_id": 15368
+      },
+      {
+        "context": "quality (--no-default-features --features no_std)",
+        "app_id": 15368
+      }
+    ]
+  },
+  "enforce_admins": true,
+  "required_pull_request_reviews": {
+    "dismiss_stale_reviews": false,
+    "require_code_owner_reviews": false,
+    "required_approving_review_count": 0,
+    "require_last_push_approval": false
+  },
+  "restrictions": null,
+  "required_linear_history": false,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "required_conversation_resolution": false
+}

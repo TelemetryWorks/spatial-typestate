@@ -1,0 +1,13 @@
+{
+  "observed_utc": "2026-11-08T04:59:33.993707+00:00",
+  "main_revision": "75c89c441e230c54d94b3bcb553750839188c7d9",
+  "before": {
+    "protected": false,
+    "classic_protection_http": 404,
+    "classic_branch_protection_rules": [],
+    "repository_and_inherited_rulesets": [],
+    "active_rulesets_on_main": [],
+    "viewer_permission": "ADMIN"
+  },
+  "scope": "Read-only pre-application snapshot; no credentials included."
+}

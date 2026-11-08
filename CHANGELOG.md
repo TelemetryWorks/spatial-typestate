@@ -13,6 +13,11 @@
 
 ### Changed
 
+- Protect `main` with required PRs, strict app-bound Rust/Python/CodeQL/Sonar
+  checks, administrator enforcement, and force-push/deletion blocks. Approval
+  count remains zero for the sole maintainer; fork/Dependabot Sonar skips are
+  not analysis evidence. See the [policy audit](docs/evals/2026-11-08-main-protection.md).
+
 - Split packaging validation and benchmark registration into smaller ordered
   helpers; share repeated artifact names and tighten the endian exception test.
   Numeric APIs, CLI contracts, validation order and measured Rust expressions

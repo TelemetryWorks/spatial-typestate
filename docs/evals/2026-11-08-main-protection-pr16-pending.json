@@ -1,0 +1,139 @@
+{
+  "observed_utc": "2026-11-08T05:05:04.561255+00:00",
+  "pull_request": 16,
+  "url": "https://github.com/TelemetryWorks/spatial-typestate/pull/16",
+  "head_sha": "09cb2e531afcbbff84af7ba2df98347317a9c4bf",
+  "base_sha": "75c89c441e230c54d94b3bcb553750839188c7d9",
+  "merge_state_status": "BLOCKED",
+  "mergeable": "MERGEABLE",
+  "review_decision": "",
+  "configured_required_count": 27,
+  "reported_required_checks": [
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342694/job/128635026546",
+      "name": "Token-free Sonar reports (not a server analysis)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003524",
+      "name": "bare-metal",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003803",
+      "name": "Library (1.85.0, )",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003858",
+      "name": "quality (--all-features)",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342764/job/128635003840",
+      "name": "Python (ubuntu-latest, 3.14)",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003961",
+      "name": "Tests (ubuntu-latest, no-std)",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342676/job/128635003717",
+      "name": "CodeQL (rust)",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342764/job/128635003614",
+      "name": "Python (ubuntu-latest, 3.11)",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342676/job/128635003397",
+      "name": "CodeQL (python)",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003889",
+      "name": "quality (--no-default-features --features no_std)",
+      "state": "IN_PROGRESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342694/job/128635003504",
+      "name": "Sonar eligibility/configuration (not an analysis)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003973",
+      "name": "Tests (ubuntu-latest, all-features)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003926",
+      "name": "Tests (windows-latest, all-features)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003736",
+      "name": "Tests (windows-latest, no-std)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003853",
+      "name": "Tests (windows-latest, default)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342764/job/128635003845",
+      "name": "Python (windows-latest, 3.14)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342764/job/128635003839",
+      "name": "Python (windows-latest, 3.11)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635004016",
+      "name": "Tests (ubuntu-latest, default)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003822",
+      "name": "Library (1.85.0, --no-default-features)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003832",
+      "name": "Library (1.85.0, --all-features)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003825",
+      "name": "Library (1.91.1, )",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003714",
+      "name": "Library (1.91.1, --no-default-features)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342761/job/128635003814",
+      "name": "Library (1.91.1, --all-features)",
+      "state": "QUEUED"
+    },
+    {
+      "link": "https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42449342676/job/128635003702",
+      "name": "CodeQL (actions)",
+      "state": "QUEUED"
+    }
+  ],
+  "not_yet_reported_required_contexts": [
+    "CodeQL",
+    "Public Sonar evidence (no scanner token)",
+    "Sonar scanner"
+  ],
+  "scope": "Read-only observation before checks passed; no merge attempt or destructive probe."
+}

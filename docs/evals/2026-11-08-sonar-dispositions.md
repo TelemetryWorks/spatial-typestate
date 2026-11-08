@@ -19,7 +19,7 @@ prevents the flagged option injection. No numeric API, source implementation,
 historical reproduction command, rule, gate, threshold or exclusion changes.
 The 24 maintainability findings are outside this decision and remain backlog.
 
-## Execution boundary (pending actual execution)
+## Reviewed execution boundary
 
 A temporary PR-13-only workflow also requires a unique one-time repository
 variable. It has no checkout, runs isolated inline Python, and takes the existing
@@ -43,8 +43,10 @@ size. Partial failures stop; reruns skip a target only when its exact approved
 comment and one matching changelog transition are already present. Target status
 without this audit fails instead of inventing an audit after the fact.
 
-Anonymous final reads must confirm each modern status, exactly one matching
-literal comment, and one matching transition in its changelog. Legacy resolution
+The original verification required anonymous final reads to confirm each modern
+status, exactly one matching literal comment, and one matching changelog transition.
+The changelog requirement was not met; the reviewed alternate public evidence is
+recorded below. Legacy resolution
 is recorded separately: `FALSE-POSITIVE` corresponds to `FALSE_POSITIVE`, and
 `WONTFIX` may accompany modern `ACCEPTED`; there is no legacy `ACCEPTED` resolution.
 No success is inferred from an HTTP acknowledgement alone.
@@ -61,7 +63,8 @@ optional atomic `comment` parameter. Deprecated `wontfix` is not used.
 ## Exact public audit comments
 
 The following fixed comments are part of the reviewed transition payloads.
-Actual run IDs and verified outcomes will be added after execution.
+The exact comments below were applied in the atomic transitions. Verified
+outcomes follow them.
 
 ### AaG4bQRmnDi6kOcnr-BC
 
@@ -74,3 +77,41 @@ Actual run IDs and verified outcomes will be added after execution.
 ### AaG4bQO8nDi6kOcnr-Ap
 
 2026-11-08 UTC owner-approved accepted risk: --out is an intentional arbitrary-write interface for a trusted local operator and can overwrite any file that principal may write. Do not expose it to untrusted callers or forward untrusted output paths under broader OS rights. See docs/evals/2026-11-07-sonar-main-triage.md. Preserve the documented reproduction interface; this is accepted operator risk, not a false positive or a sandbox guarantee.
+
+## Actual execution and independently verified outcome
+
+Run [42433830390](https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42433830390)
+at reviewed commit `f89eb0949920b2d3d8f84dfb1aa155bc463528f4` applied all three
+approved transitions. Each POST returned HTTP 200 and passed the in-code issue
+key and modern-status checks before the run reached final verification. Response
+bodies were not logged or retained; these acknowledgements are established by
+the executed client checks, not invented raw-response receipts.
+
+| Issue | Modern issueStatus | Legacy status / resolution | Issue update and comment time (UTC) | Exact matching comments |
+|---|---|---|---|---:|
+| `AaG4bQRmnDi6kOcnr-BC` | `FALSE_POSITIVE` | `RESOLVED` / `FALSE-POSITIVE` | 2026-11-08T01:20:38Z | 1 |
+| `AaG4bQQrnDi6kOcnr-A7` | `ACCEPTED` | `RESOLVED` / `WONTFIX` | 2026-11-08T01:20:40Z | 1 |
+| `AaG4bQO8nDi6kOcnr-Ap` | `ACCEPTED` | `RESOLVED` / `WONTFIX` | 2026-11-08T01:20:42Z | 1 |
+
+The comments are byte-identical to the reviewed literals above (399, 453 and
+446 characters respectively). Their timestamps match their issue update times,
+consistent with the atomic transition/comment calls. The coordinator and
+independent reviewer verified these public statuses, resolutions, exact comment
+contents/counts and timestamps separately.
+
+The helper's final changelog check failed: anonymous `api/issues/changelog`
+returned an empty array for all three issues, before and after the actions.
+Thus that endpoint is not usable as public history evidence on this project;
+no claim is made about an authenticated history that was never read. The run
+remains **FAILED**. It was not rerun or made green, no transitions/comments were
+posted again, and no additional token-bearing verification was performed.
+Public status, resolution, one exact comment and matching timestamps were
+accepted by the coordinator and reviewer as sufficient alternate audit evidence.
+
+The activation variable was deleted immediately after the stop, then the helper
+and its tests were removed in the next commit. The final PR contains only these
+dated documentation updates; no permanent mutator remains. Public verification
+showed zero OPEN vulnerabilities and 24 unchanged OPEN code smells, with two
+explicitly ACCEPTED operator risks and one FALSE_POSITIVE finding. This is not
+an overall vulnerability-free or sandbox claim. Natural post-merge analysis and
+all returned CI checks remain the final delivery verification.

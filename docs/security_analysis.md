@@ -9,8 +9,11 @@ the new-code gate passed all six conditions, with a real period starting at the
 first deployment analysis on 2026-11-07. The owner subsequently authorized
 exactly [three per-issue dispositions](evals/2026-11-08-sonar-dispositions.md):
 false positive for the already-validated filter, accepted operator risk for CSV
-input and benchmark output. Execution and public audit verification are recorded
-in that follow-up. No other issue, rule, gate, threshold or exclusion is in scope;
+input and benchmark output. The three transitions were applied and independently verified through public
+modern/legacy statuses, exact comments and matching timestamps in that follow-up.
+The mutation run remains failed because anonymous changelog was empty; no rerun
+or extra credentialed history read was performed. Two operator risks are
+ACCEPTED, one sanitised finding is FALSE_POSITIVE, and none remains OPEN. No other issue, rule, gate, threshold or exclusion is in scope;
 the 24 maintainability findings remain backlog.
 
 Update 2026-11-07: CodeQL was restored in PR #9. PR #10 deployed the hardened

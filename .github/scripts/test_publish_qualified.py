@@ -109,8 +109,9 @@ class PublicTransportTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     p.public(url)
                 opener.assert_not_called()
+        handler = p.NoRedirect()
         with self.assertRaisesRegex(ValueError, "redirect"):
-            p.NoRedirect().redirect_request(None, None, 302, "redirect", {}, "https://pypi.org/x")
+            handler.redirect_request(None, None, 302, "redirect", {}, "https://pypi.org/x")
 
     def test_response_cap_missing_and_error_statuses(self):
         for raw, expected in ((b"public", b"public"), (b"x" * 4_000_001, None)):

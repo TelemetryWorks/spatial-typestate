@@ -11,7 +11,12 @@ readme = "README.md"
 keywords = ["typestate", "3d", "spatial", "coordinate-system", "safety"]
 categories = ["science", "aerospace", "mathematics", "embedded"]
 authors = ["TelemetryWorks"]
-exclude = ["/docs", "/.github", "/python"] # Keep docs, workflows and the separate Python project out of core archives
+# Keep development controls and the separate Python project out of core archives.
+exclude = [
+    "/docs", "/.github", "/python",
+    "/AGENTS.md", "/CLAUDE.md", "/.cargo", "/rust-toolchain.toml", "/scripts", "/.gitignore",
+    "/ROADMAP.md", "/images",
+]
 
 # Safety-critical posture — avoid accidental features
 [profile.release]

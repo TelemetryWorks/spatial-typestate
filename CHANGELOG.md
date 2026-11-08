@@ -9,6 +9,14 @@ artifact signoff. The
 [published 0.0.1 migration](docs/migration-0.0.1-to-0.1.0.md) is the consumer guide;
 the development history below also includes changes between unpublished commits.
 
+### Packaging
+
+- Omit agent instructions, development Cargo/toolchain controls, local tooling,
+  the repository-only roadmap pointer and unused logo from the Rust crate archive.
+  Tests, benches and examples remain packaged; repository files and runtime
+  behavior are unchanged. This manifest change supersedes the initial candidate
+  source/artifact selection; qualification must use the replacement reviewed commit.
+
 ### Fixed
 
 - Validate the main-only Sonar task `branch` field against the expected branch,

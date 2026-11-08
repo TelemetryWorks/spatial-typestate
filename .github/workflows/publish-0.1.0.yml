@@ -1,0 +1,234 @@
+name: Publish exact approved 0.1.0 artifacts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-qualified-0.1.0-once
+  cancel-in-progress: false
+
+env:
+  PUBLICATION_GUARD: ${{ vars.PUBLICATION_0_1_0 }}
+  RUSTUP_TOOLCHAIN: '1.99.0'
+  CARGO_BUILD_JOBS: '2'
+
+jobs:
+  preflight:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: tooling
+          persist-credentials: false
+      - name: One-time gate and credential presence (no credential values)
+        env:
+          CARGO_PRESENT: ${{ secrets.CARGO_REGISTRY_TOKEN != '' }}
+          PYPI_PRESENT: ${{ secrets.PYPI_API_TOKEN != '' }}
+        run: python -I tooling/.github/scripts/publish_qualified.py gate
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9974fd6a00521d631d6ff6e35d4aa936f6b624cf
+          path: candidate-source
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # verified commit
+        with:
+          toolchain: '1.99.0'
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          artifact-ids: '13626802673'
+          run-id: '42505032821'
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/source-ubuntu
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          artifact-ids: '13627490908'
+          run-id: '42505032821'
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/source-windows
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          artifact-ids: '13628765976'
+          run-id: '42508333524'
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/qualified-crate
+      - name: Public absence, ownership, four hashes and clean Cargo package guard
+        run: python -I tooling/.github/scripts/publish_qualified.py preflight
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: publication-preflight-${{ github.run_id }}
+          path: ${{ runner.temp }}/publication-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+
+  pypi:
+    needs: preflight
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9974fd6a00521d631d6ff6e35d4aa936f6b624cf
+          path: candidate-source
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          artifact-ids: '13626802673'
+          run-id: '42505032821'
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/source-ubuntu
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          artifact-ids: '13627490908'
+          run-id: '42505032821'
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/source-windows
+      - name: Recheck absence and stage only the three exact Python files
+        run: python -I tooling/.github/scripts/publish_qualified.py stage-python
+      - name: Publish exact files to PyPI (sole Python credential holder)
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3, peeled tag verified
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: publish-dist/
+          verify-metadata: 'true'
+          skip-existing: 'false'
+          verbose: 'false'
+          print-hash: 'true'
+          attestations: 'false'
+      - name: Fresh public download and exact three-file verification
+        run: python -I tooling/.github/scripts/publish_qualified.py verify-python
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: publication-pypi-${{ github.run_id }}
+          path: ${{ runner.temp }}/publication-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+
+  crates:
+    needs: [preflight, pypi]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9974fd6a00521d631d6ff6e35d4aa936f6b624cf
+          path: candidate-source
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # verified commit
+        with:
+          toolchain: '1.99.0'
+      - name: Recheck public PyPI bytes, Rust absence and exact Cargo archive
+        run: python -I tooling/.github/scripts/publish_qualified.py crate-guard
+      - name: Publish Rust with official Cargo (sole Cargo credential holder)
+        working-directory: candidate-source
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_TARGET_DIR: ${{ runner.temp }}/publication-cargo-target
+        run: cargo +1.99.0 publish --locked --jobs 2
+      - name: Fresh public index and exact crate download verification
+        run: python -I tooling/.github/scripts/publish_qualified.py verify-crate
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: publication-crates-${{ github.run_id }}
+          path: ${{ runner.temp }}/publication-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+
+  public-python:
+    needs: crates
+    if: github.ref == 'refs/heads/main'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.14']
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9974fd6a00521d631d6ff6e35d4aa936f6b624cf
+          path: candidate-source
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install public bytes into isolated venv and run outside-checkout suite/lab
+        run: python -I tooling/.github/scripts/publish_qualified.py installed
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: public-python-${{ matrix.os }}-${{ matrix.python }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/publication-evidence/
+          if-no-files-found: warn
+          retention-days: 30
+
+  public-rust:
+    needs: crates
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          path: tooling
+          persist-credentials: false
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9974fd6a00521d631d6ff6e35d4aa936f6b624cf
+          path: candidate-source
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # verified commit
+        with:
+          toolchain: '1.99.0'
+      - name: Build and run actual crates.io consumers (std and no_std library)
+        run: python -I tooling/.github/scripts/publish_qualified.py registry-consumer
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: public-rust-${{ github.run_id }}
+          path: ${{ runner.temp }}/publication-evidence/
+          if-no-files-found: warn
+          retention-days: 30

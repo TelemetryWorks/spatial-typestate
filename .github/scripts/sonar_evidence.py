@@ -75,11 +75,20 @@ def validate_task_urls(record):
         raise ValueError("task URL/ID mismatch")
 
 
-def task_properties(path, project, organization=None):
+def validate_task_identity(record, project, organization, branch):
+    if record["projectKey"] != project or record["serverUrl"] != HOST:
+        raise ValueError("task project/host mismatch")
+    if "organization" in record and record["organization"] != organization:
+        raise ValueError("task organization mismatch")
+    if "branch" in record and (branch is None or record["branch"] != branch):
+        raise ValueError("task branch mismatch")
+
+
+def task_properties(path, project, organization=None, branch=None):
     if path.is_symlink() or not path.is_file() or path.stat().st_size > 65536:
         raise ValueError("missing/invalid scanner task file; no analysis evidence")
     record = {}
-    allowed = {"projectKey", "organization", "serverUrl", "serverVersion", "dashboardUrl", "ceTaskId", "ceTaskUrl"}
+    allowed = {"projectKey", "organization", "branch", "serverUrl", "serverVersion", "dashboardUrl", "ceTaskId", "ceTaskUrl"}
     for line in path.read_text(encoding="utf-8").splitlines():
         if not line or line.startswith("#"):
             continue
@@ -87,10 +96,7 @@ def task_properties(path, project, organization=None):
         if key not in allowed or key in record:
             raise ValueError("unexpected/duplicate scanner task field")
         record[key] = value
-    if record["projectKey"] != project or record["serverUrl"] != HOST:
-        raise ValueError("task project/host mismatch")
-    if "organization" in record and record["organization"] != organization:
-        raise ValueError("task organization mismatch")
+    validate_task_identity(record, project, organization, branch)
     validate_task_urls(record)
     return record
 
@@ -197,10 +203,11 @@ def write_evidence(task_dir, environ, get=public_json):
     try:
         project = environ["PROJECT_KEY"]
         revision = environ["SOURCE_REVISION"]
-        task = task_properties(task_dir / "report-task.txt", project, environ["ORGANIZATION"])
         event = json.loads(Path(environ["GITHUB_EVENT_PATH"]).read_text())
         pr = str(event["number"]) if environ["GITHUB_EVENT_NAME"] == "pull_request" else None
         branch = environ["GITHUB_REF"].removeprefix("refs/heads/")
+        expected_task_branch = None if pr else branch
+        task = task_properties(task_dir / "report-task.txt", project, environ["ORGANIZATION"], expected_task_branch)
         result = collect(recorded_json, project, revision, task["ceTaskId"], branch, pr, environ["ORGANIZATION"])
     except (ValueError, KeyError, OSError) as error:
         result["blocker"] = str(error)

@@ -1,4 +1,4 @@
-# Sonar probe delta: design only
+# Sonar execution and reviewed probe record
 
 Updated 2026-11-07. User now authorizes actual reviewed deployment/scan with
 organization telemetryworks and project spatial-typestate. Both nonsecret

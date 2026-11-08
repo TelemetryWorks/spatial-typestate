@@ -3,8 +3,11 @@
 These are proposals, not implemented guarantees or promises of a release date.
 
 - Complete [Sonar restoration](security_analysis.md) through the hardened
-  workflow's first real run and actual server-side
-  findings, coverage and quality-gate evidence. CodeQL restoration is independent.
+  workflow's second main analysis and real quality gate. Its first full analysis
+  and [exact findings/coverage triage](evals/2026-11-07-sonar-main-triage.md)
+  are recorded. Two operator-controlled CLI path risks need an owner decision;
+  24 old maintainability findings remain visible backlog. No issue is accepted
+  or suppressed to manufacture green. CodeQL restoration is independent.
 
 - Assess additional unit conversions/dimensional algebra only against concrete domain needs; current linear lengths deliberately exclude them.
 - Assess long-chain rotation drift and whether explicit reconditioning is needed.

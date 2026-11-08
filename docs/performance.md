@@ -231,6 +231,12 @@ python scripts/performance_study.py --prepare --configs lto-std,nolto-std
 python scripts/performance_study.py --run --study controls --configs lto-std,nolto-std --filter '^controls/'
 ```
 
+The current runner treats `--filter` only as a positional Criterion regex and
+rejects values beginning with `-` before any build or measurement. The documented
+`^amortization` and `^controls/` forms and built-in subset remain valid; use `^-x`
+if a literal initial hyphen is needed. Do not forward untrusted options or edit
+the operator-owned executable manifest from an untrusted source.
+
 Again, ns are median of three run medians [min,max], not confidence intervals.
 
 | Control | LTO/std | no-LTO/std |

@@ -15,9 +15,54 @@ sys.path.insert(0, str(PROJECT))
 import build_backend as b
 import verify_artifacts as v
 import check_package_metadata as m
+import package_ci as ci
 
 
 class BackendTests(unittest.TestCase):
+    def test_runtime_uses_private_temp_directory_and_keeps_wheel_evidence(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            for relative in ('python/tests', 'python/examples', 'docs'):
+                (root / relative).mkdir(parents=True)
+            (root / 'docs/PYTHON-GUIDE.md').write_text('fixture guide')
+            out = root / 'artifacts'
+            out.mkdir()
+            wheel = out / 'fixture.whl'
+            wheel.write_bytes(b'wheel fixture')
+            digest = hashlib.sha256(wheel.read_bytes()).hexdigest()
+            commands = []
+            private_paths = []
+            def fake_run(command, **kwargs):
+                commands.append(command)
+                self.assertEqual(command[command.index('--workdir') + 1], '/')
+                self.assertIn('-I', command)
+                program = command[-1]
+                # Execute only the trusted startup prefix, with no Docker,
+                # native library load, pip install, or test execution.
+                startup = program.split('lib=ctypes.CDLL(None)', 1)[0]
+                probe = startup + "print(json.dumps(dict(path=os.getcwd(),mode=__import__('stat').S_IMODE(os.stat(os.getcwd()).st_mode))));os.chdir(tempfile.gettempdir());work.cleanup()"
+                process = subprocess.Popen([sys.executable, '-I', '-c', probe], stdout=subprocess.PIPE, text=True)
+                output, _ = process.communicate(timeout=10)
+                self.assertEqual(process.returncode, 0)
+                private_record = json.loads(output)
+                private = private_record['path']
+                private_paths.append(private)
+                self.assertNotEqual(private, tempfile.gettempdir())
+                if os.name == 'posix':
+                    self.assertEqual(private_record['mode'], 0o700)
+                self.assertFalse(Path(private).exists())  # TemporaryDirectory cleaned at process exit.
+                glibc = '2.28' if ci.MANYLINUX in command else '2.36'
+                record = dict(glibc=glibc, python='fixture interpreter', sha256=digest)
+                return subprocess.CompletedProcess(command, 0, 'SPATIAL_RUNTIME=' + json.dumps(record), '')
+            with patch.object(ci, 'ROOT', root), patch.object(ci.subprocess, 'run', side_effect=fake_run):
+                ci.runtime(out, '3.11')
+            records = json.loads((out / 'runtime-evidence.json').read_text())
+            self.assertEqual(len(commands), 2)
+            self.assertEqual(len(set(private_paths)), 2)
+            self.assertEqual({item['glibc'] for item in records}, {'2.28', '2.36'})
+            self.assertTrue(all(item['sha256'] == digest and item['artifact'] == wheel.name for item in records))
+
     def test_extra_wheel_metadata_rejected(self):
         import zipfile
         with tempfile.TemporaryDirectory() as d:

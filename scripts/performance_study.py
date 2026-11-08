@@ -91,7 +91,15 @@ def collect(home, label, metadata):
     (home.parent / "result.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
 
 
+def criterion_filter(value):
+    """A positional regex must never become a Criterion command-line option."""
+    if value is not None and value.startswith("-"):
+        raise ValueError("Criterion filter must not start with '-'; use a regex such as '^amortization'")
+    return value
+
+
 def run(study, configs, selected_filter, analysis_threads):
+    selected_filter = criterion_filter(selected_filter)
     manifest = json.loads((OUT / "manifest.json").read_text())
     if manifest["fingerprint"] != fingerprint():
         raise RuntimeError("Source changed after preparation; rebuild before collecting timings")
@@ -174,7 +182,7 @@ if __name__ == "__main__":
     parser.add_argument("--study", default="host-study")
     parser.add_argument("--configs", default=",".join(CONFIGS),
                         help="comma-separated named profiles (default: all)")
-    parser.add_argument("--filter", default=None,
+    parser.add_argument("--filter", type=criterion_filter, default=None,
                         help="optional Criterion filter, replacing the no-LTO subset")
     parser.add_argument("--analysis-threads", type=int, default=None,
                         help="explicit Rayon bootstrap worker cap, outside operation timing")

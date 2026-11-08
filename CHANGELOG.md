@@ -13,6 +13,11 @@
 
 ### Changed
 
+- Establish the reviewed Sonar new-code-since-deployment baseline using a fixed
+  date before the first main analysis. This evaluates subsequent changes while
+  three older vulnerability findings and 24 smells remain visibly OPEN; it is
+  not an overall-clean claim or a rule/threshold/issue-status change.
+
 - Add a pinned Sonar workflow with isolated token-free reports and precedence
   probe, hosted-runner Rust-tool checks and a credential-bearing official scanner
   step. Sonar restoration requires actual server/import/gate evidence; configured

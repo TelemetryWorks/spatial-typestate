@@ -18,16 +18,19 @@
   Numeric APIs, CLI contracts, validation order and measured Rust expressions
   are unchanged. See the [maintainability audit](docs/evals/2026-11-08-maintainability.md)
   for per-issue server verification and the limits of equivalence evidence.
+  All 24 original keys were verified FIXED on main `c047c12` (2026-11-08),
+  with no replacement keys and the three security dispositions unchanged.
 
 - Record the owner's three issue-specific Sonar decisions with public audit
   comments: false positive for the already-validated Criterion filter, and
   accepted trusted-operator CSV input/benchmark output risks. Numeric APIs and
-  CLI behavior are unchanged; 24 maintainability findings remain backlog.
+  CLI behavior are unchanged; maintainability work is recorded separately above.
 
 - Establish the reviewed Sonar new-code-since-deployment baseline using a fixed
-  date before the first main analysis. This evaluates subsequent changes while
-  three older vulnerability findings and 24 smells remain visibly OPEN; it is
-  not an overall-clean claim or a rule/threshold/issue-status change.
+  date before the first main analysis. This evaluates subsequent changes; at
+  setup, three older vulnerability findings and 24 smells were still OPEN.
+  Their later dispositions/fixes are recorded separately. The baseline setup
+  was not an overall-clean claim or a rule/threshold/issue-status change.
 
 - Add a pinned Sonar workflow with isolated token-free reports and precedence
   probe, hosted-runner Rust-tool checks and a credential-bearing official scanner

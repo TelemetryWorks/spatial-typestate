@@ -2,12 +2,12 @@
 
 These are proposals, not implemented guarantees or promises of a release date.
 
-- Complete [Sonar restoration](security_analysis.md) through the hardened
-  workflow's explicit new-code definition and real quality gate. Its full analyses
-  and [exact findings/coverage triage](evals/2026-11-07-sonar-main-triage.md)
-  are recorded. Three pre-existing Sonar vulnerability findings need owner review;
-  24 old maintainability findings remain visible backlog. No issue is accepted
-  or suppressed to manufacture green. CodeQL restoration is independent.
+- Preserve the restored [security analysis](security_analysis.md) and review new
+  findings. The [historical triage](evals/2026-11-07-sonar-main-triage.md) and
+  [owner-approved dispositions](evals/2026-11-08-sonar-dispositions.md) distinguish
+  a sanitised filter finding from two accepted operator risks. The 24 old
+  maintainability findings remain visible backlog; they are not part of the
+  three-issue decision. No broad rule, gate, threshold or exclusion change follows.
 
 - Assess additional unit conversions/dimensional algebra only against concrete domain needs; current linear lengths deliberately exclude them.
 - Assess long-chain rotation drift and whether explicit reconditioning is needed.

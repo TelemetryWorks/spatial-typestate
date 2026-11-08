@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
-from types import ModuleType
+from types import ModuleType, SimpleNamespace
 import unittest
 from unittest.mock import patch
 
@@ -166,6 +166,105 @@ class SamplingTests(unittest.TestCase):
         self.assertEqual(len({id(batch) for batch in exports}), len(exports))
         self.assertEqual(totals, [2_000_000] * 9)
         self.assertEqual(samples, [2_000_000 / 4096] * 9)
+
+
+def worker_binding():
+    """Record FFI routing, not numeric math; installed-wheel tests cover the math."""
+    observed = SimpleNamespace(views=[], conversions=[], events=[])
+
+    class Batch:
+        def __init__(self, raw):
+            self.raw = raw
+
+        def view(self):
+            observed.views.append(self)
+            observed.events.append("view")
+            return memoryview(self.raw)
+
+        def convert_to(self, unit):
+            observed.conversions.append(unit)
+            return self
+
+    binding = ModuleType("spatial_typestate")
+    binding.Frame = unittest.mock.Mock(side_effect=lambda name: name)
+    binding.METERS, binding.FEET = object(), object()
+    binding.Quaternion = unittest.mock.Mock(return_value="rotation")
+    binding.Points = unittest.mock.Mock()
+    binding.Points.from_buffer.side_effect = lambda raw, frame, unit: Batch(raw)
+    observed.transform = unittest.mock.Mock()
+    observed.transform.apply_points.side_effect = lambda points: points
+    binding.Transform = unittest.mock.Mock()
+    binding.Transform.from_rotation_translation.return_value = observed.transform
+    return binding, observed
+
+
+class WorkerRoutingTests(unittest.TestCase):
+    def test_stage_routing_cold_calls_and_serialized_observations(self):
+        # imports, maps, views, conversions, transform constructions, respectively.
+        counts = {"import": (3, 0, 0, 0, 1), "apply": (1, 2, 0, 0, 1),
+                  "convert": (1, 0, 0, 2, 1), "export_cached": (1, 0, 3, 0, 1),
+                  "export_first": (3, 0, 2, 0, 1), "end_to_end": (3, 2, 2, 0, 1),
+                  "scalar_calls": (5, 4, 4, 0, 1), "setup": (1, 0, 0, 0, 3)}
+        for stage, expected in counts.items():
+            with self.subTest(stage=stage):
+                self.check_stage(stage, expected)
+
+    def check_stage(self, stage, expected):
+        binding, observed = worker_binding()
+        memory = {"peak_rss_before_bytes": 1, "peak_rss_after_bytes": 2,
+                  "retained_python_blocks": 3, "python_traced_current_bytes": 4,
+                  "python_traced_peak_bytes": 5}
+
+        def retained(fn):
+            fn()
+            return memory
+
+        ticks = iter((100, 250))
+        def clock_read():
+            observed.events.append("clock")
+            return next(ticks)
+
+        with (patch.dict(sys.modules, {"spatial_typestate": binding}),
+              patch.object(benchmark.time, "perf_counter_ns", side_effect=clock_read) as clock,
+              patch.object(benchmark, "sample_calls", return_value=([20, 10], [1, 1], [20, 10], [])) as sample,
+              patch.object(benchmark, "retained_memory", side_effect=retained)):
+            result = benchmark.worker(stage, 2)
+        self.assertEqual(result, {"stage": stage, "rows": 2, "samples_ns": [20, 10],
+                                  "iterations_per_sample": [1, 1], "sample_totals_ns": [20, 10],
+                                  "cold_single_call_ns": 150, "calibration": [],
+                                  "median_ns": 15, "min_ns": 10, "max_ns": 20, **memory})
+        self.assertEqual(clock.call_count, 2)
+        self.assertEqual(sample.call_count, 1)
+        self.assertEqual((binding.Points.from_buffer.call_count, observed.transform.apply_points.call_count,
+                          len(observed.views), len(observed.conversions),
+                          binding.Transform.from_rotation_translation.call_count), expected)
+        for call in binding.Points.from_buffer.call_args_list:
+            self.assertEqual(call.args[1:], ("Sensor", binding.METERS))
+            self.assertEqual(list(call.args[0]), [2., 3., 4.] * (len(call.args[0]) // 3))
+        self.assertTrue(all(unit is binding.FEET for unit in observed.conversions))
+        initial = binding.Transform.from_rotation_translation.call_args_list[0]
+        self.assertEqual(initial.args, ("Sensor", "World", binding.METERS, "rotation", (10., 20., 30.)))
+        if stage == "export_cached":
+            self.assertEqual(len({id(batch) for batch in observed.views}), 1)
+            self.assertEqual(observed.events, ["view", "clock", "view", "clock", "view"])
+        if stage == "export_first":
+            self.assertEqual(len({id(batch) for batch in observed.views}), 2)
+
+    def test_memory_stage_delegates_without_cold_or_timed_calls(self):
+        binding, _ = worker_binding()
+        for stage in ("memory_viewed", "memory_unviewed"):
+            with (patch.dict(sys.modules, {"spatial_typestate": binding}),
+                  patch.object(benchmark, "memory_worker", return_value={"fixture": stage}) as memory,
+                  patch.object(benchmark.time, "perf_counter_ns") as clock,
+                  patch.object(benchmark, "sample_calls") as samples):
+                result = benchmark.worker(stage, 2)
+            self.assertEqual(result, {"fixture": stage})
+            args = memory.call_args.args
+            self.assertEqual(args[:2], (stage, 2))
+            self.assertEqual(list(args[2]), [2., 3., 4., 2., 3., 4.])
+            self.assertEqual(args[3:], ("Sensor", binding.Points, binding.METERS))
+            clock.assert_not_called()
+            samples.assert_not_called()
 
 
 class StaticMetadataTests(unittest.TestCase):

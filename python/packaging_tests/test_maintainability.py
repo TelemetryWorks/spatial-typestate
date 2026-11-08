@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+from types import ModuleType
 import unittest
 from unittest.mock import patch
 
@@ -118,7 +119,11 @@ class SamplingTests(unittest.TestCase):
     def test_short_samples_increase_repetitions_with_exact_clock_normalization(self):
         durations = [500_000, 2_000_000, 500_000] + [1_000_000] * 8
         timestamps = list(itertools.chain.from_iterable((0, total) for total in durations))
-        with (patch.object(benchmark.time, "perf_counter_ns", side_effect=timestamps) as clock,
+        binding = ModuleType("spatial_typestate")
+        binding.Points = unittest.mock.Mock()
+        binding.METERS = object()
+        with (patch.dict(sys.modules, {"spatial_typestate": binding}),
+              patch.object(benchmark.time, "perf_counter_ns", side_effect=timestamps) as clock,
               patch.object(benchmark.gc, "collect") as collect):
             action = unittest.mock.Mock(return_value=None)
             samples, counts, totals, calibration = benchmark.sample_calls(
@@ -133,7 +138,6 @@ class SamplingTests(unittest.TestCase):
         self.assertEqual(collect.call_count, 9)
 
     def test_first_exports_are_fresh_and_never_warmed_by_calibration(self):
-        import spatial_typestate
         batches = []
         exports = []
 
@@ -147,8 +151,10 @@ class SamplingTests(unittest.TestCase):
             batches.append(result)
             return result
 
-        points_type = unittest.mock.Mock(from_buffer=import_batch)
-        with (patch.object(spatial_typestate, "Points", points_type),
+        binding = ModuleType("spatial_typestate")
+        binding.Points = unittest.mock.Mock(from_buffer=import_batch)
+        binding.METERS = object()
+        with (patch.dict(sys.modules, {"spatial_typestate": binding}),
               patch.object(benchmark.time, "perf_counter_ns", side_effect=[0, 1000] + [0, 2_000_000] * 9),
               patch.object(benchmark.gc, "collect")):
             samples, counts, totals, calibration = benchmark.sample_calls(

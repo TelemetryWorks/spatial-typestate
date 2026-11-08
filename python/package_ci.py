@@ -17,6 +17,8 @@ NEWER = {
 }
 
 
+RUNTIME_EVIDENCE = "runtime-evidence.json"
+
 def run(*args, **kwargs):
     subprocess.run([str(a) for a in args], check=True, **kwargs)
 
@@ -72,7 +74,7 @@ def docker_build(out, version, from_sdist=False):
 
 
 def runtime(out, version):
-    evidence=json.loads((out/"runtime-evidence.json").read_text()) if (out/"runtime-evidence.json").exists() else []
+    evidence=json.loads((out/RUNTIME_EVIDENCE).read_text()) if (out/RUNTIME_EVIDENCE).exists() else []
     wheels=[next(out.glob("*.whl"))]
     if (out/"from-sdist").exists(): wheels += sorted((out/"from-sdist").glob("*.whl"))
     with tempfile.TemporaryDirectory(prefix="spatial-runtime-tests-") as d:
@@ -103,7 +105,7 @@ def runtime(out, version):
                 if record["sha256"]!=__import__("hashlib").sha256(wheel.read_bytes()).hexdigest():
                     raise ValueError("runtime tested different wheel bytes")
                 evidence.append(dict(record,image=image,artifact=str(wheel.relative_to(out))))
-    (out/"runtime-evidence.json").write_text(json.dumps(evidence,indent=2,sort_keys=True)+"\n",encoding="utf-8")
+    (out/RUNTIME_EVIDENCE).write_text(json.dumps(evidence,indent=2,sort_keys=True)+"\n",encoding="utf-8")
 
 
 def main():

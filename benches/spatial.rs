@@ -424,26 +424,30 @@ fn configuration() -> Criterion {
         .noise_threshold(0.03)
 }
 
-fn controls(c: &mut Criterion) {
-    let mut group = c.benchmark_group("controls");
-    let reverse = std::env::var_os("SPATIAL_BENCH_REVERSE").is_some();
+fn control_singles(group: &mut BenchmarkGroup<'_, WallTime>, reverse: bool) {
     let order = if reverse { [2, 1, 0] } else { [0, 1, 2] };
     for kind in ["valid", "subnormal"] {
         let data = cases(kind);
         for candidate in order {
             match candidate {
-                0 => indexed(&mut group, &format!("single_{kind}/public"), &data, |v| {
+                0 => indexed(group, &format!("single_{kind}/public"), &data, |v| {
                     black_box(&v.map).apply_point(black_box(v.point))
                 }),
-                1 => indexed(&mut group, &format!("single_{kind}/local"), &data, |v| {
+                1 => indexed(group, &format!("single_{kind}/local"), &data, |v| {
                     experiments::point_local(black_box(&v.map), black_box(v.point))
                 }),
-                _ => indexed(&mut group, &format!("single_{kind}/forced"), &data, |v| {
+                _ => indexed(group, &format!("single_{kind}/forced"), &data, |v| {
                     experiments::point_forced(black_box(&v.map), black_box(v.point))
                 }),
             }
         }
     }
+}
+
+fn controls(c: &mut Criterion) {
+    let mut group = c.benchmark_group("controls");
+    let reverse = std::env::var_os("SPATIAL_BENCH_REVERSE").is_some();
+    control_singles(&mut group, reverse);
     let data = cases("valid");
     let map = data[0].map;
     let prepared = experiments::Prepared::new(map).unwrap();
@@ -502,6 +506,155 @@ fn controls(c: &mut Criterion) {
     group.finish();
 }
 
+fn amortization_points(
+    group: &mut BenchmarkGroup<'_, WallTime>,
+    kind: &str,
+    n: usize,
+    map: Transform<World, World, Meters>,
+    points: Vec<Point3<World, Meters>>,
+    reverse: bool,
+) {
+    let prepared = borrowed::BorrowedPoint::prepare(&map).unwrap();
+    let mut outputs = vec![Err(spatial_typestate::SpatialError::NonFinite); n];
+    group.throughput(Throughput::Elements(n as u64));
+    let order = if reverse {
+        [4, 3, 2, 1, 0]
+    } else {
+        [0, 1, 2, 3, 4]
+    };
+    for variant in order {
+        let prefix = format!("point_{kind}_n{n}");
+        match variant {
+            0 => {
+                group.bench_function(format!("{prefix}/public"), |b| {
+                    b.iter(|| {
+                        let (map, input, output) = black_box((&map, &points[..], &mut outputs[..]));
+                        assert_eq!(input.len(), output.len());
+                        for (out, p) in output.iter_mut().zip(input) {
+                            *out = map.apply_point(*p);
+                        }
+                        black_box(output);
+                    })
+                });
+            }
+            1 => {
+                group.bench_function(format!("{prefix}/full_local"), |b| {
+                    b.iter(|| {
+                        let (map, input, output) = black_box((&map, &points[..], &mut outputs[..]));
+                        assert_eq!(input.len(), output.len());
+                        for (out, p) in output.iter_mut().zip(input) {
+                            *out = experiments::point_local(map, *p);
+                        }
+                        black_box(output);
+                    })
+                });
+            }
+            2 => {
+                group.bench_function(format!("{prefix}/caller_hoisted"), |b| {
+                    b.iter(|| {
+                        let (map, input, output) = black_box((&map, &points[..], &mut outputs[..]));
+                        borrowed::caller_local_points(map, input, output).unwrap();
+                        black_box(output);
+                    })
+                });
+            }
+            3 => {
+                group.bench_function(format!("{prefix}/prepare_each_batch"), |b| {
+                    b.iter(|| {
+                        let (map, input, output) = black_box((&map, &points[..], &mut outputs[..]));
+                        assert_eq!(input.len(), output.len());
+                        let prepared = borrowed::BorrowedPoint::prepare(map).unwrap();
+                        for (out, p) in output.iter_mut().zip(input) {
+                            *out = prepared.apply_point(*p);
+                        }
+                        black_box(output);
+                    })
+                });
+            }
+            _ => {
+                group.bench_function(format!("{prefix}/borrowed_reuse"), |b| {
+                    b.iter(|| {
+                        let (map, input, output) =
+                            black_box((&prepared, &points[..], &mut outputs[..]));
+                        assert_eq!(input.len(), output.len());
+                        for (out, p) in output.iter_mut().zip(input) {
+                            *out = map.apply_point(*p);
+                        }
+                        black_box(output);
+                    })
+                });
+            }
+        }
+    }
+}
+
+fn amortization_vectors(
+    group: &mut BenchmarkGroup<'_, WallTime>,
+    kind: &str,
+    map: Transform<World, World, Meters>,
+    vectors: Vec<Vector3<World, Dimensionless>>,
+    reverse: bool,
+) {
+    let prepared = borrowed::BorrowedVector::prepare(&map).unwrap();
+    let mut outputs = vec![Err(spatial_typestate::SpatialError::NonFinite); COUNT];
+    group.throughput(Throughput::Elements(COUNT as u64));
+    let order = if reverse { [3, 2, 1, 0] } else { [0, 1, 2, 3] };
+    for variant in order {
+        match variant {
+            0 => {
+                group.bench_function(format!("vector_{kind}_n64/public"), |b| {
+                    b.iter(|| {
+                        let (map, input, output) =
+                            black_box((&map, &vectors[..], &mut outputs[..]));
+                        assert_eq!(input.len(), output.len());
+                        for (out, v) in output.iter_mut().zip(input) {
+                            *out = map.apply_vector(*v);
+                        }
+                        black_box(output);
+                    })
+                });
+            }
+            1 => {
+                group.bench_function(format!("vector_{kind}_n64/caller_hoisted"), |b| {
+                    b.iter(|| {
+                        let (map, input, output) =
+                            black_box((&map, &vectors[..], &mut outputs[..]));
+                        borrowed::caller_local_vectors(map, input, output).unwrap();
+                        black_box(output);
+                    })
+                });
+            }
+            2 => {
+                group.bench_function(format!("vector_{kind}_n64/prepare_each_batch"), |b| {
+                    b.iter(|| {
+                        let (map, input, output) =
+                            black_box((&map, &vectors[..], &mut outputs[..]));
+                        assert_eq!(input.len(), output.len());
+                        let prepared = borrowed::BorrowedVector::prepare(map).unwrap();
+                        for (out, v) in output.iter_mut().zip(input) {
+                            *out = prepared.apply_vector(*v);
+                        }
+                        black_box(output);
+                    })
+                });
+            }
+            _ => {
+                group.bench_function(format!("vector_{kind}_n64/borrowed_reuse"), |b| {
+                    b.iter(|| {
+                        let (map, input, output) =
+                            black_box((&prepared, &vectors[..], &mut outputs[..]));
+                        assert_eq!(input.len(), output.len());
+                        for (out, v) in output.iter_mut().zip(input) {
+                            *out = map.apply_vector(*v);
+                        }
+                        black_box(output);
+                    })
+                });
+            }
+        }
+    }
+}
+
 fn amortization(c: &mut Criterion) {
     let data = cases("valid");
     let ordinary = data[0].map;
@@ -547,82 +700,7 @@ fn amortization(c: &mut Criterion) {
                 }
             })
             .collect();
-        let prepared = borrowed::BorrowedPoint::prepare(&map).unwrap();
-        let mut outputs = vec![Err(spatial_typestate::SpatialError::NonFinite); n];
-        group.throughput(Throughput::Elements(n as u64));
-        let order = if reverse {
-            [4, 3, 2, 1, 0]
-        } else {
-            [0, 1, 2, 3, 4]
-        };
-        for variant in order {
-            let prefix = format!("point_{kind}_n{n}");
-            match variant {
-                0 => {
-                    group.bench_function(format!("{prefix}/public"), |b| {
-                        b.iter(|| {
-                            let (map, input, output) =
-                                black_box((&map, &points[..], &mut outputs[..]));
-                            assert_eq!(input.len(), output.len());
-                            for (out, p) in output.iter_mut().zip(input) {
-                                *out = map.apply_point(*p);
-                            }
-                            black_box(output);
-                        })
-                    });
-                }
-                1 => {
-                    group.bench_function(format!("{prefix}/full_local"), |b| {
-                        b.iter(|| {
-                            let (map, input, output) =
-                                black_box((&map, &points[..], &mut outputs[..]));
-                            assert_eq!(input.len(), output.len());
-                            for (out, p) in output.iter_mut().zip(input) {
-                                *out = experiments::point_local(map, *p);
-                            }
-                            black_box(output);
-                        })
-                    });
-                }
-                2 => {
-                    group.bench_function(format!("{prefix}/caller_hoisted"), |b| {
-                        b.iter(|| {
-                            let (map, input, output) =
-                                black_box((&map, &points[..], &mut outputs[..]));
-                            borrowed::caller_local_points(map, input, output).unwrap();
-                            black_box(output);
-                        })
-                    });
-                }
-                3 => {
-                    group.bench_function(format!("{prefix}/prepare_each_batch"), |b| {
-                        b.iter(|| {
-                            let (map, input, output) =
-                                black_box((&map, &points[..], &mut outputs[..]));
-                            assert_eq!(input.len(), output.len());
-                            let prepared = borrowed::BorrowedPoint::prepare(map).unwrap();
-                            for (out, p) in output.iter_mut().zip(input) {
-                                *out = prepared.apply_point(*p);
-                            }
-                            black_box(output);
-                        })
-                    });
-                }
-                _ => {
-                    group.bench_function(format!("{prefix}/borrowed_reuse"), |b| {
-                        b.iter(|| {
-                            let (map, input, output) =
-                                black_box((&prepared, &points[..], &mut outputs[..]));
-                            assert_eq!(input.len(), output.len());
-                            for (out, p) in output.iter_mut().zip(input) {
-                                *out = map.apply_point(*p);
-                            }
-                            black_box(output);
-                        })
-                    });
-                }
-            }
-        }
+        amortization_points(&mut group, kind, n, map, points, reverse);
     }
     for kind in ["valid", "ignored_translation"] {
         let mut map = ordinary;
@@ -635,64 +713,7 @@ fn amortization(c: &mut Criterion) {
             .iter()
             .map(|v| Vector3::<World, Dimensionless>::new(v.point.x, v.point.y, v.point.z))
             .collect();
-        let prepared = borrowed::BorrowedVector::prepare(&map).unwrap();
-        let mut outputs = vec![Err(spatial_typestate::SpatialError::NonFinite); COUNT];
-        group.throughput(Throughput::Elements(COUNT as u64));
-        let order = if reverse { [3, 2, 1, 0] } else { [0, 1, 2, 3] };
-        for variant in order {
-            match variant {
-                0 => {
-                    group.bench_function(format!("vector_{kind}_n64/public"), |b| {
-                        b.iter(|| {
-                            let (map, input, output) =
-                                black_box((&map, &vectors[..], &mut outputs[..]));
-                            assert_eq!(input.len(), output.len());
-                            for (out, v) in output.iter_mut().zip(input) {
-                                *out = map.apply_vector(*v);
-                            }
-                            black_box(output);
-                        })
-                    });
-                }
-                1 => {
-                    group.bench_function(format!("vector_{kind}_n64/caller_hoisted"), |b| {
-                        b.iter(|| {
-                            let (map, input, output) =
-                                black_box((&map, &vectors[..], &mut outputs[..]));
-                            borrowed::caller_local_vectors(map, input, output).unwrap();
-                            black_box(output);
-                        })
-                    });
-                }
-                2 => {
-                    group.bench_function(format!("vector_{kind}_n64/prepare_each_batch"), |b| {
-                        b.iter(|| {
-                            let (map, input, output) =
-                                black_box((&map, &vectors[..], &mut outputs[..]));
-                            assert_eq!(input.len(), output.len());
-                            let prepared = borrowed::BorrowedVector::prepare(map).unwrap();
-                            for (out, v) in output.iter_mut().zip(input) {
-                                *out = prepared.apply_vector(*v);
-                            }
-                            black_box(output);
-                        })
-                    });
-                }
-                _ => {
-                    group.bench_function(format!("vector_{kind}_n64/borrowed_reuse"), |b| {
-                        b.iter(|| {
-                            let (map, input, output) =
-                                black_box((&prepared, &vectors[..], &mut outputs[..]));
-                            assert_eq!(input.len(), output.len());
-                            for (out, v) in output.iter_mut().zip(input) {
-                                *out = map.apply_vector(*v);
-                            }
-                            black_box(output);
-                        })
-                    });
-                }
-            }
-        }
+        amortization_vectors(&mut group, kind, map, vectors, reverse);
     }
     group.finish();
     let mut group = c.benchmark_group("amortization_setup");

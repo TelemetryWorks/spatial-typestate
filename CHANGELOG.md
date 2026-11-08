@@ -13,6 +13,12 @@
 
 ### Changed
 
+- Split packaging validation and benchmark registration into smaller ordered
+  helpers; share repeated artifact names and tighten the endian exception test.
+  Numeric APIs, CLI contracts, validation order and measured Rust expressions
+  are unchanged. See the [maintainability audit](docs/evals/2026-11-08-maintainability.md)
+  for per-issue server verification and the limits of equivalence evidence.
+
 - Record the owner's three issue-specific Sonar decisions with public audit
   comments: false positive for the already-validated Criterion filter, and
   accepted trusted-operator CSV input/benchmark output risks. Numeric APIs and

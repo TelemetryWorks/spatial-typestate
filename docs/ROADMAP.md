@@ -3,9 +3,9 @@
 These are proposals, not implemented guarantees or promises of a release date.
 
 - Complete [Sonar restoration](security_analysis.md) through the hardened
-  workflow's second main analysis and real quality gate. Its first full analysis
+  workflow's explicit new-code definition and real quality gate. Its full analyses
   and [exact findings/coverage triage](evals/2026-11-07-sonar-main-triage.md)
-  are recorded. Two operator-controlled CLI path risks need an owner decision;
+  are recorded. Three pre-existing Sonar vulnerability findings need owner review;
   24 old maintainability findings remain visible backlog. No issue is accepted
   or suppressed to manufacture green. CodeQL restoration is independent.
 

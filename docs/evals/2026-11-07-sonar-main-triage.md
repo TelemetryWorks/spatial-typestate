@@ -5,10 +5,32 @@ Analysis `92b0daf3-ff23-48ec-9815-01cfa7c5d1ca`, push run
 [42426773113](https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42426773113).
 Public inventory was re-read with exact revision/analysis identity. There are
 28 open issues: four vulnerabilities and 24 pre-existing code smells; zero bugs
-and zero main hotspots. The first main gate is `NONE`, with no conditions, because
-this first analysis establishes the new-code baseline. It is not an OK result.
-The next main analysis must produce a real gate result; no threshold/rule change
-is proposed. Sonar restoration remains incomplete.
+and zero main hotspots. Both the first and second main gate returned `NONE`,
+with no conditions: no new-code definition was configured. The initial
+assumption that a second scan alone would establish it was disproved. `NONE`
+is not an OK result. The built-in Sonar way gate has only new-code conditions.
+No threshold/rule change is proposed. Sonar restoration remains incomplete.
+
+Follow-up `f620882` fixed S5443 and implemented the tested leading-hyphen filter
+guard. Sonar still reports S8705 because its taint model does not recognise that
+validation. Three pre-existing vulnerability findings and 24 smells remain OPEN;
+no issue disposition has been changed.
+
+The coordinator chose the documented Cloud Specific Date new-code definition:
+`2026-11-07`, before deployment analysis `32db7a1` at 23:51 UTC that day. This
+includes deployment and PR #11 changes; it is not a rolling reset to the latest
+analysis. It scopes the new-code gate without hiding the overall backlog.
+The three older vulnerability findings remain outside that new-code window
+and visibly OPEN. A passing new-code gate must never be described as an
+overall-clean project. Exact setup requires independent review before execution.
+
+Cloud's [documented configuration API](https://docs.sonarsource.com/sonarqube-cloud/managing-your-projects/project-analysis/configuring-new-code-calculation)
+uses two project-scoped settings writes: `sonar.leak.period=2026-11-07`, then
+`sonar.leak.period.type=date`. No Server-only new-code endpoint or scanner
+property is assumed. The temporary helper permits only unset or already-exact
+values, refuses foreign/partial state, and verifies both keys. It changes no
+gate, rule, threshold or issue status. Real verification still requires a
+nonempty period and real conditions on a subsequent main analysis.
 
 ## Four security findings and decisions
 

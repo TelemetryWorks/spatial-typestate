@@ -5,12 +5,14 @@ success or absence of alerts. Core math/API, dependency graphs, pin/MSRV/no_std
 and Python provenance contracts stay unchanged.
 
 Update 2026-11-07: CodeQL was restored in PR #9. PR #10 deployed the hardened
-Sonar workflow. The first full main analysis indexed all 47 tracked Rust files
-and imported core/native/Python coverage without Cargo warnings. Its first gate
-is NONE (new-code baseline), not a pass; the second main analysis must give a
-real result. [Exact findings, coverage and CLI triage](evals/2026-11-07-sonar-main-triage.md)
-record four vulnerabilities and 24 old maintainability findings. Two concrete
-fixes proceed; two operator-controlled path risks remain OPEN for owner review.
+Sonar workflow. Full main analyses indexed all 47 tracked Rust files and imported
+core/native/Python coverage without Cargo warnings. Both returned NONE because
+no new-code definition was configured; repeating a scan alone did not fix this.
+[Exact findings, coverage and CLI triage](evals/2026-11-07-sonar-main-triage.md)
+record the baseline setup decision and initial four vulnerabilities/24 smells.
+S5443 is FIXED. The validated-filter finding and two operator-controlled path
+findings remain OPEN for owner review. Three older vulnerability findings and
+24 smells remain visible even if the new-code-since-deployment gate passes.
 No false-positive/Accept mutation is authorized. Sonar is NOT fully restored
 until the actual gate and remaining risks pass review. The
 [probe record](sonar_probe_plan.md) supersedes the historical setup wait below.

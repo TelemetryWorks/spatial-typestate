@@ -152,10 +152,25 @@ workflow, secret exposure or `pull_request_target` path was added.
   policy itself. No policy can prevent that same administrator changing settings.
 - No direct-push, force-push or deletion probe was performed. Their configured
   prohibitions were verified by REST/GraphQL; destructive tests are not justified.
-- Verification through a real audit PR under this policy is pending: capture
-  required/pending checks and blocked merge state, then normal merge after all
-  checks without `--admin`, followed by post-merge analysis. No builds/tests
-  were run locally for this policy-only task.
+- No builds/tests were run locally for this policy-only task. Hosted workflows
+  run normally on the audit PR under the new required-check policy.
+
+## Observed PR enforcement
+
+[Audit PR #16](https://github.com/TelemetryWorks/spatial-typestate/pull/16) was
+created from an owned branch. The [captured pre-merge observation](2026-11-08-main-protection-pr16-pending.json)
+records head `09cb2e531afcbbff84af7ba2df98347317a9c4bf`, base `75c89c4`,
+`mergeStateStatus=BLOCKED`, and `mergeable=MERGEABLE`: conflict-free is not permission
+to merge. GitHub's `pr checks --required` reported 24 required jobs, including
+queued/in-progress ones. The other three configured contexts (Sonar scanner,
+public evidence and CodeQL results) had not yet reported; no missing context was
+removed from the policy. The expected fork notice was not required.
+
+This is a dated pre-merge observation, not a claim that checks had passed.
+The final normal merge must use no admin bypass or temporary policy reduction;
+its outcome and post-merge runs are recorded in the PR's permanent description
+and timeline. Read the actual merged state and commit-bound checks there rather
+than inferring success from this earlier blocked-state snapshot.
 
 ## Primary references
 

@@ -1,0 +1,89 @@
+name: Frozen 0.1.0 candidate qualification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frozen-0.1.0-qualification
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    if: github.ref == 'refs/heads/main'
+    name: Selected Windows wheel (Python ${{ matrix.python }})
+    runs-on: windows-latest
+    permissions:
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        python: ['3.11', '3.14']
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          path: tooling
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9974fd6a00521d631d6ff6e35d4aa936f6b624cf
+          persist-credentials: false
+          path: candidate-source
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5
+        with:
+          artifact-ids: '13627490908'
+          run-id: '42505032821'
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/source-artifact
+      - name: Verify selected hash and run isolated installed consumers
+        run: python -I tooling/.github/scripts/candidate_qualification.py windows
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: qualified-windows-${{ matrix.python }}-attempt${{ github.run_attempt }}
+          path: ${{ runner.temp }}/qualified-candidate/
+          if-no-files-found: warn
+          retention-days: 30
+
+  crate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      RUSTUP_TOOLCHAIN: '1.99.0'
+      CARGO_BUILD_JOBS: '2'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          path: tooling
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: 9974fd6a00521d631d6ff6e35d4aa936f6b624cf
+          persist-credentials: false
+          path: candidate-source
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # verified commit
+        with:
+          toolchain: '1.99.0'
+      - name: Verify actual crate and unpacked std/no_std consumers
+        run: python -I tooling/.github/scripts/candidate_qualification.py crate
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: qualified-crate-attempt${{ github.run_attempt }}
+          path: ${{ runner.temp }}/qualified-candidate/
+          if-no-files-found: warn
+          retention-days: 30

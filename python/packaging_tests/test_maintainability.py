@@ -235,9 +235,10 @@ class WorkerRoutingTests(unittest.TestCase):
                                   "median_ns": 15, "min_ns": 10, "max_ns": 20, **memory})
         self.assertEqual(clock.call_count, 2)
         self.assertEqual(sample.call_count, 1)
-        self.assertEqual((binding.Points.from_buffer.call_count, observed.transform.apply_points.call_count,
-                          len(observed.views), len(observed.conversions),
-                          binding.Transform.from_rotation_translation.call_count), expected)
+        actual_counts = (binding.Points.from_buffer.call_count, observed.transform.apply_points.call_count,
+                         len(observed.views), len(observed.conversions),
+                         binding.Transform.from_rotation_translation.call_count)
+        self.assertEqual(actual_counts, expected)
         for call in binding.Points.from_buffer.call_args_list:
             self.assertEqual(call.args[1:], ("Sensor", binding.METERS))
             self.assertEqual(list(call.args[0]), [2., 3., 4.] * (len(call.args[0]) // 3))

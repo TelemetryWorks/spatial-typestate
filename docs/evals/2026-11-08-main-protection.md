@@ -9,8 +9,12 @@ inherited rulesets and active ruleset rules on main were empty. Merge-commit,
 squash and rebase methods were already enabled and are unchanged.
 
 - [Before snapshot](2026-11-08-main-protection-before.json).
-- [Exact approved PUT body](2026-11-08-main-protection-request.json), SHA256
+- [LF-normalized approved request snapshot](2026-11-08-main-protection-request.json), SHA256
+  `ebf511c7ddfcb9608a71dab2925624f4e355d7657121e24b6bc123ba0ec056f3`.
+  The original applied CRLF payload had SHA256
   `eb06c1532e1b45f7e684c4a7cce7abeaa9e01bc60a9c4fe2f648066bbd230da2`.
+  The normalized file is JSON-equal to those original bytes; only line endings
+  differ. The original payload was preserved locally and was not sent again.
 - [Actual GET after application](2026-11-08-main-protection-after.json).
 
 The one request was `PUT /repos/TelemetryWorks/spatial-typestate/branches/main/protection`.

@@ -5,10 +5,8 @@ These are proposals, not implemented guarantees or promises of a release date.
 - Preserve the restored [security analysis](security_analysis.md) and review new
   findings. The [historical triage](evals/2026-11-07-sonar-main-triage.md) and
   [owner-approved dispositions](evals/2026-11-08-sonar-dispositions.md) distinguish
-  a sanitised filter finding from two accepted operator risks. The 24 old
-  maintainability findings are tracked in the separate
-  [cleanup audit](evals/2026-11-08-maintainability.md); they are not part of the
-  three-issue decision. No broad rule, gate, threshold or exclusion change follows.
+  a sanitised filter finding from two accepted operator risks. Those accepted
+  risks remain explicit. No broad rule, gate, threshold or exclusion change follows.
 
 - Assess additional unit conversions/dimensional algebra only against concrete domain needs; current linear lengths deliberately exclude them.
 - Assess long-chain rotation drift and whether explicit reconditioning is needed.

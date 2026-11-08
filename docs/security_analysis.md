@@ -4,6 +4,14 @@ Configuration checkpoint, 2026-11-05. No scan result is inferred from workflow
 success or absence of alerts. Core math/API, dependency graphs, pin/MSRV/no_std
 and Python provenance contracts stay unchanged.
 
+Follow-up 2026-11-08 at main `c047c12`: the separate
+[maintainability cleanup audit](evals/2026-11-08-maintainability.md) verifies every
+one of the 24 original smell keys CLOSED/FIXED, with no replacement keys. At that
+commit Sonar had 0 OPEN issues, a complete main hotspot inventory (0), and an OK
+new-code gate (coverage 84.2%). The two ACCEPTED operator risks and sanitised
+FALSE_POSITIVE retain their original comments. This dated result does not claim
+that accepted risks were eliminated or that the code is vulnerability-free.
+
 Update 2026-11-08: restoration was independently verified at main `318562f`:
 the new-code gate passed all six conditions, with a real period starting at the
 first deployment analysis on 2026-11-07. The owner subsequently authorized
@@ -14,7 +22,8 @@ modern/legacy statuses, exact comments and matching timestamps in that follow-up
 The mutation run remains failed because anonymous changelog was empty; no rerun
 or extra credentialed history read was performed. Two operator risks are
 ACCEPTED, one sanitised finding is FALSE_POSITIVE, and none remains OPEN. No other issue, rule, gate, threshold or exclusion is in scope;
-the 24 maintainability findings remain backlog.
+the 24 maintainability findings were backlog at that checkpoint and were
+subsequently fixed in the separate follow-up above.
 
 Update 2026-11-07: CodeQL was restored in PR #9. PR #10 deployed the hardened
 Sonar workflow. Full main analyses indexed all 47 tracked Rust files and imported

@@ -120,9 +120,13 @@ for the conservative algorithm, raw escape hatches and deliberately excluded sco
 ## Features, development, and verification
 
 The only runtime features are `std` (default) and `no_std` (a marker).
-Current guide APIs are source-only: crates.io currently has legacy 0.0.1, not
-this checkout's 0.0.2 (checked 2026-11-04). Use a reviewed source revision; this
-validated full commit contains the current core API. Disable defaults for no-std:
+Current guide APIs are source-only. On 2026-11-04, crates.io had legacy 0.0.1
+while the checkout used unpublished 0.0.2. Candidate preparation on 2026-11-08
+selects Rust 0.1.0; that registry version is still unavailable at the fresh check.
+See the [published-to-candidate migration](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/migration-0.0.1-to-0.1.0.md).
+Use a reviewed source revision. This validated full pin has the demonstrated
+core API but manifest version 0.0.2, not candidate identity 0.1.0; do not add a
+0.1.0 version constraint to it. Disable defaults for no-std:
 
 ```toml
 spatial-typestate = { git = "https://github.com/TelemetryWorks/spatial-typestate.git", rev = "1b80c3d7aa930538eb29ce0107a6e5ec2523ea86", default-features = false, features = ["no_std"] }

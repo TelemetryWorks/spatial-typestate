@@ -4,6 +4,15 @@ Configuration checkpoint, 2026-11-05. No scan result is inferred from workflow
 success or absence of alerts. Core math/API, dependency graphs, pin/MSRV/no_std
 and Python provenance contracts stay unchanged.
 
+Update 2026-11-08: restoration was independently verified at main `318562f`:
+the new-code gate passed all six conditions, with a real period starting at the
+first deployment analysis on 2026-11-07. The owner subsequently authorized
+exactly [three per-issue dispositions](evals/2026-11-08-sonar-dispositions.md):
+false positive for the already-validated filter, accepted operator risk for CSV
+input and benchmark output. Execution and public audit verification are recorded
+in that follow-up. No other issue, rule, gate, threshold or exclusion is in scope;
+the 24 maintainability findings remain backlog.
+
 Update 2026-11-07: CodeQL was restored in PR #9. PR #10 deployed the hardened
 Sonar workflow. Full main analyses indexed all 47 tracked Rust files and imported
 core/native/Python coverage without Cargo warnings. Both returned NONE because

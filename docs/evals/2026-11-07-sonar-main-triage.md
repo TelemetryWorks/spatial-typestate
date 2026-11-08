@@ -1,5 +1,10 @@
 # Main Sonar analysis and CLI boundary review
 
+Historical snapshot. The later owner-approved, issue-specific decisions are
+recorded in the [2026-11-08 disposition audit](2026-11-08-sonar-dispositions.md).
+The initial OPEN states and pending-approval notes below remain unchanged as
+evidence of the earlier review; they are not the later disposition outcome.
+
 Checked 2026-11-07 against main `32db7a10f32945c9743c89980a26bfb84499fb37`.
 Analysis `92b0daf3-ff23-48ec-9815-01cfa7c5d1ca`, push run
 [42426773113](https://github.com/TelemetryWorks/spatial-typestate/actions/runs/42426773113).

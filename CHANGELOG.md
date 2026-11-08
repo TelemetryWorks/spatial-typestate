@@ -13,6 +13,11 @@
 
 ### Changed
 
+- Record the owner's three issue-specific Sonar decisions with public audit
+  comments: false positive for the already-validated Criterion filter, and
+  accepted trusted-operator CSV input/benchmark output risks. Numeric APIs and
+  CLI behavior are unchanged; 24 maintainability findings remain backlog.
+
 - Establish the reviewed Sonar new-code-since-deployment baseline using a fixed
   date before the first main analysis. This evaluates subsequent changes while
   three older vulnerability findings and 24 smells remain visibly OPEN; it is

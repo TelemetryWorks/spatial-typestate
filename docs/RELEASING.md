@@ -1,9 +1,30 @@
 # Versioning, compatibility and release gates
 
-This policy defines future procedure, not publication authorization. No version,
-tag, registry upload or new platform support is created by adopting it. An owner
-must assign a separate release task and approve the exact artifacts/versions.
+This policy separates candidate preparation from publication authorization.
+Selecting metadata does not authorize artifacts, tags, uploads or new support.
+An owner must assign those later steps and approve the exact artifacts/versions.
 There is no automated publishing workflow or promised release schedule.
+
+## Candidate decision (2026-11-08, step 1 only)
+
+| Package | Selected candidate | State |
+| --- | --- | --- |
+| Rust `spatial-typestate` | 0.1.0 | New breaking compatibility line from published 0.0.1; replaces the unpublished 0.0.2 development metadata. |
+| Python distribution `spatial-typestate` | 0.1.0 | Retained first-release candidate; not published on PyPI. |
+| Private native crate `spatial-typestate-py` | 0.1.0 | Matches pyproject; `publish=false`, exact core path dependency unchanged. |
+
+A fresh primary registry check still found only Rust 0.0.1 (not yanked) and
+PyPI HTTP 404; remote tags and GitHub releases were empty. The crate archive
+checksum and VCS commit match the dated baseline below. Equal candidate numbers
+do not couple future Rust/Python versions. See the self-contained
+[migration from the actual published crate and Python first-release limits](migration-0.0.1-to-0.1.0.md).
+
+Step 1 changes only candidate metadata and migration documentation. It does not
+approve a candidate artifact campaign, hashes/signoff, tags or uploads. Ordinary
+protected-PR CI builds remain quality gates, not publication or artifact approval.
+Current registry installation of version 0.1.0 is **not available** at this check.
+The following 2026-11-04 section is a historical snapshot, not current checkout
+version metadata.
 
 ## Observed baseline (2026-11-04)
 
@@ -92,8 +113,9 @@ For Cargo **0.0.x, each patch is a separate caret compatibility line**; that
 does not mean every patch actually changes API. For 0.y.z with y > 0, changing
 y is incompatible while z stays in the same caret line. Recommendation: first
 new Rust release of the substantially changed current API should start 0.1.0,
-not imply compatibility with legacy 0.0.1; the owner selects the version during
-the release task. This recommendation does not change current 0.0.2.
+not imply compatibility with legacy 0.0.1. The owner selected that 0.1.0 candidate
+in step 1 above; the earlier 0.0.2 metadata was unpublished. This selection does
+not authorize publication or guarantee compatibility beyond the stated policy.
 
 Before 1.0, a breaking release requires migration notes/examples and an explicit
 compatibility-line change, but no guaranteed deprecation duration. Prefer an

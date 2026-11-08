@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+Candidate selection (2026-11-08, step 1 only): Rust 0.1.0 replaces unpublished
+0.0.2 metadata; Python/native remain the unpublished 0.1.0 first-release candidate.
+This metadata selection alone does not authorize packages, tags, uploads or
+artifact signoff. The
+[published 0.0.1 migration](docs/migration-0.0.1-to-0.1.0.md) is the consumer guide;
+the development history below also includes changes between unpublished commits.
+
 ### Fixed
 
 - Validate the main-only Sonar task `branch` field against the expected branch,
@@ -64,10 +71,12 @@
   still reports non-finite numeric inputs/results. See [unit decisions](docs/units.md)
   for metadata-first error policy and raw/custom-declaration limitations.
 
-- **Breaking:** `Transform::apply_point`, `apply_vector`, and `then` now return
-  `Result<_, SpatialError>` under their existing names. Add `?` or explicit error
-  handling to callers; no separate `try_` variants or unchecked alternatives are
-  introduced. Participating non-finite inputs and computed overflow/NaN return
+- **Breaking from published 0.0.1:** `Transform::apply_point` now returns
+  `Result<_, SpatialError>` under its existing name. Add `?` or explicit error
+  handling. `apply_vector` and `then` also return Result, but they are additions
+  relative to 0.0.1; changing their earlier unchecked development forms is
+  unpublished history. No parallel unchecked/`try_` alternatives are introduced.
+  Participating non-finite inputs and computed overflow/NaN return
   `NonFinite`. Raw bottom rows remain ignored; vector application also ignores
   translation. Finiteness checks do not certify rigidity or calibration.
 - Sequential application and composition validate different intermediates and

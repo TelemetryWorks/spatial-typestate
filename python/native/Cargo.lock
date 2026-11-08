@@ -103,7 +103,7 @@ dependencies = [
 
 [[package]]
 name = "spatial-typestate"
-version = "0.0.2"
+version = "0.1.0"
 
 [[package]]
 name = "spatial-typestate-py"

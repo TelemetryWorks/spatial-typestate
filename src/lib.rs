@@ -50,9 +50,11 @@
 //! # Feature flags
 //!
 //! - `std` (default): uses native square root for quaternion normalization.
-//! - `no_std`: marker for builds without `std`. Disable default features:
+//! - `no_std`: marker for builds without `std`. Disable default features.
+//!   Candidate 0.1.0 is unpublished; this reviewed source pin has the same core
+//!   API and manifest version 0.0.2, so do not add a 0.1.0 constraint to it:
 //!   ```toml
-//!   spatial-typestate = { version = "0.0.2", default-features = false, features = ["no_std"] }
+//!   spatial-typestate = { git = "https://github.com/TelemetryWorks/spatial-typestate.git", rev = "1b80c3d7aa930538eb29ce0107a6e5ec2523ea86", default-features = false, features = ["no_std"] }
 //!   ```
 //!   The absence of `std` selects a private bounded Newton square root; the
 //!   marker alone does not disable default features. No normal dependencies

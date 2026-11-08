@@ -16,6 +16,7 @@ import zipfile
 SOURCE_COMMIT = "9974fd6a00521d631d6ff6e35d4aa936f6b624cf"
 SOURCE_IDENTITY = "9c5b2f7c362afb06671fe5a5b8b6edf58aa86db87c721437dd719e45b023fa44"
 VERSION = "0.1.0"
+MANIFEST = "Cargo.toml"
 WHEEL = "spatial_typestate-0.1.0-cp311-abi3-win_amd64.whl"
 WHEEL_SHA = "b59ead8787b870d28f0aba2b7bd8264a993e2dfa93ca3fa9d3a5d249254c12c8"
 TOOLCHAIN = "+1.99.0"
@@ -56,7 +57,7 @@ def validate_source(source):
             or git("rev-parse", "HEAD") != SOURCE_COMMIT
             or git("status", "--porcelain", "--untracked-files=all")):
         raise ValueError("source is not the frozen clean checkout")
-    if tomllib.loads((source / "Cargo.toml").read_text(encoding="utf-8"))["package"]["version"] != VERSION:
+    if tomllib.loads((source / MANIFEST).read_text(encoding="utf-8"))["package"]["version"] != VERSION:
         raise ValueError("wrong core version")
 
 
@@ -129,9 +130,9 @@ def windows(output, temporary):
                  "-r", SOURCE / "python/requirements-interop.txt"], cwd, output / "interop-install.log")
         installed_suite(python, assets, cwd, output, "numpy")
         shutil.copyfile(wheel, output / WHEEL)
-        return dict(kind="installed-wheel", source_commit=SOURCE_COMMIT, wheel_sha256=sha(wheel),
-                    installed=probe, stdlib_suite="passed", numpy_suite="passed",
-                    cwd_outside_checkout=True, publication_approved=False)
+        return {"kind": "installed-wheel", "source_commit": SOURCE_COMMIT, "wheel_sha256": sha(wheel),
+                "installed": probe, "stdlib_suite": "passed", "numpy_suite": "passed",
+                "cwd_outside_checkout": True, "publication_approved": False}
 
 
 def archive_files(archive):
@@ -155,10 +156,10 @@ def validate_crate(files, source):
     vcs = json.loads(files[".cargo_vcs_info.json"])
     if vcs["git"]["sha1"] != SOURCE_COMMIT or vcs["git"].get("dirty", False) is not False:
         raise ValueError("crate VCS identity mismatch")
-    config = tomllib.loads(files["Cargo.toml"].decode())
+    config = tomllib.loads(files[MANIFEST].decode())
     if config["package"]["version"] != VERSION or config.get("dependencies"):
         raise ValueError("crate version or normal dependencies changed")
-    if files["Cargo.toml.orig"] != (source / "Cargo.toml").read_bytes():
+    if files["Cargo.toml.orig"] != (source / MANIFEST).read_bytes():
         raise ValueError("crate original manifest differs")
     for name in ("LICENSE", "README.md", "Cargo.lock"):
         if files[name] != (source / name).read_bytes():
@@ -184,7 +185,7 @@ def unpack(files, destination):
 def validate_consumer(metadata, unpacked):
     core = [p for p in metadata["packages"] if p["name"] == "spatial-typestate"]
     if (len(core) != 1 or core[0]["version"] != VERSION
-            or Path(core[0]["manifest_path"]).resolve() != (unpacked / "Cargo.toml").resolve()):
+            or Path(core[0]["manifest_path"]).resolve() != (unpacked / MANIFEST).resolve()):
         raise ValueError("consumer did not resolve the unpacked candidate")
 
 
@@ -193,7 +194,7 @@ def consumer(unpacked, root, output, mode):
     (directory / "src").mkdir(parents=True)
     options = "" if mode == "std" else ', default-features = false, features = ["no_std"]'
     dependency = json.dumps(str(unpacked).replace("\\", "/"))
-    (directory / "Cargo.toml").write_text(
+    (directory / MANIFEST).write_text(
         '[package]\nname="candidate-consumer"\nversion="0.0.0"\nedition="2024"\n'
         '[dependencies]\nspatial-typestate={path=' + dependency + ', version="=0.1.0"' + options + '}\n',
         encoding="utf-8")
@@ -226,9 +227,10 @@ def crate(output, temporary):
         for mode in ("std", "no_std"):
             consumer(unpacked, root, output, mode)
         shutil.copyfile(archive, output / archive.name)
-        return dict(kind="crate", source_commit=SOURCE_COMMIT, archive_sha256=sha(archive), vcs=vcs, tools=tools,
-                    files={n: hashlib.sha256(v).hexdigest() for n, v in sorted(files.items())},
-                    consumer_modes=["std", "no_std"], publication_approved=False)
+        return {"kind": "crate", "source_commit": SOURCE_COMMIT, "archive_sha256": sha(archive),
+                "vcs": vcs, "tools": tools,
+                "files": {n: hashlib.sha256(v).hexdigest() for n, v in sorted(files.items())},
+                "consumer_modes": ["std", "no_std"], "publication_approved": False}
 
 
 def main():

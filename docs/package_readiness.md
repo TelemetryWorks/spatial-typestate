@@ -13,6 +13,41 @@ Original design scope: embedded build evidence, Linux compatibility and inspecta
 artifacts. Core source/API/dependencies/pin/MSRV and all package versions remain
 unchanged. No tag, upload, registry credential or new runtime helper/API is added.
 
+## Project links and licence display (2026-11-09)
+
+Future metadata declares canonical Repository, Documentation and Issues links.
+The prepared metadata, wheel METADATA and sdist/rebuilt-wheel PKG-INFO/METADATA
+must independently carry those exact static URLs, `License-Expression: Apache-2.0`
+and `License-File: LICENSE`. Legacy `License` and `Dynamic` are rejected; parity
+alone cannot detect fields omitted from both sides. The existing artifact checks
+still verify every declared licence file and the actual archive contents.
+
+The published 0.1.0 wheels/sdist already contain Metadata-Version 2.4, Apache-2.0
+License-Expression and 31 License-File declarations. Their PyPI release JSON has
+null license_expression, license_files and project_urls. Project URLs were absent
+from pyproject. The licence declaration was correct: no licence change, deprecated
+field or classifier workaround is needed.
+
+The legacy maturin v1.16.0 upload form code maps only legacy `license` (absent
+in these artifacts, so not sent) and has no `license_expression` or `license_file`
+mapping. PyPI populates a new release from the first
+upload's metadata form. This diagnosis is supported by maturin v1.16.0 source,
+published artifacts and PyPI JSON; **no upload was run to reproduce it**. It is a
+causal inference, not a recorded request-body capture. The existing 0.1.0 page
+stays unchanged. The future Trusted Publishing client must preserve modern licence
+and URL fields, and a real upload's public JSON must pass the
+[release gates](RELEASING.md#mandatory-future-pypi-publishing-policy) before claiming
+the display is corrected. This task configures no publisher and authorizes no upload.
+
+Changing pyproject changes the Python source identity; qualification for published
+C2/0.1.0 does not cover this future source tree. Versions remain unchanged during
+metadata preparation; these outputs are diagnostics, not new release candidates.
+
+Primary sources: [maturin v1.16.0 upload code](https://github.com/PyO3/maturin/blob/v1.16.0/src/upload.rs),
+[PyPI upload fields](https://docs.pypi.org/api/upload/),
+[PyPI project metadata display](https://docs.pypi.org/project_metadata/)
+and [pyproject URL/licence specification](https://packaging.python.org/en/latest/specifications/pyproject-toml/).
+
 ## Provenance ownership and records
 
 Use an in-tree, stdlib-only PEP 517 backend, delegating compilation/metadata to

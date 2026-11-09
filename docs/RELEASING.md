@@ -92,6 +92,13 @@ After upload, before declaring completion or creating release tags:
   equal the approved manifest and freshly downloaded public file. Independently
   check the artifact's embedded source identity against the approved source
   commit; do not substitute a tooling commit for a different build source.
+- Separately verify the new version's public PyPI JSON has
+  `license_expression: Apache-2.0`, non-null `license_files` containing `LICENSE`,
+  and exactly the canonical Repository, Documentation and Issues `project_urls`
+  declared in pyproject. Missing/changed fields block completion and release tags;
+  correct wheel/sdist headers alone do not prove that the uploader preserved the
+  metadata form. This JSON check is not attestation proof and cannot replace the
+  per-file Integrity API checks. See the [historical 0.1.0 diagnosis](package_readiness.md#project-links-and-licence-display-2026-11-09).
 - Confirm each PyPI file page displays **Provenance** with the expected publisher,
   rather than **Without provenance**. Record URLs, hashes, identity and verified
   results for every wheel and sdist. The UI alone is not cryptographic proof.

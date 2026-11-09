@@ -1,6 +1,6 @@
 # Spatial Typestate for Python
 
-Published [0.1.0](https://pypi.org/project/spatial-typestate/0.1.0/), checked on
+Published on PyPI: **0.1.0**, checked on
 2026-11-09: batch-oriented CPython binding with no runtime Python dependencies.
 The distribution is `spatial-typestate`, the import is `spatial_typestate`, and
 the extension is `spatial_typestate._native`.

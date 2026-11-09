@@ -13,6 +13,11 @@ readme = "PYTHON-README.md"
 license-files = ["LICENSE", "licenses/**/*"]
 dependencies = []
 
+[project.urls]
+Repository = "https://github.com/TelemetryWorks/spatial-typestate"
+Documentation = "https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/PYTHON-GUIDE.md"
+Issues = "https://github.com/TelemetryWorks/spatial-typestate/issues"
+
 [tool.maturin]
 manifest-path = "native/Cargo.toml"
 python-source = "src"

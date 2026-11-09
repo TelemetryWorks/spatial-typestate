@@ -11,6 +11,12 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
+- Add canonical Python repository, documentation and issue-tracker metadata for
+  the next release, with generated-metadata gates for exact URLs and existing
+  Apache-2.0 licence fields. Record the legacy uploader's licence-form omission;
+  published 0.1.0 remains unchanged, and future public metadata still needs actual
+  upload verification alongside mandatory Trusted Publishing/attestations.
+
 - Update current registry installation and availability guidance for published
   Rust/Python 0.1.0, sourced from C2, while retaining dated preparation evidence.
   The existing published package descriptions/rustdoc remain frozen; repository

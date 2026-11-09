@@ -3,7 +3,74 @@
 This policy separates candidate preparation from publication authorization.
 Selecting metadata does not authorize artifacts, tags, uploads or new support.
 An owner must assign those later steps and approve the exact artifacts/versions.
-There is no automated publishing workflow or promised release schedule.
+No release schedule is promised. The historical `publish-0.1.0.yml` workflow is
+retired, disabled and forbidden for future use; no compliant future publisher is
+configured or approved by this policy change.
+
+## Mandatory future PyPI publishing policy
+
+Owner decision (2026-11-08): **every future PyPI release/upload** must use OIDC
+Trusted Publishing from a reviewed hosted GitHub Actions job **and** publish
+PEP 740 publish attestations for every distribution file: all wheels and the
+sdist. Trusted Publishing alone is insufficient: some providers authenticate
+uploads without producing attestations. Local builds and qualification remain
+allowed; API-token/password uploads, local `maturin upload`/`twine upload`, token
+fallbacks and `attestations: false` are forbidden for future PyPI uploads. This
+rule does not change the crates.io publishing policy.
+
+Before any future upload:
+
+1. Separately review and configure the PyPI Trusted Publisher for the exact
+   repository `TelemetryWorks/spatial-typestate` and named workflow filename.
+   Record its allowed ref and immutable publishing-tooling commit. If the
+   publisher is environment-bound, the publish job must use that exact reviewed
+   GitHub environment; record the binding (or its explicit absence). Missing or
+   mismatched setup is a release blocker, not permission to use a token.
+2. Use the official `pypa/gh-action-pypi-publish` action pinned to a reviewed full
+   commit SHA, with `attestations: true`, no password/token inputs and no
+   `skip-existing`. Grant `id-token: write` only to the single publish job, never
+   top-level or to build/test jobs. Keep build/qualification separate from
+   publishing and carry the approved per-file SHA256 manifest across jobs/runs.
+3. Validate the exact artifact set, source commit, embedded source records and
+   hashes before upload. Record the publishing workflow/ref/commit separately
+   from the artifact source commit if they differ. An attestation-generation,
+   signing or upload failure stops release; never retry via a token or silently
+   omit a wheel or sdist's attestation.
+
+After upload, before declaring completion or creating release tags:
+
+- For **each** filename, fetch
+  `https://pypi.org/integrity/<project>/<version>/<filename>/provenance` and retain
+  its bundle. HTTP 404 means no provenance; any missing/invalid proof is a failed
+  release requiring investigation, not a pass or permission to re-upload a file.
+- Cryptographically verify each publish attestation, including its signing
+  certificate and transparency evidence, using reviewed verification tooling.
+  Require the GitHub Actions OIDC issuer `https://token.actions.githubusercontent.com`,
+  exact repository, workflow filename, ref and publishing-tooling commit to match
+  the reviewed identity. Require the attested subject filename and SHA256 to
+  equal the approved manifest and freshly downloaded public file. Independently
+  check the artifact's embedded source identity against the approved source
+  commit; do not substitute a tooling commit for a different build source.
+- Confirm each PyPI file page displays **Provenance** with the expected publisher,
+  rather than **Without provenance**. Record URLs, hashes, identity and verified
+  results for every wheel and sdist. The UI alone is not cryptographic proof.
+
+Publish attestations identify which workflow published particular bytes; they do
+not prove reproducible builds, review, source-to-binary equivalence or code safety.
+Build provenance and the existing unsigned `_provenance.json` source/build record
+are separate evidence. A missing Trusted Publisher/OIDC permission or any failed
+attestation/verification gate must fail closed with no credential fallback.
+
+Python 0.1.0 was uploaded locally with a token and has **no public attestations**.
+Its embedded source record and matching hashes do not populate PyPI Provenance.
+This historical release is not repaired by this policy: no re-upload or
+retroactive attestation claim is permitted. See the
+[0.1.0 publication record](publication-0.1.0.md).
+
+Primary references: [Trusted Publishing](https://docs.pypi.org/trusted-publishers/using-a-publisher/),
+[producing attestations](https://docs.pypi.org/attestations/producing-attestations/),
+[consuming attestations](https://docs.pypi.org/attestations/consuming-attestations/)
+and the [Integrity API](https://docs.pypi.org/api/integrity/).
 
 ## Candidate decision (2026-11-08, step 1 only)
 
@@ -169,8 +236,10 @@ and align claims with retained evidence; metadata alone does not expand support.
 6. Review native compatibility tags and declared Python/MSRV/platform limits.
    Record hashes and build environments, retain logs/artifacts. Check no debug
    local paths, credentials, private datasets or unlicensed inputs are packaged.
-7. Only after explicit owner artifact approval, perform assigned tag/upload
-   actions. Registry credentials stay out of Git/logs. Re-download the published
+7. Only after explicit owner artifact approval, perform assigned upload actions.
+   For PyPI, satisfy the mandatory Trusted Publishing and per-file attestation
+   gates above, including public verification before completion/tags. Registry
+   credentials stay out of Git/logs. Re-download the published
    artifacts, verify hashes, install/build and smoke-test the public artifacts.
    Verify release manifest links before announcing availability.
 8. On a defective published artifact, document impact and issue a new version;

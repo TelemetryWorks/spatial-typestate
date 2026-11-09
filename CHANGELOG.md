@@ -11,6 +11,11 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
+- Require hosted PyPI OIDC Trusted Publishing and verified per-file PEP 740 publish
+  attestations for every future wheel and sdist, with no token/local-upload
+  fallback. The token-uploaded 0.1.0 release remains historical and unattested;
+  the disabled one-time publisher is retired from future reuse.
+
 - Omit agent instructions, development Cargo/toolchain controls, local tooling,
   the repository-only roadmap pointer and unused logo from the Rust crate archive.
   Tests, benches and examples remain packaged; repository files and runtime

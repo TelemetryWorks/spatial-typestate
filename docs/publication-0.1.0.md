@@ -1,4 +1,26 @@
-# Exact-artifact publication plan: 0.1.0
+# Historical exact-artifact publication: 0.1.0
+
+## Completed release and superseding future policy
+
+Rust 0.1.0 was published on 2026-11-08 and Python 0.1.0 on 2026-11-09 UTC
+(2026-11-08 local time). The owner superseded the hosted plan below with local
+publication. Existing Cargo authentication published the exact qualified crate;
+local maturin uploaded the exact two wheels and canonical sdist using a token.
+Fresh public downloads matched all four qualified hashes, independently verified.
+Both release tags point at C2 and must never be moved. Python 0.1.0 has **no public PyPI
+attestations**; embedded `_provenance.json` is a separate unsigned source record.
+Do not re-upload 0.1.0 or describe it as Trusted Published/attested.
+
+**Every future PyPI upload must follow the [mandatory Trusted Publishing plus
+per-file PEP 740 policy](RELEASING.md#mandatory-future-pypi-publishing-policy).**
+Missing publisher setup or attestations blocks release; no local/token fallback.
+The old `publish-0.1.0.yml` was never dispatched and remains disabled and retired.
+Its password input and `attestations: false` are historical, noncompliant tooling,
+not a template: never re-enable or copy it. No new publishing workflow or PyPI
+Trusted Publisher configuration is approved by this document.
+
+The original reviewed hosted route below is retained as superseded planning
+history, not active execution instructions or permission to obtain credentials.
 
 On 2026-11-08 the owner approved publication of the four qualified **final 0.1.0**
 artifacts, with Python minimum 3.11 unchanged. This supersedes the qualification
@@ -12,7 +34,7 @@ The exact filenames/hashes are in [the qualification plan](candidate-qualificati
 and its external LF manifest. The qualified crate SHA256 is
 `fc6b60a9a7f3aa44122e51473cbe52026ae6330826b15401610489ca0b355abf`.
 
-## Route and least privilege
+## Superseded hosted route and least privilege (historical)
 
 The manual-only, no-input workflow requires main, run attempt 1, and one-time
 variable `PUBLICATION_0_1_0=approved-9974fd6-once`. Activate only after exact-head
@@ -49,7 +71,7 @@ No workflow step has contents:write or handles both registry credentials.
 `CARGO_REGISTRY_TOKEN` is exposed only to the official Cargo publish step;
 `PYPI_API_TOKEN` only to the official PyPA action. SONAR_TOKEN is never used.
 
-## Credential and failure boundary
+## Superseded hosted credential and failure boundary (historical)
 
 Public crate owner is `joey-huckabee`, matching the authenticated GitHub login.
 This is identity evidence, not proof that a supplied token has publish rights.
@@ -60,8 +82,9 @@ Use a short-lived crates.io token scoped to publish-update for spatial-typestate
 PyPI Pending Trusted Publishing is preferable if the owner configures it; the
 reviewed token route instead needs a one-time account-wide token because the
 project does not exist yet. Revoke that token immediately after use and delete
-the GitHub secret. Future uploads should use project-scoped access or Trusted
-Publishing. Credentials are supplied through the secure request mechanism,
+the GitHub secret. That historical choice does not authorize future token uploads;
+the mandatory Trusted Publishing and attestation policy above supersedes it.
+Credentials are supplied through the secure request mechanism,
 never chat, files in Git, argv or logs. No local tool installation is needed.
 
 PyPI 404 does not reserve the name or prove upload permission. Its first accepted

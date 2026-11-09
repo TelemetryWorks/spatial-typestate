@@ -218,6 +218,12 @@ built bytes. source_origin distinguishes checkout from validated sdist. build
 records the actual compiler/target, separate wrapper/maturin versions, configuration,
 wheel tags and compiler-notice hashes. Artifact hashes are external, never self-
 embedded. These unsigned records are descriptive, not trusted attestations.
+They are distinct from PyPI's public PEP 740 publish attestations. Python 0.1.0
+was token-uploaded and has no public attestations. Every future PyPI upload must
+use hosted OIDC Trusted Publishing and attest every wheel and sdist, then verify
+per-file Integrity API proof and the PyPI Provenance display before completion or
+tags. Missing setup/proof blocks release with no local/token fallback; see the
+[mandatory policy](RELEASING.md#mandatory-future-pypi-publishing-policy).
 
 Sdist provenance is source-only. Rebuilds verify the frozen vendored input bytes
 before compilation and record their own compiler; no Git or registry core lookup

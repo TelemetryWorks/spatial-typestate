@@ -19,12 +19,15 @@ These are proposals, not implemented guarantees or promises of a release date.
 - Expand domain examples and populate diagrams where they explain a concrete workflow.
 - Validate execution and timing on real embedded hardware; CI cross-compilation alone is insufficient.
 - Extend the [Python batch binding](PYTHON-GUIDE.md) only for concrete needs;
-  custom units, broader platforms/free-threaded Python and public wheel publication
-  are not yet supported. Preserve explicit runtime checks, copies and lost-guarantee
-  documentation. [Host observations](python/2026-11-03/README.md) are not native parity.
+  custom units and broader platforms/free-threaded Python are not yet supported.
+  Published 0.1.0 wheels have the narrow [documented scope](PYTHON-GUIDE.md).
+  Preserve explicit runtime checks, copies and lost-guarantee documentation. [Host observations](python/2026-11-03/README.md) are not native parity.
 - Satisfy [release-policy gates](RELEASING.md) before any separately authorized
-  publication: exact artifact versions/signoff and registry/ownership rechecks
-  remain future work. [Readiness tooling](package_readiness.md) now implements
+  future publication: exact artifact versions/signoff and registry/ownership
+  rechecks are per-release work. Configure and review a compliant Trusted Publisher
+  and per-file PEP 740 publishing workflow before the next PyPI upload; the
+  completed 0.1.0 token upload is not a template.
+  [Readiness tooling](package_readiness.md) now implements
   embedded source/build provenance and narrow Linux baseline/container gates;
   these are not publication approval or universal-platform guarantees.
 - Ground further lab workflows in real licensed data/calibration when available;

@@ -5,6 +5,45 @@ rigid transforms. APIs are evolving. The crate is not certified for safety-,
 life-, or mission-critical use; applications must independently validate their
 physical frame definitions, calibration, unit declarations, and numerical requirements.
 
+## Install published 0.1.0
+
+As checked on 2026-11-09, Rust [0.1.0](https://crates.io/crates/spatial-typestate/0.1.0)
+and Python [0.1.0](https://pypi.org/project/spatial-typestate/0.1.0/) are published.
+Rust requires 1.85 or newer. Add the registry dependency to Cargo.toml:
+
+```toml
+[dependencies]
+spatial-typestate = "0.1.0"
+```
+
+For a library dependency without std, use this instead:
+
+```toml
+spatial-typestate = { version = "0.1.0", default-features = false, features = ["no_std"] }
+```
+
+For Python, use a virtual environment with GIL-enabled CPython >=3.11,<3.15:
+
+```sh
+python -m pip install --only-binary=:all: spatial-typestate==0.1.0
+```
+
+Published abi3 wheels are `cp311-abi3-win_amd64` and
+`cp311-abi3-manylinux_2_28_x86_64`: Windows x86_64 and Linux x86_64 with glibc >=2.28.
+Qualification exercised the same wheel bytes on CPython 3.11/3.14 and, for Linux,
+glibc 2.28/2.36 containers. Python 3.12/3.13 are allowed by metadata, not in the
+CI matrix; local Windows 3.12 is additional evidence. No macOS, musl, ARM, PyPy
+or free-threaded support is claimed. Wheel-only installation fails if no compatible
+wheel exists; omitting that option can select the sdist and require an installed
+Rust toolchain and build tools. See the [Python guide](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/PYTHON-GUIDE.md).
+
+Both releases identify source commit `9974fd6a00521d631d6ff6e35d4aa936f6b624cf`
+(C2). Tags `rust-v0.1.0` and `python-v0.1.0` both point there and must never move.
+See [migration from Rust 0.0.1 and Python first-release limits](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/migration-0.0.1-to-0.1.0.md).
+Python 0.1.0 was token-uploaded without public PyPI attestations; its embedded
+source record is not a signed attestation. All future PyPI uploads require
+[Trusted Publishing plus per-file PEP 740 attestations](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/RELEASING.md#mandatory-future-pypi-publishing-policy).
+
 ## Sensor -> aircraft -> world
 
 ```rust
@@ -120,13 +159,12 @@ for the conservative algorithm, raw escape hatches and deliberately excluded sco
 ## Features, development, and verification
 
 The only runtime features are `std` (default) and `no_std` (a marker).
-Current guide APIs are source-only. On 2026-11-04, crates.io had legacy 0.0.1
-while the checkout used unpublished 0.0.2. Candidate preparation on 2026-11-08
-selects Rust 0.1.0; that registry version is still unavailable at the fresh check.
-See the [published-to-candidate migration](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/migration-0.0.1-to-0.1.0.md).
-Use a reviewed source revision. This validated full pin has the demonstrated
-core API but manifest version 0.0.2, not candidate identity 0.1.0; do not add a
-0.1.0 version constraint to it. Disable defaults for no-std:
+Use the published registry dependency above for this guide's API.
+Historical snapshot (2026-11-04): crates.io then had legacy 0.0.1 while the
+checkout used unpublished 0.0.2. The following previously validated Git pin has
+the demonstrated core API but manifest version 0.0.2, not release identity 0.1.0;
+it is retained as history, not the recommended install route. Do not add a
+0.1.0 version constraint to that historical pin:
 
 ```toml
 spatial-typestate = { git = "https://github.com/TelemetryWorks/spatial-typestate.git", rev = "1b80c3d7aa930538eb29ce0107a6e5ec2523ea86", default-features = false, features = ["no_std"] }
@@ -177,18 +215,18 @@ original study, with environment load, variance and codegen limitations recorded
 
 ## Python batches
 
-An unreleased, separate [Python package](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/PYTHON-GUIDE.md)
+The published, separate [Python package](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/PYTHON-GUIDE.md)
 provides Rust-owned point/vector batches, immutable runtime frame/unit metadata,
 checked transforms/quaternions, and bytes-backed memoryviews without a Python
 object per row. Python frame/unit errors are runtime checks, not Rust compile-time
 proofs. Import/export copy, the binding requires std/CPython, and custom Rust unit
 markers are not exposed. The core remains dependency-free/no_std-capable.
-No PyPI publication or native performance parity is implied.
+Python 0.1.0 is available as described above; no native performance parity is implied.
 
 The [synthetic Python lab walkthrough](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/python_lab_workflow.md)
 uses the installed wheel for a 100 Hz sensor-aircraft-world batch analysis.
 The [release/versioning policy](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/RELEASING.md)
-defines compatibility and future publication gates; no new release is implied.
+defines compatibility and mandatory future publication/attestation gates.
 
 [Package readiness](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/package_readiness.md)
 adds inspectable source/build records and license checks to backend-produced

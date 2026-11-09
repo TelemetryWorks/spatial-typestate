@@ -1,6 +1,15 @@
-# Package-readiness design (no publication)
+# Package-readiness design and release relationship
 
-Scope: embedded build evidence, Linux compatibility and inspectable dry-run
+Current release status (checked 2026-11-09): Rust/Python 0.1.0 are published from
+C2 `9974fd6a00521d631d6ff6e35d4aa936f6b624cf`; both release tags point there.
+The separately [qualified artifact set](candidate-qualification-0.1.0.md) was
+published with matching public hashes; see [publication history](publication-0.1.0.md)
+and [current installation/release policy](RELEASING.md). Routine CI outputs below
+remain readiness candidates, not automatic release selections. Python 0.1.0 has
+no public attestations; future PyPI releases must satisfy the mandatory Trusted
+Publishing and per-file PEP 740 policy before completion/tags.
+
+Original design scope: embedded build evidence, Linux compatibility and inspectable dry-run
 artifacts. Core source/API/dependencies/pin/MSRV and all package versions remain
 unchanged. No tag, upload, registry credential or new runtime helper/API is added.
 

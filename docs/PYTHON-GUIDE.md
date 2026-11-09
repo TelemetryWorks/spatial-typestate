@@ -1,10 +1,36 @@
 # Python batch guide
 
-The unreleased `spatial_typestate` Python package is a separate CPython extension
+The published `spatial_typestate` Python package is a separate CPython extension
 over the Rust core. It makes one object per batch, not one point/vector object
-per row. No PyPI publication or prebuilt-wheel availability is promised.
+per row. Distribution [spatial-typestate 0.1.0](https://pypi.org/project/spatial-typestate/0.1.0/)
+is available on PyPI (checked 2026-11-09).
 The core remains dependency-free and no_std-capable; PyO3/build dependencies live
 only in `python/native`, with their own lockfile. The binding uses std.
+
+## Install published 0.1.0
+
+Use a virtual environment with GIL-enabled CPython >=3.11,<3.15:
+
+```sh
+python -m pip install --only-binary=:all: spatial-typestate==0.1.0
+```
+
+The wheels are `cp311-abi3-win_amd64` and
+`cp311-abi3-manylinux_2_28_x86_64`. This wheel-only command prevents an unexpected
+source build when no compatible wheel exists. Omitting `--only-binary` allows pip
+to select the canonical sdist, which requires an installed Rust toolchain
+(release build compiler 1.99.0) and platform compiler/linker tools. Source builds
+outside the tested platform matrix need their own validation.
+For a release-matching checkout use `python-v0.1.0` at
+`9974fd6a00521d631d6ff6e35d4aa936f6b624cf` (C2), also targeted by `rust-v0.1.0`.
+The distribution name, import and extension differ: `spatial-typestate`,
+`spatial_typestate`, `spatial_typestate._native`.
+
+The published wheel bytes were qualified on CPython 3.11/3.14, GIL-enabled,
+x86_64 Windows and Linux glibc 2.28/2.36 containers. 3.12/3.13 are allowed by
+metadata/abi3, not in the CI matrix; local Windows 3.12 adds a narrower datapoint.
+No macOS, musl, ARM, PyPy or free-threaded support is asserted. The 0.1.0 upload
+has no public attestations; see [release policy](RELEASING.md#mandatory-future-pypi-publishing-policy).
 
 ## Build and test locally
 
@@ -13,8 +39,8 @@ CPython's 3.11 stable ABI; that does not promise PyPy/free-threaded support.
 Linux/Windows x86_64 package jobs test 3.11 and 3.14; local development uses 3.12.
 Linux readiness wheels target manylinux_2_28 (glibc >= 2.28); older glibc, musl
 and other architectures are outside this wheel baseline.
-Other platforms/source builds need their own validation. No platform wheels are
-published by this task. Rust core pin/MSRV are unchanged.
+Other platforms/source builds need their own validation. These are developer
+build commands, not publication instructions. Rust core pin/MSRV are unchanged.
 
 ```powershell
 python -m venv target/python-venv

@@ -1,12 +1,16 @@
-# Migration: published Rust 0.0.1 to candidate Rust 0.1.0
+# Migration: published Rust 0.0.1 to published Rust 0.1.0
 
-Candidate decision, 2026-11-08: Rust **0.1.0**, Python distribution **0.1.0**,
-and its private native crate **0.1.0**. These are unpublished candidate versions,
-not an installation or publication announcement. This step selects metadata and
-finalizes migration notes; it does not approve artifacts, tags or uploads.
+As checked on 2026-11-09, Rust **0.1.0** and Python distribution **0.1.0** are
+published; private native **0.1.0** is not a separate registry package. Both
+releases identify source C2 `9974fd6a00521d631d6ff6e35d4aa936f6b624cf`.
+Tags `rust-v0.1.0` and `python-v0.1.0` point there and must never move.
+Install from the registries using [the current release guidance](RELEASING.md#published-release-checked-2026-11-09).
+Python 0.1.0 has no public attestations; all future uploads require the mandatory
+[Trusted Publishing and per-file attestation gates](RELEASING.md#mandatory-future-pypi-publishing-policy).
 
-The live registry check on that date found only Rust 0.0.1 (not yanked), and
-PyPI returned 404. A 404 does not reserve the Python name or prove upload rights.
+Historical step-1 check (2026-11-08, before publication) found only Rust 0.0.1
+(not yanked), and PyPI returned 404. That observation is not current availability.
+A 404 did not reserve the Python name or prove upload rights.
 The baseline below is the actual [published crate](https://crates.io/crates/spatial-typestate/0.0.1),
 archive SHA256 `b4c0b2c27b4ce9703ba7710f04281febaaf41f2c0327ef652f9c427b1c27320c`.
 Its `.cargo_vcs_info.json` names commit
@@ -15,7 +19,7 @@ The interim 0.0.2 checkout was never published at this check.
 
 ## Rust changes relative to the published API
 
-| Published 0.0.1 | Candidate 0.1.0 / caller action |
+| Published 0.0.1 | Published 0.1.0 / caller action |
 | --- | --- |
 | `Point3<F>` | `Point3<F, L>` with an explicit `L: LengthUnit`, such as `Meters` or `Feet`. |
 | `Vector3<F>` | `Vector3<F, U>` with an explicit `U: Unit`; use `Dimensionless` for a unitless direction. |
@@ -53,7 +57,7 @@ fn main() {
 }
 ```
 
-Candidate 0.1.0, with the same coordinates asserted to be meters:
+Published 0.1.0, with the same coordinates asserted to be meters:
 
 ```rust
 use spatial_typestate::{Frame, Meters, Point3, SpatialError, Transform};
@@ -170,9 +174,9 @@ typenum/num-traits/thiserror and optional backend dependencies. Standard builds
 use native sqrt; no-std uses a private eight-step helper only on scaled norms
 in `[1,4]`. Do not infer a general sqrt, universal timing or device-runtime claim.
 
-## Python 0.1.0: first release candidate, not a published migration
+## Python 0.1.0: first published release
 
-There is no previous published Python package in the observed PyPI namespace.
+0.1.0 is the first published Python release, so there is no earlier Python API to migrate.
 The distribution name is `spatial-typestate`, the import is `spatial_typestate`,
 and the extension is `spatial_typestate._native`. The private Cargo package is
 `spatial-typestate-py` (`publish=false`), not another public Rust release.
@@ -211,16 +215,17 @@ and the extension is `spatial_typestate._native`. The private Cargo package is
   Editable installs reject; direct maturin bypasses provenance gates. Rebuilds
   compile in a fresh staging tree. See the [Python guide](PYTHON-GUIDE.md).
 
-Rust/Python versions evolve independently even though these candidates both say
+Rust/Python versions evolve independently even though these releases both say
 0.1.0; native and pyproject versions must match. Wheels carry compiled core code,
 not a dependency on an installed Rust crate. Source archives vendor the exact
 path-dependent core. Backend provenance records actual source identity, versions,
 lock hashes and build tools; source identity and a later wheel's compiler record
 are distinct. Those records are unsigned, and equal source hashes do not imply
-byte-identical binaries. Exact artifacts, hashes, platforms and publication still
-need the separate [release gates](RELEASING.md).
+byte-identical binaries or public PyPI attestations. The published 0.1.0 files
+passed the separate artifact qualification and public hash checks; future
+releases still need all [release gates](RELEASING.md).
 
-## Validation record
+## Historical step-1 validation record
 
 Validated on 2026-11-08 with the explicit installed Rust 1.99.0 compiler,
 two build workers, offline dependency resolution and locked build/run commands:
@@ -242,5 +247,6 @@ two build workers, offline dependency resolution and locked build/run commands:
 
 These are source/example checks, not candidate artifact qualification. No manual
 crate package, wheel/sdist candidate build, tag, upload or artifact signoff was
-performed in step 1. Later artifact preparation needs an exact reviewed source
-commit and the separate release gates.
+performed in step 1. Subsequent qualification and publication used exact source
+C2, as recorded in [the publication history](publication-0.1.0.md). This later
+outcome does not change the historical step-1 validation evidence.

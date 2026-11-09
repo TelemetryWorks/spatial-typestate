@@ -7,6 +7,47 @@ No release schedule is promised. The historical `publish-0.1.0.yml` workflow is
 retired, disabled and forbidden for future use; no compliant future publisher is
 configured or approved by this policy change.
 
+## Published release (checked 2026-11-09)
+
+Rust [0.1.0](https://crates.io/crates/spatial-typestate/0.1.0) and Python
+[0.1.0](https://pypi.org/project/spatial-typestate/0.1.0/) are available. Both name
+source C2 `9974fd6a00521d631d6ff6e35d4aa936f6b624cf`; release tags
+`rust-v0.1.0` and `python-v0.1.0` point there and must never move. Core and Python
+versions remain independent; private native 0.1.0 matches Python, `publish=false`.
+
+```toml
+[dependencies]
+spatial-typestate = "0.1.0"
+```
+
+For no-std library selection replace that dependency with:
+
+```toml
+spatial-typestate = { version = "0.1.0", default-features = false, features = ["no_std"] }
+```
+
+```sh
+python -m pip install --only-binary=:all: spatial-typestate==0.1.0
+```
+
+Python metadata is >=3.11,<3.15; published wheels are x86_64 Windows and
+manylinux_2_28 Linux, cp311-abi3. Qualification covers GIL-enabled CPython 3.11/3.14
+and Linux glibc 2.28/2.36 containers. 3.12/3.13 are metadata-compatible, not CI
+matrix entries; local Windows 3.12 is additional evidence. No macOS, musl, ARM,
+PyPy or free-threaded claim. Wheel-only installation fails without a matching
+wheel; ordinary pip may build the sdist and require installed Rust/build tools.
+See [installation/build details](PYTHON-GUIDE.md) and the
+[published Rust migration / Python first-release limits](migration-0.0.1-to-0.1.0.md).
+
+Python 0.1.0 is a historical token upload without public attestations. The
+[publication record](publication-0.1.0.md) distinguishes exact-byte/source
+verification from signed provenance. The published registry descriptions and
+0.1.0 rustdoc still contain candidate/unpublished text frozen at C2; updating
+repository docs does not change those published pages or permit re-upload.
+
+The following future policy is mandatory. The dated candidate and baseline
+sections below it are historical snapshots, not current availability guidance.
+
 ## Mandatory future PyPI publishing policy
 
 Owner decision (2026-11-08): **every future PyPI release/upload** must use OIDC
@@ -72,7 +113,7 @@ Primary references: [Trusted Publishing](https://docs.pypi.org/trusted-publisher
 [consuming attestations](https://docs.pypi.org/attestations/consuming-attestations/)
 and the [Integrity API](https://docs.pypi.org/api/integrity/).
 
-## Candidate decision (2026-11-08, step 1 only)
+## Historical candidate decision (2026-11-08, step 1 only)
 
 | Package | Selected candidate | State |
 | --- | --- | --- |
@@ -89,7 +130,7 @@ do not couple future Rust/Python versions. See the self-contained
 Step 1 changes only candidate metadata and migration documentation. It does not
 approve a candidate artifact campaign, hashes/signoff, tags or uploads. Ordinary
 protected-PR CI builds remain quality gates, not publication or artifact approval.
-Current registry installation of version 0.1.0 is **not available** at this check.
+Registry installation of version 0.1.0 was **not available** at that step-1 check.
 The following 2026-11-04 section is a historical snapshot, not current checkout
 version metadata.
 
@@ -114,8 +155,9 @@ Primary registry checks, which must be repeated before any release:
   This is archive metadata, not a release tag; use that source plus the archive
   as the baseline for migration review.
 
-For current APIs use a reviewed source checkout or explicit full Git commit as
-in [README](../README.md), not an unavailable registry version. The Unreleased
+At that historical check, the guide used a reviewed source checkout or full Git
+commit rather than an unavailable registry version. Current installation uses
+published 0.1.0 as above. The Unreleased
 [changelog](../CHANGELOG.md) includes breaking migration: explicit point/transform
 length and vector unit tags, Result-returning apply/then, private normalized
 quaternion components/no unchecked constructor, exhaustive error variants and
@@ -178,11 +220,10 @@ Python packaging does not itself enforce this project's semantic guarantees.
 
 For Cargo **0.0.x, each patch is a separate caret compatibility line**; that
 does not mean every patch actually changes API. For 0.y.z with y > 0, changing
-y is incompatible while z stays in the same caret line. Recommendation: first
-new Rust release of the substantially changed current API should start 0.1.0,
-not imply compatibility with legacy 0.0.1. The owner selected that 0.1.0 candidate
-in step 1 above; the earlier 0.0.2 metadata was unpublished. This selection does
-not authorize publication or guarantee compatibility beyond the stated policy.
+y is incompatible while z stays in the same caret line. Rust 0.1.0 starts a
+new compatibility line for the changed API; it does not imply compatibility with
+legacy 0.0.1. The earlier 0.0.2 metadata was unpublished. A future version decision
+does not itself authorize publication or guarantee compatibility beyond this policy.
 
 Before 1.0, a breaking release requires migration notes/examples and an explicit
 compatibility-line change, but no guaranteed deprecation duration. Prefer an
@@ -202,7 +243,7 @@ versions than intended (for example ~=0.1 versus ~=0.1.0).
 | Embedded/MUSL | CI thumbv7em-none-eabihf and MUSL library compilation only; no device runtime/timing evidence. |
 | Python | GIL-enabled CPython 3.11 and 3.14 wheel/runtime CI on Linux/Windows x86_64; Linux 3.11 source rebuild. Local Windows 3.12 evidence is narrower than CI. |
 | Python metadata | >=3.11,<3.15 and abi3-py311 allow 3.12/3.13, neither 3.12 nor 3.13 is in the CI matrix. abi3 does not validate every interpreter/platform or provide Rust ABI compatibility. |
-| Not claimed | macOS/other architectures, PyPy, free-threaded CPython, published wheels, Python no_std or certified behavior. |
+| Not claimed | macOS/other architectures, PyPy, free-threaded CPython, Python no_std or certified behavior. |
 
 Linux readiness wheels now target manylinux_2_28_x86_64, knowingly excluding
 glibc 2.17-2.27 and musl. CI checks actual ELF requirements and the same wheel in

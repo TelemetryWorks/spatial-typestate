@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-Candidate selection (2026-11-08, step 1 only): Rust 0.1.0 replaces unpublished
+Historical candidate selection (2026-11-08, step 1 only, before publication): Rust 0.1.0 replaces unpublished
 0.0.2 metadata; Python/native remain the unpublished 0.1.0 first-release candidate.
 This metadata selection alone does not authorize packages, tags, uploads or
 artifact signoff. The
@@ -10,6 +10,11 @@ artifact signoff. The
 the development history below also includes changes between unpublished commits.
 
 ### Packaging
+
+- Update current registry installation and availability guidance for published
+  Rust/Python 0.1.0, sourced from C2, while retaining dated preparation evidence.
+  The existing published package descriptions/rustdoc remain frozen; repository
+  corrections do not change artifact bytes or add attestations to 0.1.0.
 
 - Require hosted PyPI OIDC Trusted Publishing and verified per-file PEP 740 publish
   attestations for every future wheel and sdist, with no token/local-upload

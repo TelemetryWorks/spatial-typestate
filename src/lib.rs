@@ -51,11 +51,14 @@
 //!
 //! - `std` (default): uses native square root for quaternion normalization.
 //! - `no_std`: marker for builds without `std`. Disable default features.
-//!   Candidate 0.1.0 is unpublished; this reviewed source pin has the same core
-//!   API and manifest version 0.0.2, so do not add a 0.1.0 constraint to it:
+//!   Published 0.1.0 is available from crates.io (checked 2026-11-09):
 //!   ```toml
-//!   spatial-typestate = { git = "https://github.com/TelemetryWorks/spatial-typestate.git", rev = "1b80c3d7aa930538eb29ce0107a6e5ec2523ea86", default-features = false, features = ["no_std"] }
+//!   spatial-typestate = { version = "0.1.0", default-features = false, features = ["no_std"] }
 //!   ```
+//!   Its source is tag `rust-v0.1.0` at
+//!   `9974fd6a00521d631d6ff6e35d4aa936f6b624cf`.
+//!   Historical validation used Git revision `1b80c3d7aa930538eb29ce0107a6e5ec2523ea86`,
+//!   whose manifest says 0.0.2; it is not the published 0.1.0 package identity.
 //!   The absence of `std` selects a private bounded Newton square root; the
 //!   marker alone does not disable default features. No normal dependencies
 //!   are enabled in any runtime feature configuration.

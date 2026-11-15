@@ -214,7 +214,8 @@ they are not a CI timing gate.
 
 For a longer runnable offline analysis, use the [synthetic 100 Hz lab workflow](python_lab_workflow.md).
 See [release/compatibility policy](RELEASING.md) for current registry facts,
-independent core/Python versions and future provenance/publication gates.
+the owner decision of 2026-11-15 for future lockstep Rust/Python versions and
+one `vX.Y.Z` tag, plus provenance/publication gates. Historical 0.1.0 tags remain unchanged.
 
 ## Inspect build provenance (no publication)
 

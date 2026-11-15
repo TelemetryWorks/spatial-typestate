@@ -188,14 +188,23 @@ CI tests GIL-enabled CPython 3.11/3.14 Linux/Windows and a Linux source rebuild.
 Local venv/build requirements are allowed for assigned Python work, never global
 system installs. See guide for exact separate-native lint/test/build commands.
 No PyPI publishing/wheel release/version changes without an assigned task.
+Owner policy (2026-11-13): every future crates.io or PyPI upload must use OIDC
+Trusted Publishing from a reviewed hosted GitHub Actions workflow. No stored
+registry tokens or local real publishing; missing setup blocks release. See
+[owner/agent migration steps](docs/RELEASING.md#trusted-publishing-migration-owner-and-agent-steps).
+Owner decision (2026-11-15): future releases use ONE `vX.Y.Z` tag for both
+registries from the same verified commit, lockstep Rust/Python/native versions
+and one changelog section. Historical dual 0.1.0 tags stay untouched. Both
+protected publish environments use Tag rule `v*`; see the release policy.
 Every future PyPI upload must use OIDC Trusted Publishing from a reviewed hosted
 GitHub Actions publisher and publish PEP 740 publish attestations for every wheel
 and sdist. No API token/password, local maturin/twine upload, token fallback or
 `attestations: false` path is permitted. Missing Trusted Publisher configuration,
 OIDC permission or per-file attestations blocks release. Verify every file through
 the PyPI Integrity API (cryptographic identity, issuer/repository/workflow/ref,
-source identity and SHA256) and its PyPI Provenance display before completion or
-release tags; see the mandatory [release gates](docs/RELEASING.md#mandatory-future-pypi-publishing-policy).
+source identity and SHA256) and its PyPI Provenance display before coordinated
+release completion; the shared trigger tag already exists. See the mandatory
+[release gates](docs/RELEASING.md#mandatory-future-pypi-publishing-policy).
 Local building/qualification remains allowed. Python 0.1.0 is a historical token
 upload without public attestations; never re-upload it or claim retroactive proof.
 The disabled `publish-0.1.0.yml` is retired and must not be enabled or copied.

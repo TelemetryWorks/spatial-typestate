@@ -215,8 +215,10 @@ and the extension is `spatial_typestate._native`. The private Cargo package is
   Editable installs reject; direct maturin bypasses provenance gates. Rebuilds
   compile in a fresh staging tree. See the [Python guide](PYTHON-GUIDE.md).
 
-Rust/Python versions evolve independently even though these releases both say
-0.1.0; native and pyproject versions must match. Wheels carry compiled core code,
+The published 0.1.0 releases used independently managed Rust/Python versions.
+Owner decision 2026-11-15 makes FUTURE releases lockstep: one version and one
+`vX.Y.Z` tag; see the [migration plan](RELEASING.md#proposal-choosing-the-first-coordinated-version).
+Historical dual tags stay unchanged; native and pyproject versions must match. Wheels carry compiled core code,
 not a dependency on an installed Rust crate. Source archives vendor the exact
 path-dependent core. Backend provenance records actual source identity, versions,
 lock hashes and build tools; source identity and a later wheel's compiler record

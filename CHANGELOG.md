@@ -14,8 +14,10 @@ the development history below also includes changes between unpublished commits.
 - Plan OIDC-only Trusted Publishing migration for both registries, with separate
   owner setup and agent workflow tasks; preserve PyPI per-file attestations and
   the historical token-published 0.1.0 record. No publisher/settings are changed.
-- Scope a Verus feasibility study in the roadmap: exact-model goals, floating-point
-  limitations, isolated proof tooling and a first bounded target; no proof claimed.
+- Scope a layered Rust-core verification study: Kani on real float code, Verus
+  exact-model proofs versus Creusot, proven rounding-bound tooling, conditional
+  Miri and mutation testing; advisory CI before stable required harnesses.
+  Harness placement/first target remain study outputs; no proof is claimed.
 
 - Add canonical Python repository, documentation and issue-tracker metadata for
   the next release, with generated-metadata gates for exact URLs and existing

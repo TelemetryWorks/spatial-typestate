@@ -69,6 +69,18 @@ These are **planned prerequisites**, not settings/workflows installed by this
 roadmap PR. Missing setup blocks the next release; do not recover by uploading
 locally. The disabled `publish-0.1.0.yml` stays retired and must not be copied.
 
+Release routing choices are explicit owner decisions, not defaults inferred from
+another repository:
+
+- **Owner decision 2026-11-15 (Rust):** switch future crates.io triggers from
+  `rust-vX.Y.Z` to **`vX.Y.Z`**. The protected `crates-io` environment admits only
+  tags matching **`v*`**. Historical `rust-v0.1.0` stays at C2 unchanged.
+- **Owner decision 2026-11-15 (Python):** keep **`python-vX.Y.Z`**, independent of
+  Rust versions. Publishing must use a protected **`pypi`** GitHub environment,
+  with the owner as required reviewer, no administrator bypass, selected **Tag**
+  rule **`python-v*`** and no branch rule. Bind that exact environment to the PyPI
+  Trusted Publisher and publish job. This decision does not configure it.
+
 **Agent work, through separately reviewed PRs:**
 
 1. Use the [irig106-types release workflow][types-workflow] and
@@ -111,9 +123,9 @@ locally. The disabled `publish-0.1.0.yml` stays retired and must not be copied.
 2. Restrict `crates-io` deployment eligibility to selected **Tag** rule `v*`, with
    no branch rule. Separately review owner-only tag creation and update/deletion
    protection for `v*`: environment eligibility does not control who may push a
-   tag. Existing `rust-v0.1.0`/`python-v0.1.0` tags stay unchanged. Configure the
-   exact reviewed Python release-ref policy on `pypi`, respecting independent
-   package versions; do not broaden it to arbitrary branches.
+   tag. Existing `rust-v0.1.0`/`python-v0.1.0` tags stay unchanged. Apply the
+   owner-decided `python-v*` selected Tag rule to protected `pypi`, with no branch
+   rule; retain independent package versions and the exact Trusted Publisher binding.
 3. On crates.io, configure the GitHub Trusted Publisher fields for
    owner `TelemetryWorks`, repository `spatial-typestate`, workflow `release.yml`,
    environment `crates-io`. On PyPI, configure that package's Trusted Publisher
@@ -300,8 +312,8 @@ mandatory exact-artifact release gate, not publication authorization:
    commit even when core is not separately published. Document resource lookup
    in the release-specific guide. Local editable/source builds are not release
    artifacts and must not masquerade as those hashes.
-4. Future Rust release triggers use `vX.Y.Z`; Python release tags use
-   `python-vX.Y.Z`, subject to its separately reviewed publisher/ref policy. Tags
+4. Under the owner decisions of 2026-11-15, future Rust release triggers use
+   `vX.Y.Z` and Python release tags use `python-vX.Y.Z` (independent versions). Tags
    point to the approved source and must never move; they are not technically
    immutable without protection. Historical `rust-v0.1.0` and `python-v0.1.0`
    remain at C2. Tags/manifest do not retroactively create registry provenance.

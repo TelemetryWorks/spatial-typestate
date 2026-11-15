@@ -13,8 +13,9 @@ including its Scorecard/zizmor workflows and dated pilot report. Compare the
 and the [pinned zizmor action contract](https://github.com/zizmorcore/zizmor-action/blob/45d7276c9ca790aabd705e31ca99c6185c3e76dd/action.yml).
 
 - Scorecard runs weekly and on main pushes only, with `publish_results: true`.
-  Its template requires top-level `read-all` (the explicit exception to the
-  repository's contents-read default). Its analysis job grants only contents
+  Its workflow default is contents read; the template's broader `read-all` is
+  unnecessary. Scorecard forbids workflow-level write grants, not narrower read
+  defaults. Its analysis job grants only contents
   read, security-events write and id-token write. OIDC here publishes Scorecard
   results, not packages. SARIF is retained for five days and uploaded to code
   scanning. No PR checkout runs with these write permissions.
@@ -51,7 +52,7 @@ new Scorecard/zizmor steps use the pilot/template's pins.
 | zizmorcore/zizmor-action | v0.8.1 | `45d7276c9ca790aabd705e31ca99c6185c3e76dd` |
 
 All checkouts now have `persist-credentials: false`. All workflow-level
-permissions are contents read except Scorecard's documented read-all. Existing
+permissions are contents read, including Scorecard. Existing
 job grants remain: CodeQL security-events write; qualification/publication
 artifact consumers actions read; all other existing jobs inherit contents read.
 No new package-publishing capability or required-check rename is introduced.
@@ -93,3 +94,11 @@ zizmor and existing required gates) must run on the exact review head. Scorecard
 publishing, its first badge value, OIDC issuance and SARIF upload cannot be
 established by a local audit or this PR event; verify after an authorized merge's
 main/scheduled run. No score, settings change or package attestation is claimed.
+
+## PR review correction
+
+SonarCloud reported `githubactions:S8234` on the initial Scorecard workflow's
+`read-all` default (new security rating C). Narrow it to `contents: read`; keep
+analysis-job `security-events: write` and `id-token: write`. No finding suppression
+or quality-gate change is used. Current main `5f01996` is incorporated by ordinary
+merge; the correction needs fresh exact-head PR checks.

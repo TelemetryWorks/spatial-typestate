@@ -6,8 +6,9 @@ on:
   schedule:
     - cron: '30 1 * * 6'
 
-# Required by the official Scorecard publishing template. The job restricts writes.
-permissions: read-all
+# Keep the workflow read-only; publishing grants belong only to the analysis job.
+permissions:
+  contents: read
 
 jobs:
   analysis:

@@ -26,30 +26,36 @@ These are proposals, not implemented guarantees or promises of a release date.
   policy of 2026-11-13: future uploads use OIDC from a reviewed GitHub Actions
   workflow, never a stored registry token or local publisher. This is setup work
   still to do, not evidence that a publisher/environment has been configured.
-  - **Owner decision 2026-11-15 (Rust):** future release triggers are `vX.Y.Z`,
-    replacing `rust-vX.Y.Z`, with protected `crates-io` environment Tag rule `v*`.
-    Historical `rust-v0.1.0` stays unchanged.
-  - **Owner decision 2026-11-15 (Python):** retain `python-vX.Y.Z` and independent
-    Python versions; use protected `pypi` with owner required reviewer, no admin
-    bypass and selected Tag rule `python-v*` (no branch rule), bound to the PyPI
-    Trusted Publisher and publish job. Owner setup remains to be performed.
-  - **Agent steps (future reviewed PRs):** prepare a tag-only Rust release workflow
-    with separate verification and `crates-io` publishing jobs; bind `vX.Y.Z` to
-    the manifest version and reviewed source on main, pin
+  - **Owner decision 2026-11-15 (superseding earlier dual-tag choices):** ONE
+    `vX.Y.Z` tag releases both packages from the same verified commit, with Rust,
+    Python/native versions in lockstep and ONE combined changelog section. Future
+    `rust-vX.Y.Z` / `python-vX.Y.Z` routes are retired; historical `rust-v0.1.0`
+    and `python-v0.1.0` stay untouched. Both protected `crates-io` and `pypi`
+    environments require owner approval, no admin bypass and Tag rule `v*` (no
+    branch rule), bound to the corresponding Trusted Publisher.
+  - **Agent steps (future reviewed PRs):** prepare one coordinated tag-only release
+    workflow verifying both artifact sets before uploads; bind `vX.Y.Z` to all
+    version metadata and the same reviewed source on main, pin
     `rust-lang/crates-io-auth-action` by full SHA, and grant OIDC only to the
-    publishing job. Prepare a separate qualified-artifact PyPI publisher bound to
-    `pypi`, with per-file PEP 740 attestations and public verification. Preserve
-    this crate's MSRV/pin and independent Rust/Python versions; do not copy the
-    example's toolchain or feature matrix. Build the independent approver checklist
+    registry publish jobs. Prepare its qualified-artifact PyPI job bound to `pypi`,
+    with per-file PEP 740 attestations and public verification. Preserve this
+    crate's MSRV/pin; do not copy the example's toolchain or feature matrix. Build the independent approver checklist
     and immutable-published-text review into release preparation.
   - **Owner steps (settings, separately authorized):** create protected `crates-io`
     and `pypi` environments with explicit owner approval and no administrator
-    bypass; restrict deployments to Rust tags `v*` and Python tags `python-v*`,
-    no branches. Configure the exact registry Trusted Publisher identities. Enable crates.io **Trusted Publishing
-    only**, delete any stored `CARGO_REGISTRY_TOKEN` and `PYPI_API_TOKEN` secrets,
+    bypass; restrict BOTH deployments to shared tags `v*`, no branches. Configure
+    the exact registry Trusted Publisher identities. Enable crates.io **Trusted
+    Publishing only**, delete any stored `CARGO_REGISTRY_TOKEN` and `PYPI_API_TOKEN` secrets,
     and revoke superseded long-lived credentials at their issuers. Deletion is not
     revocation; first inventory secret names without reading values. No fallback
     upload is allowed while setup or verification is incomplete.
+  - **Proposals for review:** classify changes against each last publication and
+    choose a jointly unused shared version (e.g. 0.1.1 for compatible fixes or 0.2.0
+    if either surface breaks; owner decides). Verify both, then crates.io, then
+    PyPI. If one succeeds and the other fails, stop, record the incomplete release
+    and inspect public state; no blind rerun, overwritten version or moved tag.
+    Owner-authorized recovery of only missing exact bytes, or a new coordinated
+    release, needs separate review. See [migration and recovery proposals](RELEASING.md#proposal-coordinated-ordering-and-partial-release-handling).
   - Follow the detailed [owner/agent setup and approver gates](RELEASING.md#trusted-publishing-migration-owner-and-agent-steps).
     The [irig106-types reference](https://github.com/TelemetryWorks/irig106-types/blob/fef4233b1e4deca170e881fc34438555b09e15d8/docs/RELEASING.md)
     and its [reviewed workflow](https://github.com/TelemetryWorks/irig106-types/blob/fef4233b1e4deca170e881fc34438555b09e15d8/.github/workflows/release.yml)

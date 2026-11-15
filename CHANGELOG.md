@@ -11,6 +11,11 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
+- Record the superseding owner decision of 2026-11-15: one shared version,
+  `vX.Y.Z` tag and changelog section for both registries; retain historical 0.1.0
+  tags. Document migration/version-selection and partial-release recovery as
+  proposals, with both protected environments using `v*`.
+
 - Plan OIDC-only Trusted Publishing migration for both registries, with separate
   owner setup and agent workflow tasks; preserve PyPI per-file attestations and
   the historical token-published 0.1.0 record. No publisher/settings are changed.

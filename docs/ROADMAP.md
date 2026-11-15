@@ -8,6 +8,10 @@ These are proposals, not implemented guarantees or promises of a release date.
   a sanitised filter finding from two accepted operator risks. Those accepted
   risks remain explicit. No broad rule, gate, threshold or exclusion change follows.
 
+- Review [supply-chain audit](evals/2026-11-15-supply-chain-rollout.md) results and
+  proposed Dependabot updates. Confirm the first main/scheduled Scorecard
+  publication and SARIF upload after merge; a badge is not a verified score.
+  New checks do not change branch protection or authorize automatic merges.
 - Assess additional unit conversions/dimensional algebra only against concrete domain needs; current linear lengths deliberately exclude them.
 - Assess long-chain rotation drift and whether explicit reconditioning is needed.
 - Review the [borrowed-validation prototype](borrowed_validation.md): caller-local

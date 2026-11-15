@@ -188,6 +188,10 @@ CI tests GIL-enabled CPython 3.11/3.14 Linux/Windows and a Linux source rebuild.
 Local venv/build requirements are allowed for assigned Python work, never global
 system installs. See guide for exact separate-native lint/test/build commands.
 No PyPI publishing/wheel release/version changes without an assigned task.
+Owner policy (2026-11-13): every future crates.io or PyPI upload must use OIDC
+Trusted Publishing from a reviewed hosted GitHub Actions workflow. No stored
+registry tokens or local real publishing; missing setup blocks release. See
+[owner/agent migration steps](docs/RELEASING.md#trusted-publishing-migration-owner-and-agent-steps).
 Every future PyPI upload must use OIDC Trusted Publishing from a reviewed hosted
 GitHub Actions publisher and publish PEP 740 publish attestations for every wheel
 and sdist. No API token/password, local maturin/twine upload, token fallback or

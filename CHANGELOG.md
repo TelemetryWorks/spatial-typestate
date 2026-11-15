@@ -11,6 +11,12 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
+- Plan OIDC-only Trusted Publishing migration for both registries, with separate
+  owner setup and agent workflow tasks; preserve PyPI per-file attestations and
+  the historical token-published 0.1.0 record. No publisher/settings are changed.
+- Scope a Verus feasibility study in the roadmap: exact-model goals, floating-point
+  limitations, isolated proof tooling and a first bounded target; no proof claimed.
+
 - Add canonical Python repository, documentation and issue-tracker metadata for
   the next release, with generated-metadata gates for exact URLs and existing
   Apache-2.0 licence fields. Record the legacy uploader's licence-form omission;

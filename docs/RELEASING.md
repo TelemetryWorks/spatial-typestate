@@ -48,6 +48,106 @@ repository docs does not change those published pages or permit re-upload.
 The following future policy is mandatory. The dated candidate and baseline
 sections below it are historical snapshots, not current availability guidance.
 
+## Mandatory future registry publishing policy
+
+Owner policy (2026-11-13, documented here 2026-11-15): every future TelemetryWorks
+crate/package upload to **crates.io or PyPI** uses OIDC Trusted Publishing from a
+reviewed hosted GitHub Actions workflow. No stored registry token, local real
+publish, password or credential fallback is permitted. Local packaging and
+credential-free dry runs remain preparation, not publication. PyPI additionally
+requires the per-file PEP 740 attestations below. This supersedes the earlier
+PyPI-only policy's crates.io exemption.
+
+Rust 0.1.0 was published using a stored `CARGO_REGISTRY_TOKEN` credential; Python
+0.1.0 used a local token upload. Neither is a template for future uploads. Their
+existing source C2, hashes and tags above remain historical; do not re-upload,
+move tags or imply retroactive Trusted Publishing/attestations.
+
+### Trusted Publishing migration: owner and agent steps
+
+These are **planned prerequisites**, not settings/workflows installed by this
+roadmap PR. Missing setup blocks the next release; do not recover by uploading
+locally. The disabled `publish-0.1.0.yml` stays retired and must not be copied.
+
+**Agent work, through separately reviewed PRs:**
+
+1. Use the [irig106-types release workflow][types-workflow] and
+   [release/approver guidance][types-releasing] as the security model. Its 0.1.0
+   release on 2026-11-15 has public [crates.io `trustpub_data`][types-publication]
+   naming `TelemetryWorks/irig106-types`, run `43727921675` and commit
+   `3c517358694646652939c236968b202ebf76e28a`. That success is evidence for the
+   reference, not configuration or permission for spatial-typestate.
+2. Prepare a Rust `release.yml` triggered **only** by `v*.*.*` tag pushes, no
+   dispatch/branch/PR publishing path. Validate exact `v` + Cargo version and the
+   peeled event SHA on reviewed main. Separate credential-free verification from
+   the `crates-io` publish job; check out the verified immutable SHA. Preserve
+   this repository's existing toolchain/feature/artifact gates, rather than
+   adopting the reference crate's stable toolchain/feature matrix.
+3. Full-SHA pin all actions, including `rust-lang/crates-io-auth-action` (the
+   inspected reference uses `3268eb413133e2960fa4ae0e963ca76380c54cd9`, v1.0.6;
+   re-review before implementation). Only the publish job gets `id-token: write`.
+   Pass its exchanged short-lived credential only to the upload step, never a
+   repository secret; verify cleanup/revocation behavior of the selected action.
+4. Prepare the separate PyPI qualified-artifact upload path with
+   `environment: pypi`, official SHA-pinned publisher, OIDC and attestations for
+   every wheel/sdist, as specified below. No password input, stored token,
+   `skip-existing` or disabled attestations. Keep artifact source and publishing
+   tooling identity distinct, with the approved per-file hashes.
+5. Document preflight and failure gates, independent owner approval and public
+   verification. Check new crates.io version metadata's Trusted Publishing
+   repository/run/commit against the approved run, fresh archive SHA256/index
+   checksum and embedded VCS SHA. Preserve the existing PyPI Integrity API,
+   metadata JSON, fresh-download and install checks. No success claim from a
+   green upload step alone; inspect public state before any separately reviewed
+   recovery from a partial upload.
+
+**Owner work, separately authorized settings/credential actions:**
+
+1. Create GitHub environments **`crates-io`** and **`pypi`** with the owner as a
+   required reviewer, explicit approval and administrator bypass disabled. A sole
+   owner who triggers the release must still be able to approve it; do not enable
+   prevent-self-review in a way that locks that owner out. Naming an environment
+   in YAML can auto-create it unprotected, so verify effective protection first.
+2. Restrict `crates-io` deployment eligibility to selected **Tag** rule `v*`, with
+   no branch rule. Separately review owner-only tag creation and update/deletion
+   protection for `v*`: environment eligibility does not control who may push a
+   tag. Existing `rust-v0.1.0`/`python-v0.1.0` tags stay unchanged. Configure the
+   exact reviewed Python release-ref policy on `pypi`, respecting independent
+   package versions; do not broaden it to arbitrary branches.
+3. On crates.io, configure the GitHub Trusted Publisher fields for
+   owner `TelemetryWorks`, repository `spatial-typestate`, workflow `release.yml`,
+   environment `crates-io`. On PyPI, configure that package's Trusted Publisher
+   for the same repository, the separately reviewed Python workflow filename,
+   and environment `pypi`. Verify the saved identities and ref/environment gates.
+4. Enable crates.io **Trusted Publishing only** and verify it is effective;
+   delete any stored **`CARGO_REGISTRY_TOKEN`** and **`PYPI_API_TOKEN`** repository
+   or environment secrets. Inventory names only; this document does not assert
+   that those secrets currently exist. Revoke superseded long-lived credentials
+   at each registry and remove obsolete local release credentials through an
+   authorized owner action. Deleting a GitHub secret does not revoke its token.
+   No token may be retained as a fallback during migration.
+
+### Independent approver checklist
+
+Before approving a pending environment deployment, the owner must obtain the
+actual tag and run commit from GitHub independently of workflow outputs; fetch
+current main and verify ancestry/version. Compare the run commit's workflow bytes
+with the immutable independently reviewed workflow on main (Git blob equality is
+sufficient). Do not let a tag's modified workflow attest to its own safety. Inspect
+checks, exact artifact hashes/contents and source identity; refuse approval for
+any mismatch, even with green verification. Never bypass environment protection.
+
+**Immutable-published-text lesson:** before publication inspect the actual
+packaged README/metadata, rendered descriptions, changelog date and instructions
+for stale candidate claims and broken packaged links. Editing GitHub docs later
+cannot change text embedded in an already published crate/wheel/sdist. The
+reference's checklist complements this crate's historical frozen-0.1.0 lesson;
+use a separately authorized new version for package corrections, not re-upload.
+
+[types-workflow]: https://github.com/TelemetryWorks/irig106-types/blob/fef4233b1e4deca170e881fc34438555b09e15d8/.github/workflows/release.yml
+[types-releasing]: https://github.com/TelemetryWorks/irig106-types/blob/fef4233b1e4deca170e881fc34438555b09e15d8/docs/RELEASING.md
+[types-publication]: https://crates.io/api/v1/crates/irig106-types/0.1.0
+
 ## Mandatory future PyPI publishing policy
 
 Owner decision (2026-11-08): **every future PyPI release/upload** must use OIDC
@@ -57,16 +157,15 @@ sdist. Trusted Publishing alone is insufficient: some providers authenticate
 uploads without producing attestations. Local builds and qualification remain
 allowed; API-token/password uploads, local `maturin upload`/`twine upload`, token
 fallbacks and `attestations: false` are forbidden for future PyPI uploads. This
-rule does not change the crates.io publishing policy.
+PyPI-specific attestation rule supplements the both-registry OIDC policy above.
 
 Before any future upload:
 
 1. Separately review and configure the PyPI Trusted Publisher for the exact
    repository `TelemetryWorks/spatial-typestate` and named workflow filename.
-   Record its allowed ref and immutable publishing-tooling commit. If the
-   publisher is environment-bound, the publish job must use that exact reviewed
-   GitHub environment; record the binding (or its explicit absence). Missing or
-   mismatched setup is a release blocker, not permission to use a token.
+   Record its allowed ref and immutable publishing-tooling commit. Bind both the
+   publisher and publish job to the protected `pypi` environment described above.
+   Missing or mismatched setup is a release blocker, not permission to use a token.
 2. Use the official `pypa/gh-action-pypi-publish` action pinned to a reviewed full
    commit SHA, with `attestations: true`, no password/token inputs and no
    `skip-existing`. Grant `id-token: write` only to the single publish job, never
@@ -201,9 +300,11 @@ mandatory exact-artifact release gate, not publication authorization:
    commit even when core is not separately published. Document resource lookup
    in the release-specific guide. Local editable/source builds are not release
    artifacts and must not masquerade as those hashes.
-4. After signoff, use distinct immutable tags rust-vX.Y.Z and python-vX.Y.Z
-   pointing to the reviewed source commit. Tags/manifest identify the release;
-   they do not retroactively create provenance for legacy 0.0.1.
+4. Future Rust release triggers use `vX.Y.Z`; Python release tags use
+   `python-vX.Y.Z`, subject to its separately reviewed publisher/ref policy. Tags
+   point to the approved source and must never move; they are not technically
+   immutable without protection. Historical `rust-v0.1.0` and `python-v0.1.0`
+   remain at C2. Tags/manifest do not retroactively create registry provenance.
 
 The sdist must contain the exact path-dependent core source and native lockfile;
 building must not silently resolve a newer Git HEAD or registry core. Wheels
@@ -285,9 +386,11 @@ and align claims with retained evidence; metadata alone does not expand support.
    Record hashes and build environments, retain logs/artifacts. Check no debug
    local paths, credentials, private datasets or unlicensed inputs are packaged.
 7. Only after explicit owner artifact approval, perform assigned upload actions.
-   For PyPI, satisfy the mandatory Trusted Publishing and per-file attestation
-   gates above, including public verification before completion/tags. Registry
-   credentials stay out of Git/logs. Re-download the published
+   For both registries, satisfy the OIDC-only policy and protected-environment
+   owner approval above; for PyPI also satisfy all per-file attestation gates.
+   Rust trigger tags necessarily precede their tag-only run; verify public results
+   before declaring completion. Python completion/tag gates remain as stated.
+   Registry credentials stay out of Git/logs. Re-download the published
    artifacts, verify hashes, install/build and smoke-test the public artifacts.
    Verify release manifest links before announcing availability.
 8. On a defective published artifact, document impact and issue a new version;

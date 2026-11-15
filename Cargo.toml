@@ -35,7 +35,7 @@ std = []
 no_std = []
 
 [dev-dependencies]
-criterion = "0.5"    # Benchmarks (Supports measurable + provable behavior)
+criterion = "0.7"    # Benchmarks (Supports measurable + provable behavior)
 proptest = "1.4"     # Property-based testing (Supports measurable + provable behavior)
 rand = "0.8"
 trybuild = "1.0"

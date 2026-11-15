@@ -7,7 +7,9 @@ published with matching public hashes; see [publication history](publication-0.1
 and [current installation/release policy](RELEASING.md). Routine CI outputs below
 remain readiness candidates, not automatic release selections. Python 0.1.0 has
 no public attestations; future PyPI releases must satisfy the mandatory Trusted
-Publishing and per-file PEP 740 policy before completion/tags.
+Publishing and per-file PEP 740 policy before coordinated release completion.
+Under owner decision 2026-11-15, one `vX.Y.Z` tag triggers both registries; it
+exists before upload and is not itself completion evidence.
 
 Original design scope: embedded build evidence, Linux compatibility and inspectable dry-run
 artifacts. Core source/API/dependencies/pin/MSRV and all package versions remain

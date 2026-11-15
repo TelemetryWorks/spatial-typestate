@@ -21,8 +21,9 @@ needs an installed Rust toolchain and platform build tools.
 
 The release embeds source C2 `9974fd6a00521d631d6ff6e35d4aa936f6b624cf`;
 `python-v0.1.0` and `rust-v0.1.0` both point there and must never move.
-Rust/Python versions evolve independently. The private native crate is not a
-separate published Rust package. See the
+Owner decision 2026-11-15: future Rust/Python releases share one version and
+one `vX.Y.Z` tag; the two historical 0.1.0 tags above stay unchanged. The private
+native crate is not a separate published Rust package. See the
 [first-release limits and Rust migration](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/migration-0.0.1-to-0.1.0.md)
 and [guide](https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/PYTHON-GUIDE.md)
 for copies, runtime checks and guarantees lost at the Python boundary.

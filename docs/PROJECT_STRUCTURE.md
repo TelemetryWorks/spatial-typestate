@@ -45,7 +45,7 @@ See [CONTRIBUTING.md](../CONTRIBUTING.md) for commands and actual CI scope.
 - python/examples/lab_workflow.py and data/synthetic_sensor_100hz.csv: explicit
   synthetic telemetry batch analysis, tested through the installed wheel.
 - [python_lab_workflow.md](python_lab_workflow.md): scenario, oracle and copy/error limits.
-- [RELEASING.md](RELEASING.md): independent versioning, observed registry baseline
+- [RELEASING.md](RELEASING.md): unified future version/tag policy, historical registry baseline
   and future release signoff/provenance gates, not publishing automation.
 
 - python/build_backend.py: private stdlib PEP 517 staging/provenance wrapper;

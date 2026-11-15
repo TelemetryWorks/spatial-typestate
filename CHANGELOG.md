@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Supply-chain checks
+
+- Add weekly/main OpenSSF Scorecard publishing and PR workflow auditing with
+  zizmor, plus weekly grouped Actions/root Cargo/native Cargo dependency updates.
+  Disable checkout credential persistence in Rust/Python CI; audit immutable
+  action pins, version comments and least-privilege workflow permissions.
+  The retired 0.1.0 publisher stays disabled, with two documented historical-only
+  suppressions; no new release publisher or settings change is included.
+
 Historical candidate selection (2026-11-08, step 1 only, before publication): Rust 0.1.0 replaces unpublished
 0.0.2 metadata; Python/native remain the unpublished 0.1.0 first-release candidate.
 This metadata selection alone does not authorize packages, tags, uploads or

@@ -36,11 +36,12 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
+          persist-credentials: false
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ matrix.python }}
-      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master, verified
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
           toolchain: '1.99.0'
           components: rustfmt, clippy, rust-docs
@@ -77,7 +78,7 @@ jobs:
         run: python python/package_ci.py runtime --python ${{ matrix.python }} --out target/package-artifacts
       - name: Retain candidates and inventories (failed jobs are diagnostics only)
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4, verified upstream ref
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: packages-${{ matrix.os }}-${{ matrix.python }}-attempt${{ github.run_attempt }}
           path: target/package-artifacts/

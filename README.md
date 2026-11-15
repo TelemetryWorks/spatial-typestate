@@ -1,5 +1,7 @@
 # Spatial Typestate
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/TelemetryWorks/spatial-typestate/badge)](https://scorecard.dev/viewer/?uri=github.com/TelemetryWorks/spatial-typestate)
+
 A small Rust library for frame-tagged 3D points, vectors, unit quaternions, and
 rigid transforms. APIs are evolving. The crate is not certified for safety-,
 life-, or mission-critical use; applications must independently validate their

@@ -109,3 +109,24 @@ jobs:
 
       - name: MUSL library compile-only coverage
         run: cargo +1.99.0 build --lib --locked --no-default-features --features no_std --target x86_64-unknown-linux-musl --jobs 2
+
+  deny:
+    name: Dependency policy (${{ matrix.manifest }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        manifest: [Cargo.toml, python/native/Cargo.toml]
+    env:
+      RUSTUP_TOOLCHAIN: '1.99.0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        with:
+          manifest-path: ${{ matrix.manifest }}
+          rust-version: '1.99.0'
+          arguments: --all-features --locked --config .github/deny.toml

@@ -4,6 +4,13 @@
 
 ### Supply-chain checks
 
+- Patch dev-only crossbeam-epoch/rand advisories in the root lock, including the
+  transitive rand line and rustix advisory exposed by full-graph unsound checks.
+  Add locked root/native cargo-deny gates with registry-only external sources,
+  explicit permissive licences and no advisory exceptions. Plan Dependabot major
+  version updates deliberately across every ecosystem, without disabling security
+  updates. Manifests, runtime graphs and published 0.1.0 artifacts remain unchanged.
+
 - Add weekly/main OpenSSF Scorecard publishing and PR workflow auditing with
   zizmor, plus weekly grouped Actions/root Cargo/native Cargo dependency updates.
   Disable checkout credential persistence in Rust/Python CI; audit immutable

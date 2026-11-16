@@ -66,8 +66,10 @@ move tags or imply retroactive Trusted Publishing/attestations.
 
 ### Trusted Publishing migration: owner and agent steps
 
-These are **planned prerequisites**, not settings/workflows installed by this
-roadmap PR. Missing setup blocks the next release; do not recover by uploading
+The owner settings remain prerequisites; the reviewed
+[`trusted-publishing.yml`](../.github/workflows/trusted-publishing.yml) implements
+the tag-only build/verification and gated deployment path described below.
+This workflow implementation does not configure registry publishers or settings. Missing setup blocks the next release; do not recover by uploading
 locally. The disabled `publish-0.1.0.yml` stays retired and must not be copied.
 
 **Owner decision 2026-11-15 (superseding the earlier same-day dual-tag choices):**
@@ -93,7 +95,7 @@ requirements, not settings configured by this PR.
    naming `TelemetryWorks/irig106-types`, run `43727921675` and commit
    `3c517358694646652939c236968b202ebf76e28a`. That success is evidence for the
    reference, not configuration or permission for spatial-typestate.
-2. Prepare one coordinated `release.yml` triggered **only** by `v*.*.*` tag
+2. Prepare one coordinated `trusted-publishing.yml` triggered **only** by `v*.*.*` tag
    pushes, no dispatch/branch/PR publishing path. Validate exact `v` + the shared
    Cargo/pyproject/native version and the peeled event SHA on reviewed main.
    Verify both artifact sets before any publish job; each publish job checks out
@@ -124,7 +126,7 @@ requirements, not settings configured by this PR.
 
 **Owner work, separately authorized settings/credential actions:**
 
-1. Create GitHub environments **`crates-io`** and **`pypi`** with the owner as a
+1. Verify GitHub environments **`crates-io`** and **`pypi`** with the owner as a
    required reviewer, explicit approval and administrator bypass disabled. A sole
    owner who triggers the release must still be able to approve it; do not enable
    prevent-self-review in a way that locks that owner out. Naming an environment
@@ -136,9 +138,9 @@ requirements, not settings configured by this PR.
    owner-decided shared `v*` Tag rule and the exact Trusted Publisher bindings;
    do not retain future dual-tag or independent-version release routes.
 3. On crates.io, configure the GitHub Trusted Publisher fields for
-   owner `TelemetryWorks`, repository `spatial-typestate`, workflow `release.yml`,
+   owner `TelemetryWorks`, repository `spatial-typestate`, workflow `trusted-publishing.yml`,
    environment `crates-io`. On PyPI, configure that package's Trusted Publisher
-   for the same repository and coordinated reviewed `release.yml` filename,
+   for the same repository and coordinated reviewed `trusted-publishing.yml` filename,
    and environment `pypi`. Verify the saved identities and ref/environment gates.
 4. Enable crates.io **Trusted Publishing only** and verify it is effective;
    delete any stored **`CARGO_REGISTRY_TOKEN`** and **`PYPI_API_TOKEN`** repository
@@ -195,8 +197,8 @@ cannot change text embedded in an already published crate/wheel/sdist. The
 reference's checklist complements this crate's historical frozen-0.1.0 lesson;
 use a separately authorized new version for package corrections, not re-upload.
 
-[types-workflow]: https://github.com/TelemetryWorks/irig106-types/blob/fef4233b1e4deca170e881fc34438555b09e15d8/.github/workflows/release.yml
-[types-releasing]: https://github.com/TelemetryWorks/irig106-types/blob/fef4233b1e4deca170e881fc34438555b09e15d8/docs/RELEASING.md
+[types-workflow]: https://github.com/TelemetryWorks/irig106-types/blob/2899b30/.github/workflows/trusted-publishing.yml
+[types-releasing]: https://github.com/TelemetryWorks/irig106-types/blob/2899b30/docs/RELEASING.md
 [types-publication]: https://crates.io/api/v1/crates/irig106-types/0.1.0
 
 ## Mandatory future PyPI publishing policy
@@ -219,8 +221,9 @@ Before any future upload:
    Missing or mismatched setup is a release blocker, not permission to use a token.
 2. Use the official `pypa/gh-action-pypi-publish` action pinned to a reviewed full
    commit SHA, with `attestations: true`, no password/token inputs and no
-   `skip-existing`. Grant `id-token: write` only to the single publish job, never
-   top-level or to build/test jobs. Keep build/qualification separate from
+   `skip-existing`. Grant the PyPI publisher `id-token: write` only at its job level, never
+   top-level or to build/test jobs. The separate crates.io publish job has its own
+   narrowly scoped OIDC grant. Keep build/qualification separate from
    publishing and carry the approved per-file SHA256 manifest across jobs/runs.
 3. Validate the exact artifact set, source commit, embedded source records and
    hashes before upload. Record the publishing workflow/ref/commit and each
@@ -272,6 +275,268 @@ Primary references: [Trusted Publishing](https://docs.pypi.org/trusted-publisher
 [producing attestations](https://docs.pypi.org/attestations/producing-attestations/),
 [consuming attestations](https://docs.pypi.org/attestations/consuming-attestations/)
 and the [Integrity API](https://docs.pypi.org/api/integrity/).
+
+## Coordinated publisher implementation and approvals
+
+The [workflow](../.github/workflows/trusted-publishing.yml) is tag-only
+(`v*.*.*`); it has no dispatch, branch or PR publication trigger. All actions are
+full-SHA pinned, all checkouts disable persisted credentials, and workflow
+permissions default to contents read. Verification jobs have no OIDC, package
+credential, attestation or contents-write grant. `publish-crates` and
+`publish-pypi` alone have job-scoped OIDC/attestations write; `release-assets`
+has contents write only. The retired 0.1.0 publisher is neither used nor changed.
+
+**Proposal implemented for review, still pending owner selection for execution:**
+the ordering described above is verify BOTH, crates.io, PyPI, then durable Release
+retention. An environment approval is not automatic approval of later jobs.
+The FIRST unified version remains an owner decision (0.1.1 versus 0.2.0 or another
+justified jointly unused version). This implementation changes no versions and
+creates no tag; current 0.1.0 would fail the already-published-version guard.
+
+### What verification does
+
+- `source` checks the original repository/tag push, attempt 1, exact clean event
+  SHA, live remote tag, main ancestry, all three manifest versions and both
+  lockfile core entries. Neither registry may already contain the proposed
+  version. An unavailable registry is a blocker, not evidence of absence.
+- `verify-crate` runs the full Rust CI equivalent: installed explicit 1.99.0,
+  three test modes and examples, fmt, both clippy/rustdoc/release modes, zero-normal-
+  dependency graphs, all six 1.85.0/1.91.1 compatibility checks, thumb debug/release
+  and MUSL library compilation. The pin and MSRV do not change. Windows core
+  runtime/UI/example modes also run in the Windows Python 3.11 build job.
+- `verify-python` runs the existing native and packaging gates on Linux/Windows
+  GIL-enabled 3.11/3.14, using the in-tree backend via `package_ci.py`; no direct
+  maturin CLI bypass. It checks prepared metadata, real artifact metadata,
+  source inventory, paths, licences, RECORD and Linux ELF policy. Linux 3.11
+  supplies the canonical sdist and manylinux_2_28 x86_64 wheel; Windows 3.11
+  supplies the cp311-abi3 win_amd64 wheel. Other per-job builds are diagnostics,
+  not additional release files. The Linux sdist is rebuilt without Git and both
+  resulting Linux wheels run on both 3.11/3.14 at glibc 2.28 and 2.36.
+- `verify-windows-wheel` downloads the SAME 3.11-built Windows wheel on 3.11 and
+  3.14, checks its inventory hash before install, runs outside-checkout fresh-venv
+  imports/provenance, stdlib and hash-locked optional NumPy suites and the lab.
+- Final `verify` waits for every build/consumer job, selects exactly one crate,
+  those two wheels and the canonical sdist, and rechecks source/metadata and
+  matching runtime receipts. `release-manifest.json` binds source, tag, version,
+  run and the four hashes. External LF `SHA256SUMS` covers all transfer files
+  except itself. No self-hash or unsigned-manifest authenticity claim is made.
+
+The crate is packaged with default Cargo verification, then byte-compared with
+`cargo publish --dry-run` output. The fresh publish runner repeats this comparison
+with explicit 1.99.0 BEFORE requesting its short-lived OIDC credential. Cargo
+cannot upload a prebuilt archive path: real publish packages again. A fresh
+crates.io download, index checksum and Trusted Publisher repository/run/SHA must
+match before signing evidence. A post-upload mismatch cannot undo publication;
+stop and report it, and leave any yank to the owner.
+
+CycloneDX 1.5 source-graph SBOMs use cargo-cyclonedx 0.5.9 (`--locked`, two workers):
+core from the unpacked crate, Python from the same verified native/core manifests
+and locks, all features/targets. They include development/build dependencies and
+are not a complete binary or Rust-compiler SBOM claim. Compiler notices remain
+in the wheels under the existing packaging policy. Both SBOMs are retained and
+attested about their corresponding artifact subjects.
+
+PyPI receives exactly the three verified files with OIDC and explicit
+`attestations: true`, no password, skip-existing or fallback. After upload,
+fresh public hashes and the licence/URL JSON gate must pass. Every file's
+Integrity API object is retained; hash-locked pypi-attestations 0.0.31 verifies
+its certificate chain, transparency evidence, publisher and subject, followed by
+exact issuer/repository/workflow/tag/commit and hosted-runner certificate checks.
+No unverified payload is treated as identity. Both GitHub SLSA provenance and
+source-graph SBOM attestations are also created for every Python distribution.
+GitHub attestation bundles are separate from PyPI publish attestations and do not
+substitute for them.
+
+### Three independent approval checklists
+
+For EACH deployment, obtain run ID, actual run commit/tag and reviewed-main
+identity independently of workflow output. Fetch current main in a trusted
+checkout and confirm the run commit is on main. Compare Git blob IDs for the
+workflow, `.github/scripts/release_guard.py`, `release_integrity.py`, the
+attestation requirements lock and relevant backend/build files against the
+independently reviewed main source. A modified tag workflow cannot approve itself.
+Record those identities and the exact four artifact hashes. No approval if a
+required check is absent, skipped unexpectedly, failing or bound to another SHA.
+The main commit's normal CI, CodeQL and real Sonar gate remain prerequisites;
+the release jobs do not import a Sonar credential or replace that evidence.
+
+1. **`publish-crates`, environment `crates-io`:** confirm both registry versions
+   absent, tag/version/source match, all verification jobs and SAME-wheel tests
+   passed, package contents and source records reviewed, and both registry
+   Trusted Publishers/protected `v*` environment rules effective. Confirm the
+   immutable workflow filename is `trusted-publishing.yml` (not `release.yml`).
+   Check the reproducibility preflight; approve only this first deployment.
+2. **`publish-pypi`, environment `pypi`:** repeat run/tag/source/blob/hash identity
+   checks. Confirm crates.io serves the exact selected crate, its Trusted
+   Publisher data and both GitHub crate attestations match. Confirm PyPI version
+   still absent and its exact repository/workflow/environment binding. Approve
+   only these two wheels plus the canonical Linux sdist; no rebuilding or new
+   artifact selection after the first registry accepts bytes.
+3. **`release-assets`, separate `crates-io` approval:** repeat all identities,
+   confirm both registries' public bytes/checksums, PyPI modern licence/URL
+   metadata and EVERY file's verified PEP 740 identity/digest. Independently open
+   each PyPI file page and require its expected Provenance display (not Without
+   provenance); an API pass alone is not a claim that the UI was inspected.
+   Verify crate/Python GitHub provenance AND SBOM bundles against the same
+   artifact hashes using the paths below. Missing evidence blocks approval.
+
+Only the third job can create a GitHub Release. It re-resolves/peels the remote
+tag to the verified commit and combines checked evidence. New Releases stay
+**draft** until all files are present; existing assets must be byte-identical,
+missing assets may be added, and nothing is overwritten. The tag and Latest
+selection are never changed. Release assets have no Actions retention expiry,
+but can still be deleted by authorized users; archive an independent copy.
+Transfer/evidence artifacts last 90 days or less under repository policy.
+Both publishers attempt to retain partial evidence on failure as diagnostics;
+a failed job or inconsistent checksum set is never qualified release evidence.
+
+### Failure and recovery boundary
+
+Every helper and both publish jobs require attempt 1; no automatic upload retry,
+rerun publication, skip-existing or token fallback. Registry propagation checks
+are bounded READ retries only. Any failure after an accepted upload is an
+**incomplete coordinated release**: inspect public state, preserve original run
+artifacts/logs and report exact accepted/missing files. Never rerun publication
+to repair an attestation, metadata field or Release asset. The separately reviewed,
+owner-authorized recovery proposal above is not a dispatch/recovery feature of
+this workflow; a retention-only recovery would also need separate review and
+must not invoke either publisher. No moving/deleting a tag or reusing a version
+for different bytes. Do not declare completion until the third approval and all
+mandatory public checks pass.
+
+### Path A: retained Release evidence, then offline verification
+
+Choose version and source SHA independently from the reviewed release PR/tag;
+these placeholders do not choose the first unified version. With an existing
+GitHub CLI supporting attestation verification, while connected:
+
+```sh
+set -eu
+version=X.Y.Z
+commit=REPLACE_WITH_REVIEWED_TAG_COMMIT_SHA
+repo=TelemetryWorks/spatial-typestate
+gh release download "v$version" -R "$repo" -D evidence
+gh attestation trusted-root > trusted_root.jsonl
+(cd evidence && sha256sum -c SHA256SUMS)
+curl --fail "https://static.crates.io/crates/spatial-typestate/spatial-typestate-$version.crate" -o registry.crate
+cmp "evidence/spatial-typestate-$version.crate" registry.crate
+```
+
+Also download the three PyPI files using the new version's public JSON URLs and
+compare EACH with the Release set, and retain the Integrity API objects. Verify
+JSON metadata and the PyPI UI online as above. Save those observations, the exact
+identity and independently fetched trusted roots. Do not trust roots supplied
+only by the artifact distributor. Transfer the saved set to the disconnected site.
+No later offline command proves the current live registry/UI state.
+
+For each file offline, run the following using the trusted `version` and `commit`:
+
+```sh
+set -eu
+cd evidence
+repo=TelemetryWorks/spatial-typestate
+workflow="$repo/.github/workflows/trusted-publishing.yml"
+sha256sum -c SHA256SUMS
+for file in "spatial-typestate-$version.crate" \
+  "spatial_typestate-$version-cp311-abi3-manylinux_2_28_x86_64.whl" \
+  "spatial_typestate-$version-cp311-abi3-win_amd64.whl" \
+  "spatial_typestate-$version.tar.gz"; do
+  kind=python
+  if [ "$file" = "spatial-typestate-$version.crate" ]; then kind=crate; fi
+  gh attestation verify "$file" -R "$repo" --bundle "$kind.provenance.sigstore.json" \
+    --custom-trusted-root ../trusted_root.jsonl --signer-workflow "$workflow" \
+    --source-ref "refs/tags/v$version" --source-digest "$commit" --deny-self-hosted-runners
+  gh attestation verify "$file" -R "$repo" --bundle "$kind.sbom.sigstore.json" \
+    --custom-trusted-root ../trusted_root.jsonl --signer-workflow "$workflow" \
+    --source-ref "refs/tags/v$version" --source-digest "$commit" --deny-self-hosted-runners \
+    --predicate-type https://cyclonedx.org/bom --format json > "$kind.verified-sbom.json"
+  if [ "$kind" = python ]; then
+    for bundle in "$file".publish-*.sigstore.json; do
+      gh attestation verify "$file" -R "$repo" --bundle "$bundle" \
+        --custom-trusted-root ../trusted_root.jsonl --signer-workflow "$workflow" \
+        --source-ref "refs/tags/v$version" --source-digest "$commit" --deny-self-hosted-runners \
+        --predicate-type https://docs.pypi.org/attestations/publish/v1
+    done
+  fi
+done
+python3 - <<'PYBOM'
+import json
+from pathlib import Path
+for kind, name in [('crate', 'core'), ('python', 'python')]:
+    results = json.loads(Path(kind + '.verified-sbom.json').read_text())
+    boms = [r['verificationResult']['statement']['predicate'] for r in results]
+    local = json.loads(Path(name + '.cdx.json').read_text())
+    if local.get('bomFormat') != 'CycloneDX' or not boms or any(b != local for b in boms):
+        raise SystemExit('SBOM bytes do not describe the verified predicate')
+PYBOM
+```
+
+Checksums detect corruption, not authenticity. Successful signature/identity
+verification binds subjects to hashes; the SBOM comparison authenticates its
+parsed content. The signed workflow claims are not proof of code safety,
+reproducible Python binaries, review or a SLSA level. Cargo reproducibility here
+means the checked archive comparisons only, not arbitrary-machine reproducibility.
+
+### Path B: registry downloads and online attestation lookup
+
+Without Release assets, fresh-download the crate from static.crates.io and the
+three Python files from the version's PyPI JSON URLs. Inspect the crate VCS SHA,
+wheel/sdist `_provenance.json` clean SHA/source inventory, canonical filenames,
+public checksums and licence/URL metadata. For EACH of the four files:
+
+```sh
+# Set file, repo, workflow, version and commit to independently reviewed values.
+mkdir -p online-provenance online-sbom
+(cd online-provenance && gh attestation download "../$file" -R "$repo" --predicate-type https://slsa.dev/provenance/v1)
+(cd online-sbom && gh attestation download "../$file" -R "$repo" --predicate-type https://cyclonedx.org/bom)
+gh attestation verify "$file" -R "$repo" --signer-workflow "$workflow" \
+  --source-ref "refs/tags/v$version" --source-digest "$commit" --deny-self-hosted-runners
+gh attestation verify "$file" -R "$repo" --signer-workflow "$workflow" \
+  --source-ref "refs/tags/v$version" --source-digest "$commit" --deny-self-hosted-runners \
+  --predicate-type https://cyclonedx.org/bom --format json > verified-sbom.json
+```
+
+Recover SBOM JSON only from successful verification output, as in Path A, never
+from an unverified bundle. Keep each downloaded digest-named `.jsonl` set in its
+own directory for later offline use.
+For Python also fetch each Integrity API object; use reviewed/hash-locked
+pypi-attestations tooling to verify the public file, then enforce the exact
+certificate claims with `release_integrity.py` (not only the repository default).
+For example, with the hash-locked verification dependencies already installed and
+`reviewed_checkout` pointing to independently reviewed source (never an arbitrary
+downloaded script), set `file` to each fresh canonical Python file and
+`provenance` to its saved Integrity API JSON, then run:
+
+```sh
+PYTHONPATH="$reviewed_checkout/.github/scripts" python3 - "$file" "$provenance" "$version" "$commit" <<'PYPEP'
+import json
+from pathlib import Path
+import sys
+from release_integrity import verify_file
+file, provenance, version, commit = sys.argv[1:]
+verify_file(Path(file), json.loads(Path(provenance).read_text()), version, commit)
+print('Verified PEP 740 publisher, certificate claims and file digest')
+PYPEP
+```
+
+The workflow's output retains both original API objects and converted verified
+Sigstore bundles for Path A. Library offline mode only disables TUF refresh;
+provision its cache independently or use Path A's explicit trusted-root route.
+Finally consume crates.io `=X.Y.Z` in outside-checkout std and no_std-library
+consumers, and install the real PyPI wheels into clean supported environments.
+A no_std library consumer using a std binary is not a bare-metal runtime proof.
+The scope remains Windows/manylinux x86_64, GIL-enabled 3.11/3.14; no broader
+platform, universal glibc, signed historical 0.1.0 or Python reproducibility claim.
+
+References actually inspected for this implementation:
+[pinned irig106-types workflow](https://github.com/TelemetryWorks/irig106-types/blob/2899b30/.github/workflows/trusted-publishing.yml),
+[its approval/verification guidance](https://github.com/TelemetryWorks/irig106-types/blob/2899b30/docs/RELEASING.md),
+[Cargo publish](https://doc.rust-lang.org/cargo/commands/cargo-publish.html),
+[PyPI producing](https://docs.pypi.org/attestations/producing-attestations/),
+[consuming](https://docs.pypi.org/attestations/consuming-attestations/),
+[pypi-attestations 0.0.31 source](https://github.com/pypi/pypi-attestations/blob/bc6dbbed18090a51a97e7eef6d5afc30077740b3/src/pypi_attestations/_impl.py),
+[GitHub verification CLI](https://cli.github.com/manual/gh_attestation_verify).
+
 
 ## Historical candidate decision (2026-11-08, step 1 only)
 

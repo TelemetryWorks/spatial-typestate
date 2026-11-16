@@ -108,7 +108,7 @@ jobs:
       RUSTUP_AUTO_INSTALL: '0'
       CARGO_BUILD_JOBS: '2'
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.configuration.outputs.revision }}
           persist-credentials: false
@@ -157,7 +157,7 @@ jobs:
       RUSTUP_TOOLCHAIN: '1.99.0'
       RUSTUP_AUTO_INSTALL: '0'
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.configuration.outputs.revision }}
           fetch-depth: 0
@@ -622,7 +622,7 @@ jobs:
     if: always() && needs.configuration.outputs.eligible == 'true' && (needs.scan.result == 'success' || needs.scan.result == 'failure')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.configuration.outputs.revision }}
           persist-credentials: false

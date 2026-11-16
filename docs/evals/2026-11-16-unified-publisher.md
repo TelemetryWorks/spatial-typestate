@@ -94,3 +94,20 @@ No live tag route, environment approval, OIDC issuance, Cargo/PyPI upload,
 attestation signing, public metadata correction or Release retention was executed.
 Those remain gated runtime evidence for a separately authorized version/tag.
 Published 0.1.0 bytes and its historical dual tags are untouched.
+
+## PR review: direct event-SHA checkouts
+
+Initial head `3ff324d` produced seven open CodeQL
+`actions/untrusted-checkout/medium` alerts (#6–12) on downstream checkouts using
+`needs.*.outputs.commit`. The tag-only source guard already requires that output
+commit to equal `GITHUB_SHA`, so the indirection is unnecessary. All eight
+checkouts now use `${{ github.sha }}` directly; the seven downstream refs are the
+only workflow changes. The source/tag/main equality assertions, output commit
+checks, permissions and publisher sequence are preserved. No alert dismissal,
+query suppression or gate change is used.
+
+Focused release fixtures, actionlint and regular-persona zizmor are repeated.
+Acceptance requires fresh CodeQL analyses on the revised head with zero open PR
+alerts. The exact-head remote result belongs in the PR review/timeline, avoiding
+an evidence-only commit that changes the analyzed head again. This does not run
+the tag publisher or authorize a release.

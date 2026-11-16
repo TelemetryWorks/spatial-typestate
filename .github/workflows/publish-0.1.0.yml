@@ -64,7 +64,7 @@ jobs:
           path: ${{ runner.temp }}/qualified-crate
       - name: Public absence, ownership, four hashes and clean Cargo package guard
         run: python -I tooling/.github/scripts/publish_qualified.py preflight
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: publication-preflight-${{ github.run_id }}
@@ -120,7 +120,7 @@ jobs:
           attestations: 'false'
       - name: Fresh public download and exact three-file verification
         run: python -I tooling/.github/scripts/publish_qualified.py verify-python
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: publication-pypi-${{ github.run_id }}
@@ -162,7 +162,7 @@ jobs:
         run: cargo +1.99.0 publish --locked --jobs 2 # zizmor: ignore[use-trusted-publishing]
       - name: Fresh public index and exact crate download verification
         run: python -I tooling/.github/scripts/publish_qualified.py verify-crate
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: publication-crates-${{ github.run_id }}
@@ -196,7 +196,7 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install public bytes into isolated venv and run outside-checkout suite/lab
         run: python -I tooling/.github/scripts/publish_qualified.py installed
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: public-python-${{ matrix.os }}-${{ matrix.python }}-${{ github.run_id }}
@@ -227,7 +227,7 @@ jobs:
           toolchain: '1.99.0'
       - name: Build and run actual crates.io consumers (std and no_std library)
         run: python -I tooling/.github/scripts/publish_qualified.py registry-consumer
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()
         with:
           name: public-rust-${{ github.run_id }}

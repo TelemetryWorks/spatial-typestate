@@ -20,6 +20,12 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
+- Implement the coordinated tag-only OIDC publisher for review: lockstep versions,
+  full verification, exact four-artifact selection, crates.io then PyPI under
+  separate approvals, per-file PEP 740/GitHub provenance and SBOM evidence, and a
+  third gated no-overwrite GitHub Release retention job. Ordering remains the
+  documented proposal pending owner execution; no version, tag or upload is made.
+
 - Record the superseding owner decision of 2026-11-15: one shared version,
   `vX.Y.Z` tag and changelog section for both registries; retain historical 0.1.0
   tags. Document migration/version-selection and partial-release recovery as

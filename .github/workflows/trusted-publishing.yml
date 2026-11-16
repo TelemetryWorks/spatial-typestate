@@ -1,0 +1,420 @@
+name: Coordinated release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coordinated-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_BUILD_JOBS: '2'
+  RUST_TEST_THREADS: '2'
+  RUSTUP_TOOLCHAIN: '1.99.0'
+  SPATIAL_EXPECT_COMMIT: ${{ github.sha }}
+  SPATIAL_DENY_WARNINGS: '1'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.source.outputs.version }}
+      commit: ${{ steps.source.outputs.commit }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Require original tag event, lockstep versions, clean main ancestry and live tag
+        id: source
+        run: python3 -I .github/scripts/release_guard.py source
+      - name: Refuse any existing version before expensive verification
+        run: python3 -I .github/scripts/release_guard.py absent
+
+  verify-crate:
+    needs: source
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: '1.99.0'
+          components: clippy, rustfmt
+          targets: thumbv7em-none-eabihf, x86_64-unknown-linux-musl
+      - name: Full Rust runtime, UI, example, lint, docs and graph gates
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: |
+          cargo +1.99.0 fetch --locked
+          cargo +1.99.0 fmt --all -- --check
+          for mode in '' '--no-default-features --features no_std' '--all-features'; do
+            cargo +1.99.0 test --locked --jobs 2 $mode -- --test-threads=2
+            cargo +1.99.0 run --locked --jobs 2 $mode --example sensor_alignment
+          done
+          for mode in '--all-features' '--no-default-features --features no_std'; do
+            cargo +1.99.0 clippy --locked --all-targets --jobs 2 $mode -- -D warnings
+            cargo +1.99.0 doc --locked --no-deps --jobs 2 $mode
+            cargo +1.99.0 build --locked --release --jobs 2 $mode
+          done
+          test "$(cargo +1.99.0 tree --locked --all-features --edges normal --prefix none --target all | wc -l)" -eq 1
+          test "$(cargo +1.99.0 tree --locked --no-default-features --edges normal --prefix none --target all | wc -l)" -eq 1
+      - name: MSRV and pinned-development compatibility
+        run: |
+          for compiler in 1.85.0 1.91.1; do
+            rustup toolchain install "$compiler" --profile minimal
+            for mode in '' '--no-default-features' '--all-features'; do
+              cargo +"$compiler" check --lib --locked --jobs 2 $mode
+            done
+          done
+      - name: Bare-metal debug/release and MUSL library compile-only gates
+        run: |
+          cargo +1.99.0 build --lib --locked --no-default-features --features no_std --target thumbv7em-none-eabihf --jobs 2
+          cargo +1.99.0 build --lib --release --locked --no-default-features --features no_std --target thumbv7em-none-eabihf --jobs 2
+          cargo +1.99.0 build --lib --locked --no-default-features --features no_std --target x86_64-unknown-linux-musl --jobs 2
+      - name: Package and credential-free publish reproduction
+        env:
+          RELEASE_VERSION: ${{ needs.source.outputs.version }}
+        run: |
+          cargo +1.99.0 package --locked --list
+          cargo +1.99.0 package --locked --jobs 2
+          mkdir -p target/verified-crate
+          cp "target/package/spatial-typestate-$RELEASE_VERSION.crate" target/verified-crate/
+          cargo +1.99.0 publish --locked --jobs 2 --registry crates-io --dry-run
+          cmp "target/verified-crate/spatial-typestate-$RELEASE_VERSION.crate" "target/package/tmp-crate/spatial-typestate-$RELEASE_VERSION.crate"
+      - name: Source-graph CycloneDX SBOMs (not binary completeness claims)
+        env:
+          RELEASE_VERSION: ${{ needs.source.outputs.version }}
+        run: |
+          cargo +1.99.0 install cargo-cyclonedx --version 0.5.9 --locked --jobs 2
+          cargo +1.99.0 cyclonedx --manifest-path "target/package/spatial-typestate-$RELEASE_VERSION/Cargo.toml" --all-features --target all --format json --spec-version 1.5
+          cp "target/package/spatial-typestate-$RELEASE_VERSION/spatial-typestate.cdx.json" target/verified-crate/core.cdx.json
+          cargo +1.99.0 cyclonedx --manifest-path python/native/Cargo.toml --all-features --target all --format json --spec-version 1.5
+          mv python/native/spatial-typestate-py.cdx.json target/verified-crate/python.cdx.json
+          python3 -I .github/scripts/release_guard.py source
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verified-crate
+          path: target/verified-crate/
+          if-no-files-found: error
+          retention-days: 90
+
+  verify-python:
+    needs: source
+    name: Verify Python (${{ matrix.os }}, ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.14']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: '1.99.0'
+          components: rustfmt, clippy, rust-docs
+      - name: Hash-locked build tools and real packaging control tests
+        run: |
+          python -m pip install --require-hashes --only-binary=:all: -r python/requirements-build.txt
+          python -I -m unittest discover -s python/packaging_tests -v
+          python -I -m unittest discover -s .github/scripts -p 'test_release*.py' -v
+      - name: Native format, lint and parity tests
+        run: |
+          cargo +1.99.0 fmt --manifest-path python/native/Cargo.toml -- --check
+          cargo +1.99.0 clippy --manifest-path python/native/Cargo.toml --locked --all-targets --jobs 2 -- -D warnings
+          cargo +1.99.0 test --manifest-path python/native/Cargo.toml --locked --jobs 2 -- --test-threads=2
+      - name: Windows core CI equivalent
+        if: runner.os == 'Windows' && matrix.python == '3.11'
+        run: |
+          for mode in '' '--no-default-features --features no_std' '--all-features'; do
+            cargo +1.99.0 test --locked --jobs 2 $mode -- --test-threads=2
+            cargo +1.99.0 run --locked --jobs 2 $mode --example sensor_alignment
+          done
+      - name: Backend-only wheel and sdist, prepared metadata, paths, RECORD and licences
+        env:
+          BUILD_PYTHON: ${{ matrix.python }}
+        run: python python/package_ci.py build --python "$BUILD_PYTHON" --out target/package-artifacts
+      - name: Installed wheel suites without and with hash-locked NumPy
+        run: |
+          python -c "import pathlib,subprocess,sys; w=list(pathlib.Path('target/package-artifacts').glob('*.whl')); assert len(w)==1; subprocess.run([sys.executable,'-m','pip','install','--no-deps',str(w[0])],check=True)"
+          python -I -m unittest discover -s python/tests -v
+          python -I python/examples/lab_workflow.py --demonstrate-errors
+          python -m pip install --require-hashes --only-binary=:all: -r python/requirements-interop.txt
+          python -I -m unittest discover -s python/tests -v
+      - name: Canonical Linux sdist Git-free rebuild and metadata equality
+        if: runner.os == 'Linux' && matrix.python == '3.11'
+        run: |
+          python python/package_ci.py build --python 3.11 --from-sdist --out target/package-artifacts
+          python python/check_package_metadata.py target/package-artifacts
+      - name: Same bytes on both Python runtimes and glibc 2.28/2.36
+        if: runner.os == 'Linux'
+        env:
+          BUILD_PYTHON: ${{ matrix.python }}
+        run: python python/package_ci.py runtime --python "$BUILD_PYTHON" --out target/package-artifacts
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: verified-python-${{ matrix.os }}-${{ matrix.python }}
+          path: target/package-artifacts/
+          if-no-files-found: error
+          retention-days: 90
+
+  verify-windows-wheel:
+    needs: [source, verify-python]
+    name: Same Windows wheel (${{ matrix.python }})
+    runs-on: windows-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        python: ['3.11', '3.14']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: ${{ matrix.python }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: verified-python-windows-latest-3.11
+          path: target/selected-windows
+      - name: Validate selected wheel and isolated same-byte consumers
+        env:
+          RELEASE_VERSION: ${{ needs.source.outputs.version }}
+        run: |
+          mkdir target/windows-consumer
+          python -I .github/scripts/release_guard.py installed --wheel "target/selected-windows/spatial_typestate-$RELEASE_VERSION-cp311-abi3-win_amd64.whl" --directory target/windows-consumer
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-consumer-${{ matrix.python }}
+          path: target/windows-consumer/
+          if-no-files-found: error
+          retention-days: 90
+
+  verify:
+    needs: [source, verify-crate, verify-python, verify-windows-wheel]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      version: ${{ needs.source.outputs.version }}
+      commit: ${{ needs.source.outputs.commit }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: verified-*
+          path: target/incoming
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: windows-consumer-*
+          path: target/incoming
+      - name: Select exactly four canonical artifacts and freeze external hashes
+        run: |
+          python3 -I .github/scripts/release_guard.py absent
+          python3 -I .github/scripts/release_guard.py stage
+          python3 -I .github/scripts/release_guard.py check
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-package
+          path: target/release-artifacts/
+          if-no-files-found: error
+          retention-days: 90
+
+  # Proposal from RELEASING: verify both, crates.io, then PyPI. Environment
+  # approvals choose whether to execute; implementing it does not publish now.
+  publish-crates:
+    needs: verify
+    if: github.event_name == 'push' && github.ref_type == 'tag' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: crates-io
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      RELEASE_VERSION: ${{ needs.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: '1.99.0'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-package
+          path: target/release-artifacts
+      - name: Recheck source, BOTH registry versions absent, and reproduce before OIDC
+        run: |
+          python3 -I .github/scripts/release_guard.py source
+          python3 -I .github/scripts/release_guard.py check
+          python3 -I .github/scripts/release_guard.py absent
+          cargo +1.99.0 publish --locked --jobs 2 --registry crates-io --dry-run
+          cmp "target/release-artifacts/spatial-typestate-$RELEASE_VERSION.crate" "target/package/tmp-crate/spatial-typestate-$RELEASE_VERSION.crate"
+      - name: Obtain short-lived OIDC Cargo credential
+        id: auth
+        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
+      - name: Publish once with the exact verified compiler and source
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: cargo +1.99.0 publish --locked --jobs 2 --registry crates-io
+      - name: Require public bytes, index checksum and Trusted Publisher identity
+        run: python3 -I .github/scripts/release_guard.py crate-public
+      - name: Attest the byte-verified published crate
+        id: provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: target/release-artifacts/spatial-typestate-${{ needs.verify.outputs.version }}.crate
+      - name: Attest packaged crate source-graph CycloneDX SBOM
+        id: sbom
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: target/release-artifacts/spatial-typestate-${{ needs.verify.outputs.version }}.crate
+          sbom-path: target/release-artifacts/core.cdx.json
+      - name: Retain crate bundles and recompute external checksums
+        env:
+          PROVENANCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}
+        run: |
+          cp "$PROVENANCE_BUNDLE" target/release-artifacts/crate.provenance.sigstore.json
+          cp "$SBOM_BUNDLE" target/release-artifacts/crate.sbom.sigstore.json
+          python3 -I .github/scripts/release_guard.py sums
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: crates-evidence
+          path: target/release-artifacts/
+          if-no-files-found: error
+          retention-days: 90
+
+  publish-pypi:
+    needs: [verify, publish-crates]
+    if: github.event_name == 'push' && github.ref_type == 'tag' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    env:
+      RELEASE_VERSION: ${{ needs.verify.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-package
+          path: target/release-artifacts
+      - name: Stage exactly two approved wheels and the canonical Linux sdist
+        run: |
+          python3 -I .github/scripts/release_guard.py source
+          python3 -I .github/scripts/release_guard.py check
+          python3 -I .github/scripts/release_guard.py absent --registry pypi
+          python -m pip install --require-hashes --only-binary=:all: -r .github/security/requirements-attestations.txt
+          mkdir target/pypi-dist
+          cp "target/release-artifacts/spatial_typestate-$RELEASE_VERSION-cp311-abi3-manylinux_2_28_x86_64.whl" target/pypi-dist/
+          cp "target/release-artifacts/spatial_typestate-$RELEASE_VERSION-cp311-abi3-win_amd64.whl" target/pypi-dist/
+          cp "target/release-artifacts/spatial_typestate-$RELEASE_VERSION.tar.gz" target/pypi-dist/
+      - name: Publish verified files once using OIDC and per-file PEP 740 attestations
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: target/pypi-dist/
+          attestations: true
+      - name: Fresh public hashes, licence/URLs, then cryptographic per-file Integrity API verification
+        run: |
+          python3 -I .github/scripts/release_guard.py pypi-public
+          python3 -I .github/scripts/release_guard.py sums
+          python3 -I .github/scripts/release_integrity.py target/release-artifacts --version "$RELEASE_VERSION" --commit "$GITHUB_SHA"
+      - name: GitHub provenance for each published Python artifact
+        id: provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: |
+            target/pypi-dist/*.whl
+            target/pypi-dist/*.tar.gz
+      - name: GitHub source-graph SBOM attestation for each Python artifact
+        id: sbom
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: |
+            target/pypi-dist/*.whl
+            target/pypi-dist/*.tar.gz
+          sbom-path: target/release-artifacts/python.cdx.json
+      - name: Retain Python bundles and external checksums
+        env:
+          PROVENANCE_BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM_BUNDLE: ${{ steps.sbom.outputs.bundle-path }}
+        run: |
+          cp "$PROVENANCE_BUNDLE" target/release-artifacts/python.provenance.sigstore.json
+          cp "$SBOM_BUNDLE" target/release-artifacts/python.sbom.sigstore.json
+          python3 -I .github/scripts/release_guard.py sums
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: pypi-evidence
+          path: target/release-artifacts/
+          if-no-files-found: error
+          retention-days: 90
+
+  release-assets:
+    needs: [verify, publish-crates, publish-pypi]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: crates-io
+    # A separate, third approval: only Release retention, no OIDC or registry token.
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: '*-evidence'
+          path: target/incoming
+      - name: Combine checked evidence without overwriting, retain on the existing tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 -I .github/scripts/release_guard.py merge
+          python3 -I .github/scripts/release_guard.py assets

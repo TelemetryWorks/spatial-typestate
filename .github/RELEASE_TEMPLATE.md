@@ -1,72 +1,36 @@
-# AI Forensics vX.Y.Z Release Notes
+# Spatial Typestate vX.Y.Z
 
-**Release Date:** YYYY-MM-DD
-**Git Tag:** `vX.Y.Z`
+- Release date: YYYY-MM-DD
+- Shared Rust/Python/native version: X.Y.Z (owner-selected)
+- Tag: `vX.Y.Z`
+- Reviewed source SHA: FULL_COMMIT_SHA
+- Coordinated workflow run: RUN_URL
 
----
+## Changes and migration
 
-## What's New
+Summarize both Rust and Python changes from their last publications. Link the
+one combined dated changelog section and any migration instructions. State the
+actual supported/tested scope; no certification or universal-platform claim.
 
-<!-- Fill this out per release -->
-- New model format scanner: `.onnx`
-- Improved pickle inspection heuristics
-- Added test coverage for entropy scanner
-- SBOM generation now includes SPDX format
+## Verification and assets
 
-See the full changelog in [CHANGELOG.md](./CHANGELOG.md)
+Before announcing completion, follow all three deployment approvals and public
+checks in [RELEASING](../docs/RELEASING.md#coordinated-publisher-implementation-and-approvals).
+Record the exact four artifact filenames/hashes: crate, Linux/Windows cp311-abi3
+wheels and canonical Linux sdist. Both registries must serve the approved bytes.
+Every Python file needs verified PyPI PEP 740 provenance and the expected UI
+display; correct package metadata is a separate gate.
 
----
+Retain the artifacts, source-graph CycloneDX SBOMs, GitHub provenance/SBOM bundles,
+per-file PyPI provenance objects and converted publish bundles, release manifest,
+runtime receipts, public verification records and external `SHA256SUMS`.
+Link the documented online/offline verification paths. No SLSA level, complete
+binary SBOM or Python bit-reproducibility claim is implied.
 
-## Container Image
+The workflow does not produce container images, GPG summaries or Cosign-key
+signatures. Do not invent them. Historical 0.1.0 artifacts/tags remain unchanged
+and do not gain retroactive attestations.
 
-- `ghcr.io/TelemetryWorks/spatial-typestate:vX.Y.Z`
-- `ghcr.io/TelemetryWorks/spatial-typestate:latest` (stable alias)
-
-```bash
-docker pull ghcr.io/TelemetryWorks/spatial-typestate:vX.Y.Z
-```
-
-## Digital Signature
-
-This release is signed using [Cosign](https://docs.sigstore.dev/cosign/).
-To verify:
-```bash
-cosign verify --key cosign.pub ghcr.io/TelemetryWorks/spatial-typestate:vX.Y.Z
-```
-- Public key: `[cosign.pub](https://raw.githubusercontent.com/TelemetryWorks/spatial-typestate/main/keys/cosign.pub)`
-- Fingerprint: `SHA256: abcdef...`
-
-## Code Quality & Security
-
--
--
-Record exact-commit CodeQL and core/Python gate evidence. Sonar is not restored;
-do not claim a Sonar quality gate until real project analysis is available.
-
-## SBOM and Metadata
-
-The following artifacts are published with this release:
-
-| Artifact              | Description                            |
-| --------------------- | -------------------------------------- |
-| `release.md`          | Signed release summary (Markdown)      |
-| `release.html`        | Human-readable signed summary          |
-| `release.html.asc`    | ASCII-armored GPG signature            |
-| `sbom.cyclonedx.json` | Software Bill of Materials (CycloneDX) |
-| `sbom.spdx.json`      | Software Bill of Materials (SPDX)      |
-
-## How to Verify This Release
-
-```bash
-# Verify container image signature
-cosign verify --key cosign.pub ghcr.io/TelemetryWorks/spatial-typestate:vX.Y.Z
-
-# Verify HTML release file
-gpg --verify release.html.asc release.html
-```
-
-## Documentation
-
-- [Security Policy](./SECURITY.md)
-- [Workflow Overview](./docs/development/WORKFLOWS.md)
-- [Contribution Guide](./CONTRIBUTING.md)
+If either registry or a later evidence step fails, report an incomplete
+coordinated release and its exact public state. No rerun publication, overwriting
+accepted files, moving tags or token/local fallback.

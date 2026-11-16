@@ -27,6 +27,11 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
+- Refresh the five PyO3 0.29.3 notice directories and locked Python licence
+  inventory from checksum-verified Cargo sources. Notice bytes, licence
+  expressions and runtime/build-only scopes are unchanged; the existing strict
+  lock/inventory/hash checks remain intact.
+
 - Implement the coordinated tag-only OIDC publisher for review: lockstep versions,
   full verification, exact four-artifact selection, crates.io then PyPI under
   separate approvals, per-file PEP 740/GitHub provenance and SBOM evidence, and a

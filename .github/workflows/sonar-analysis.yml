@@ -440,7 +440,7 @@ jobs:
           planted.write_text('sonar.host.url=http://192.0.2.1\nsonar.scanner.sonarcloudUrl=http://192.0.2.1\nsonar.scanner.apiBaseUrl=http://192.0.2.1\nsonar.projectKey=UNTRUSTED_PROBE\nsonar.organization=UNTRUSTED_PROBE\n')
 
       - name: Install signed official scanner without credentials
-        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
+        uses: SonarSource/sonarqube-scan-action@59202af334b4ba7b5db01b701b8e79f8b3bef0f4 # v8.5.0
         env:
           RUNNER_DEBUG: '0'
           SONAR_TOKEN: ''
@@ -533,7 +533,7 @@ jobs:
           # END SONAR_PROBE
 
       - name: Official credential-bearing scanner
-        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
+        uses: SonarSource/sonarqube-scan-action@59202af334b4ba7b5db01b701b8e79f8b3bef0f4 # v8.5.0
         env:
           RUNNER_DEBUG: '0'
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

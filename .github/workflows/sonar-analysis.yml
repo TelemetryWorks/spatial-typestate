@@ -130,7 +130,7 @@ jobs:
           SOURCE_REVISION: ${{ needs.configuration.outputs.revision }}
         run: python .github/scripts/sonar_reports.py --root "$GITHUB_WORKSPACE" --output "$RUNNER_TEMP/sonar-reports" --revision "$SOURCE_REVISION"
       - name: Upload prepared same-run reports
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sonar-prepared-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/sonar-reports/
@@ -138,7 +138,7 @@ jobs:
           retention-days: 14
       - name: Retain report diagnostics even on failure
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sonar-report-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
@@ -604,7 +604,7 @@ jobs:
               raise RuntimeError('probe firewall counter missing/nonzero; analysis is not validated')
       - name: Retain scanner diagnostic/task evidence without credentials
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sonar-task-${{ github.run_id }}-${{ github.run_attempt }}
           path: |
@@ -638,7 +638,7 @@ jobs:
         run: python3 .github/scripts/sonar_evidence.py --task-dir "$RUNNER_TEMP/sonar-task-evidence/sonar-task"
       - name: Retain server evidence even when incomplete
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sonar-server-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/sonar-server-evidence.json

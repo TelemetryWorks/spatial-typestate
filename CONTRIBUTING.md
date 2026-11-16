@@ -187,3 +187,25 @@ evidence run before merge. Do not treat GitHub's skipped-check satisfaction as
 scanner evidence. Sonar outages or expired/revoked credentials block merges;
 repair the service or renew the secret securely. Any emergency protection edit
 must be separately authorized and recorded, never an unrecorded admin bypass.
+
+## Dependency security policy
+
+Owner policy (2026-11-16): fix security updates first; plan major version updates
+separately. Dependabot's semver-major ignore applies to version-update PRs, not
+security updates. Existing major-update PRs are not automatically closed here.
+CI audits BOTH the root and separate native graph using cargo-deny 0.20.2 and
+explicit Rust 1.99.0; no project pin/MSRV change is implied. The policy is under
+[.github/deny.toml](.github/deny.toml) to keep CI controls out of the crate/sdist
+without changing either manifest. With explicitly installed tools (do not install
+implicitly on a developer host), use:
+
+```sh
+cargo +1.99.0 deny --manifest-path Cargo.toml --all-features --locked --config .github/deny.toml check
+cargo +1.99.0 deny --manifest-path python/native/Cargo.toml --all-features --locked --config .github/deny.toml check
+```
+
+Vulnerability/unsound/unmaintained/yanked findings fail; registry-only external
+sources and licence requirements apply to both graphs. The reviewed local core
+path in the native crate is retained. Duplicate versions warn because dev tools
+legitimately use distinct lines; inspect warnings rather than adding exclusions.
+See [the dated fix and validation](docs/evals/2026-11-16-dev-advisories.md).

@@ -7,6 +7,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import textwrap
 import unittest
 from unittest.mock import patch
 
@@ -23,6 +24,9 @@ class PipelineTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.directory = self.root / 'payload'
         self.record = package(self.directory)
+        for name in p.payload_names(V) - {x.name for x in self.directory.iterdir()}:
+            g.write_json(self.directory / name, {})
+        g.checksums(self.directory)
         self.env = patch.dict(os.environ, {**ENV, 'GITHUB_REF_TYPE': 'tag'})
         self.env.start()
         self.addCleanup(self.env.stop)
@@ -30,6 +34,36 @@ class PipelineTests(unittest.TestCase):
     def signed(self):
         for name in p.sidecars(V):
             (self.directory / name).write_text('{}')
+
+    def test_output_paths_refuse_escape_and_symlink_before_writes(self):
+        with patch.object(g, 'ROOT', self.root):
+            target = self.root / 'target'
+            target.mkdir()
+            safe = target / 'safe'
+            self.assertEqual(g.output_directory(safe), safe)
+            for path in (self.root / 'outside', target, target / '../outside'):
+                with self.subTest(path=path), self.assertRaisesRegex(ValueError, 'within repository target'):
+                    g.output_directory(path)
+            if os.name != 'nt':
+                link = target / 'link'
+                link.symlink_to(self.root, target_is_directory=True)
+                with self.assertRaisesRegex(ValueError, 'within repository target'):
+                    g.output_directory(link / 'outside')
+                output = target / 'SHA256SUMS'
+                output.symlink_to(self.root / 'outside')
+                with self.assertRaisesRegex(ValueError, 'unsafe checksum'):
+                    g.checksums(target)
+                with self.assertRaisesRegex(ValueError, 'unsafe JSON'):
+                    g.write_json(output, {})
+
+    def test_consumer_assets_preserve_source_relative_test_paths_without_facade(self):
+        tests, lab = g.consumer_assets(self.root)
+        self.assertEqual(tests, self.root / 'python/tests')
+        self.assertEqual(lab, self.root / 'python/examples/lab_workflow.py')
+        self.assertEqual((tests.parents[1] / 'docs/PYTHON-GUIDE.md').read_bytes(),
+                         (g.ROOT / 'docs/PYTHON-GUIDE.md').read_bytes())
+        self.assertEqual(lab.read_bytes(), (g.ROOT / 'python/examples/lab_workflow.py').read_bytes())
+        self.assertFalse((self.root / 'python/spatial_typestate').exists())
 
     def test_dispatch_from_tag_and_forged_flag_have_no_publish_authority(self):
         p.require_publish()
@@ -132,6 +166,11 @@ class PipelineTests(unittest.TestCase):
         (self.directory / p.sidecars(V)[0]).rmdir()
         (self.directory / p.sidecars(V)[0]).write_text('{}')
         (self.directory / 'extra-directory').mkdir()
+        with self.assertRaisesRegex(ValueError, 'frozen payload filename'):
+            p.payload(self.directory, V, C, signed=True)
+        (self.directory / 'extra-directory').rmdir()
+        (self.directory / 'linux-runtime.json').unlink()
+        (self.directory / 'linux-runtime.json').mkdir()
         with self.assertRaisesRegex(ValueError, 'unsafe payload'):
             p.payload(self.directory, V, C, signed=True)
 
@@ -323,6 +362,39 @@ class PipelineTests(unittest.TestCase):
                 with patch.object(sys, 'argv', ['release_pipeline.py', mode]):
                     p.main()
                 mocks[name].assert_called_once()
+
+    def test_no_checkout_pypi_staging_enforces_real_inline_script_before_upload(self):
+        workflow = (Path(__file__).resolve().parents[1] / 'workflows/trusted-publishing.yml').read_text()
+        script = textwrap.dedent(workflow.split("python3 - <<'CHECK'\n", 1)[1].split('          CHECK', 1)[0])
+        target = self.root / 'target/release-artifacts'
+        target.parent.mkdir()
+        self.directory.rename(target)
+        self.directory = target
+        self.signed()
+        result = subprocess.run([sys.executable, '-I', '-c', script], cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        expected = {f'spatial_typestate-{V}-cp311-abi3-manylinux_2_28_x86_64.whl',
+                    f'spatial_typestate-{V}-cp311-abi3-win_amd64.whl', f'spatial_typestate-{V}.tar.gz'}
+        self.assertEqual({x.name for x in (self.root / 'pypi-dist').iterdir()}, expected)
+        for mutation, error in [('file', 'checksum mismatch'), ('sum', 'invalid checksum manifest'),
+                                ('version', 'invalid version'), ('extra', 'unexpected or missing')]:
+            with self.subTest(mutation=mutation):
+                archive = target / g.names(V)[0]
+                raw, sums = archive.read_bytes(), (target / g.SUMS).read_bytes()
+                if mutation == 'file':
+                    archive.write_bytes(b'different')
+                elif mutation == 'sum':
+                    (target / g.SUMS).write_bytes(sums + sums.splitlines(keepends=True)[0])
+                elif mutation == 'extra':
+                    (target / 'extra').write_text('bad')
+                env = dict(os.environ, RELEASE_VERSION='../bad' if mutation == 'version' else V)
+                result = subprocess.run([sys.executable, '-I', '-c', script], cwd=self.root,
+                                        env=env, capture_output=True, text=True)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(error, result.stderr)
+                archive.write_bytes(raw)
+                (target / g.SUMS).write_bytes(sums)
+                (target / 'extra').unlink(missing_ok=True)
 
     def test_workflow_boundary_no_checkout_in_pypi_and_independent_guards(self):
         root = Path(__file__).resolve().parents[2]

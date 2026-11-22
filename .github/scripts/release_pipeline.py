@@ -107,12 +107,19 @@ def sidecars(version):
             prefix + '.python.sbom.sigstore.jsonl']
 
 
+def payload_names(version):
+    return set(g.names(version)) | {g.MANIFEST, g.SUMS, 'core.cdx.json', 'python.cdx.json',
+                                   'linux-runtime.json', 'windows-consumer-3.11.json', 'windows-consumer-3.14.json'}
+
+
 def payload(directory, version, commit, signed=False):
     # Sidecars are signed AFTER payload freezing, not included in SHA256SUMS.
     expected_sidecars = set(sidecars(version)) if signed else set()
     actual_sidecars = {p.name for p in directory.iterdir() if p.name.endswith('.jsonl')}
     if actual_sidecars != expected_sidecars:
         raise ValueError('unexpected or missing attestation sidecar')
+    if {path.name for path in directory.iterdir()} != payload_names(version) | expected_sidecars:
+        raise ValueError('unexpected or missing frozen payload filename')
     with tempfile.TemporaryDirectory() as temporary:
         clean = Path(temporary)
         for path in directory.iterdir():
@@ -280,7 +287,7 @@ def verify(directory, version, commit):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['gate', 'check', 'signatures', 'compare', 'known-good', 'publish-crate', 'assets', 'verify'])
-    parser.add_argument('--directory', type=Path, default=Path('target/release-artifacts'))
+    parser.add_argument('--directory', type=g.output_directory, default='target/release-artifacts')
     parser.add_argument('--compiler', default=os.environ.get('BUILD_RUST_VERSION', '1.99.0'))
     args = parser.parse_args()
     if args.mode == 'gate':

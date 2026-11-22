@@ -47,7 +47,19 @@ def digest(path):
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
+def output_directory(value):
+    path = Path(value)
+    root = ROOT.resolve() / 'target'
+    resolved = path.resolve()
+    if ('..' in path.parts or root.is_symlink() or resolved == root
+            or not resolved.is_relative_to(root)):
+        raise ValueError('release output must remain within repository target subdirectories')
+    return resolved
+
+
 def write_json(path, value):
+    if path.is_symlink() or not re.fullmatch(r'[A-Za-z0-9_.-]+', path.name):
+        raise ValueError('unsafe JSON output filename')
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 
 
@@ -156,6 +168,8 @@ def crate_check(path, version, commit):
 
 
 def checksums(directory):
+    if (directory / SUMS).is_symlink():
+        raise ValueError('unsafe checksum output symlink')
     files = sorted(p for p in directory.iterdir() if p.name != SUMS)
     if any(not p.is_file() or p.is_symlink() or not re.fullmatch(r'[A-Za-z0-9_.-]+', p.name) for p in files):
         raise ValueError('unsafe evidence file')
@@ -231,6 +245,18 @@ def stage(incoming, destination, version, commit):
     checksums(destination)
 
 
+def consumer_assets(root):
+    tests = root / 'python/tests'
+    shutil.copytree(ROOT / 'python/tests', tests)
+    examples = root / 'python/examples'
+    examples.mkdir()
+    shutil.copyfile(ROOT / 'python/examples/lab_workflow.py', examples / 'lab_workflow.py')
+    docs = root / 'docs'
+    docs.mkdir()
+    shutil.copyfile(ROOT / 'docs/PYTHON-GUIDE.md', docs / 'PYTHON-GUIDE.md')
+    return tests, examples / 'lab_workflow.py'
+
+
 def installed(wheel, version, commit, output):
     inventory = json.loads((wheel.parent / 'artifact-inventory.json').read_text())
     selected = [entry for entry in inventory if entry['filename'] == wheel.name]
@@ -245,8 +271,7 @@ def installed(wheel, version, commit, output):
         python = environment / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
         cwd = root / 'cwd'
         cwd.mkdir()
-        assets = root / 'tests'
-        shutil.copytree(ROOT / 'python/tests', assets)
+        assets, lab = consumer_assets(root)
         subprocess.run([python, '-m', 'pip', '--isolated', 'install', '--no-deps', wheel], cwd=cwd, check=True)
         probe = """import importlib.metadata as m, importlib.resources as r, json, pathlib, sysconfig
 import spatial_typestate as s
@@ -264,7 +289,7 @@ print(json.dumps({'version':m.version('spatial-typestate'),'record':json.loads(r
                 subprocess.run([python, '-m', 'pip', 'install', '--require-hashes', '--only-binary=:all:',
                                 '-r', ROOT / 'python/requirements-interop.txt'], cwd=cwd, check=True)
             subprocess.run([python, '-I', '-m', 'unittest', 'discover', '-s', assets, '-v'], cwd=cwd, check=True)
-        subprocess.run([python, '-I', ROOT / 'python/examples/lab_workflow.py', '--demonstrate-errors'], cwd=cwd, check=True)
+        subprocess.run([python, '-I', lab, '--demonstrate-errors'], cwd=cwd, check=True)
     write_json(output, {HASH: digest(wheel), COMMIT: commit, VERSION: version,
                        'python': sys.version, 'stdlib_and_numpy': 'passed', 'outside_checkout': True})
 
@@ -399,7 +424,7 @@ def release_assets(directory, record):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['source', 'absent', 'check', 'stage', 'installed', 'crate-public', 'pypi-public', 'sums', 'merge', 'assets'])
-    parser.add_argument('--directory', type=Path, default=Path('target/release-artifacts'))
+    parser.add_argument('--directory', type=output_directory, default='target/release-artifacts')
     parser.add_argument('--incoming', type=Path, default=Path('target/incoming'))
     parser.add_argument('--wheel', type=Path)
     parser.add_argument('--registry', choices=['both', 'crates', 'pypi'], default='both')

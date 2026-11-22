@@ -178,7 +178,11 @@ jobs:
               if not m or m[2] in expected or m[2] == 'SHA256SUMS':
                   raise SystemExit('invalid checksum manifest')
               expected[m[2]] = m[1]
-          if {p.name for p in root.iterdir()} != set(expected) | sidecars | {'SHA256SUMS'}:
+          payload = {f'spatial-typestate-{version}.crate', f'spatial_typestate-{version}-cp311-abi3-manylinux_2_28_x86_64.whl',
+                     f'spatial_typestate-{version}-cp311-abi3-win_amd64.whl', f'spatial_typestate-{version}.tar.gz',
+                     'release-manifest.json', 'core.cdx.json', 'python.cdx.json', 'linux-runtime.json',
+                     'windows-consumer-3.11.json', 'windows-consumer-3.14.json'}
+          if set(expected) != payload or {p.name for p in root.iterdir()} != payload | sidecars | {'SHA256SUMS'}:
               raise SystemExit('unexpected or missing payload/sidecar')
           for p in root.iterdir():
               if p.is_symlink() or not p.is_file():
@@ -197,6 +201,13 @@ jobs:
             file="${line#*  }"
             gh attestation verify "target/release-artifacts/$file"               --bundle "target/release-artifacts/spatial-typestate-$RELEASE_VERSION.crates.intoto.jsonl"               --repo "$GITHUB_REPOSITORY"               --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/build-release.yml"               --source-ref "refs/tags/v$RELEASE_VERSION" --source-digest "$GITHUB_SHA" --deny-self-hosted-runners
           done < target/release-artifacts/SHA256SUMS
+          for file in pypi-dist/*; do
+            gh attestation verify "$file" \
+              --bundle "target/release-artifacts/spatial-typestate-$RELEASE_VERSION.python.sbom.sigstore.jsonl" \
+              --repo "$GITHUB_REPOSITORY" --predicate-type https://cyclonedx.org/bom \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/build-release.yml" \
+              --source-ref "refs/tags/v$RELEASE_VERSION" --source-digest "$GITHUB_SHA" --deny-self-hosted-runners
+          done
       - name: Upload verified wheels and sdist with OIDC and per-file PEP 740 proofs
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:

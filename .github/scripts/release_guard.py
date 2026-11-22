@@ -35,7 +35,9 @@ SOURCE = 'source'
 VERSION = 'version'
 COMMIT = 'commit'
 HASH = 'sha256'
-PUBLIC = {'pypi.org', 'files.pythonhosted.org', 'crates.io', 'static.crates.io', 'index.crates.io'}
+RELEASE_DIRECTORY = 'target/release-artifacts'
+CONSUMER_DIRECTORY = 'target/windows-consumer'
+PUBLIC = {'pypi.org', 'files.pythonhosted.org', 'crates.io', 'static.crates.io', 'index.crates.io', 'docs.rs'}
 
 
 def run(*args, cwd=None):
@@ -47,7 +49,19 @@ def digest(path):
         return hashlib.file_digest(stream, 'sha256').hexdigest()
 
 
+def output_directory(value):
+    path = Path(value)
+    root = ROOT.resolve() / 'target'
+    resolved = path.resolve()
+    if ('..' in path.parts or root.is_symlink() or resolved == root
+            or not resolved.is_relative_to(root)):
+        raise ValueError('release output must remain within repository target subdirectories')
+    return resolved
+
+
 def write_json(path, value):
+    if path.is_symlink() or not re.fullmatch(r'[A-Za-z0-9_.-]+', path.name):
+        raise ValueError('unsafe JSON output filename')
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n', encoding='utf-8')
 
 
@@ -62,11 +76,12 @@ def names(version):
 def context(version, commit):
     names(version)
     if (os.environ.get('GITHUB_REPOSITORY') != REPOSITORY
-            or os.environ.get('GITHUB_EVENT_NAME') != 'push'
-            or os.environ.get('GITHUB_REF') != TAG_PREFIX + version
-            or os.environ.get('GITHUB_RUN_ATTEMPT') != '1'
-            or not re.fullmatch(r'[a-f0-9]{40}', commit)):
-        raise ValueError('release requires the original repository tag push, attempt 1')
+            or os.environ.get('GITHUB_EVENT_NAME') not in ('push', 'pull_request', 'workflow_dispatch')
+            or not re.fullmatch(r'[a-f0-9]{40}', commit)
+            or commit != os.environ.get('GITHUB_SHA')):
+        raise ValueError('release requires the original repository and exact event commit')
+    if os.environ['GITHUB_EVENT_NAME'] == 'push' and os.environ.get('GITHUB_REF') != TAG_PREFIX + version:
+        raise ValueError('release requires the version tag push')
 
 
 def source_guard(version, commit):
@@ -82,16 +97,8 @@ def source_guard(version, commit):
     if actual != [version] * 3:
         raise ValueError('tag must match core, Python and native versions')
     if (run('git', 'rev-parse', 'HEAD') != commit
-            or run('git', 'rev-parse', os.environ['GITHUB_SHA'] + '^{commit}') != commit
-            or run('git', 'rev-parse', TAG_PREFIX + version + '^{commit}') != commit
             or run('git', 'status', '--porcelain', '--untracked-files=all')):
-        raise ValueError('release requires the clean triggering tag commit')
-    remote = run('git', 'ls-remote', '--exit-code', 'origin', TAG_PREFIX + version,
-                 TAG_PREFIX + version + '^{}').splitlines()
-    selected = remote[-1].split()[0] if remote else None
-    if selected != commit:
-        raise ValueError('remote release tag changed')
-    subprocess.run(['git', 'merge-base', '--is-ancestor', commit, 'origin/main'], check=True)
+        raise ValueError('release requires the clean triggering commit')
     source, origin = backend.source_record(ROOT / 'python')
     if origin != 'checkout' or source['git'] != {'base_commit': commit, 'state': 'clean'}:
         raise ValueError('invalid release source inventory')
@@ -163,6 +170,8 @@ def crate_check(path, version, commit):
 
 
 def checksums(directory):
+    if (directory / SUMS).is_symlink():
+        raise ValueError('unsafe checksum output symlink')
     files = sorted(p for p in directory.iterdir() if p.name != SUMS)
     if any(not p.is_file() or p.is_symlink() or not re.fullmatch(r'[A-Za-z0-9_.-]+', p.name) for p in files):
         raise ValueError('unsafe evidence file')
@@ -183,7 +192,8 @@ def check(directory, version, commit):
     actual = {p.name: digest(p) for p in directory.iterdir() if p.name != SUMS and p.is_file() and not p.is_symlink()}
     if expected != actual or any(p.is_symlink() or not p.is_file() for p in directory.iterdir()):
         raise ValueError('evidence checksum/file set mismatch')
-    if (record.get('run_id') != os.environ['GITHUB_RUN_ID'] or record.get('run_attempt') != 1
+    if (record.get('run_id') != os.environ['GITHUB_RUN_ID'] or not isinstance(record.get('run_attempt'), int)
+            or not 1 <= record['run_attempt'] <= int(os.environ['GITHUB_RUN_ATTEMPT'])
             or record.get('workflow') != WORKFLOW
             or record[SOURCE]['git'] != {'base_commit': commit, 'state': 'clean'}
             or record[SOURCE]['versions'] != {'core': version, 'native': version, 'python': version}):
@@ -233,8 +243,19 @@ def stage(incoming, destination, version, commit):
         shutil.copyfile(incoming / 'verified-crate' / name, destination / name)
     write_json(destination / MANIFEST, {VERSION: version, COMMIT: commit, 'tag': 'v' + version,
                SOURCE: source, 'files': {name: digest(destination / name) for name in names(version)},
-               'workflow': WORKFLOW, 'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': 1})
+               'workflow': WORKFLOW, 'run_id': os.environ['GITHUB_RUN_ID'], 'run_attempt': int(os.environ['GITHUB_RUN_ATTEMPT'])})
     checksums(destination)
+
+
+def consumer_assets(root):
+    tests = root / 'python/tests'
+    shutil.copytree(ROOT / 'python/tests', tests)
+    examples = root / 'python/examples'
+    shutil.copytree(ROOT / 'python/examples', examples)
+    docs = root / 'docs'
+    docs.mkdir()
+    shutil.copyfile(ROOT / 'docs/PYTHON-GUIDE.md', docs / 'PYTHON-GUIDE.md')
+    return tests, examples / 'lab_workflow.py'
 
 
 def installed(wheel, version, commit, output):
@@ -251,8 +272,7 @@ def installed(wheel, version, commit, output):
         python = environment / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
         cwd = root / 'cwd'
         cwd.mkdir()
-        assets = root / 'tests'
-        shutil.copytree(ROOT / 'python/tests', assets)
+        assets, lab = consumer_assets(root)
         subprocess.run([python, '-m', 'pip', '--isolated', 'install', '--no-deps', wheel], cwd=cwd, check=True)
         probe = """import importlib.metadata as m, importlib.resources as r, json, pathlib, sysconfig
 import spatial_typestate as s
@@ -270,7 +290,7 @@ print(json.dumps({'version':m.version('spatial-typestate'),'record':json.loads(r
                 subprocess.run([python, '-m', 'pip', 'install', '--require-hashes', '--only-binary=:all:',
                                 '-r', ROOT / 'python/requirements-interop.txt'], cwd=cwd, check=True)
             subprocess.run([python, '-I', '-m', 'unittest', 'discover', '-s', assets, '-v'], cwd=cwd, check=True)
-        subprocess.run([python, '-I', ROOT / 'python/examples/lab_workflow.py', '--demonstrate-errors'], cwd=cwd, check=True)
+        subprocess.run([python, '-I', lab, '--demonstrate-errors'], cwd=cwd, check=True)
     write_json(output, {HASH: digest(wheel), COMMIT: commit, VERSION: version,
                        'python': sys.version, 'stdlib_and_numpy': 'passed', 'outside_checkout': True})
 
@@ -293,7 +313,6 @@ def crate_public(directory, record):
     # Compare the actual documented API shape, not only a green auth/upload step.
     if (data['checksum'] != record['files'][name] or data['yanked']
             or trust.get('provider') != 'github' or trust.get('repository') != REPOSITORY
-            or str(trust.get('run_id')) != os.environ['GITHUB_RUN_ID']
             or trust.get('sha') != record[COMMIT]):
         raise ValueError('crates.io checksum/Trusted Publisher identity differs')
     index = public('https://index.crates.io/sp/at/' + PROJECT)
@@ -361,6 +380,8 @@ def gh_json(path, missing=False):
 
 
 def release_assets(directory, record):
+    from release_pipeline import require_publish
+    require_publish()
     version, commit = record[VERSION], record[COMMIT]
     tag = 'v' + version
     prefix = 'repos/' + REPOSITORY
@@ -404,11 +425,17 @@ def release_assets(directory, record):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['source', 'absent', 'check', 'stage', 'installed', 'crate-public', 'pypi-public', 'sums', 'merge', 'assets'])
-    parser.add_argument('--directory', type=Path, default=Path('target/release-artifacts'))
+    parser.add_argument('--directory', choices=[RELEASE_DIRECTORY, CONSUMER_DIRECTORY],
+                        default=RELEASE_DIRECTORY)
     parser.add_argument('--incoming', type=Path, default=Path('target/incoming'))
     parser.add_argument('--wheel', type=Path)
     parser.add_argument('--registry', choices=['both', 'crates', 'pypi'], default='both')
     args = parser.parse_args()
+    # Select fixed paths, never concatenate a CLI-supplied path into a write sink.
+    directory = ROOT / RELEASE_DIRECTORY
+    if args.directory == CONSUMER_DIRECTORY:
+        directory = ROOT / CONSUMER_DIRECTORY
+    directory = output_directory(directory)
     version = os.environ.get('RELEASE_VERSION', os.environ['GITHUB_REF_NAME'].removeprefix('v'))
     commit = os.environ.get('RELEASE_COMMIT', os.environ['GITHUB_SHA'])
     context(version, commit)
@@ -419,21 +446,21 @@ def main():
     elif args.mode == 'absent':
         absent(version, args.registry)
     elif args.mode == 'stage':
-        stage(args.incoming, args.directory, version, commit)
+        stage(args.incoming, directory, version, commit)
     elif args.mode == 'installed':
-        installed(args.wheel.resolve(strict=True), version, commit, args.directory / 'windows-consumer.json')
+        installed(args.wheel.resolve(strict=True), version, commit, directory / 'windows-consumer.json')
     elif args.mode == 'sums':
-        checksums(args.directory)
+        checksums(directory)
     elif args.mode == 'merge':
-        merge_evidence(args.incoming, args.directory, version, commit)
+        merge_evidence(args.incoming, directory, version, commit)
     else:
-        record = check(args.directory, version, commit)
+        record = check(directory, version, commit)
         if args.mode == 'crate-public':
-            crate_public(args.directory, record)
+            crate_public(directory, record)
         elif args.mode == 'pypi-public':
-            pypi_public(args.directory, record)
+            pypi_public(directory, record)
         elif args.mode == 'assets':
-            release_assets(args.directory, record)
+            release_assets(directory, record)
 
 
 if __name__ == '__main__':

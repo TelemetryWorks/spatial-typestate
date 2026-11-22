@@ -37,14 +37,14 @@ These are proposals, not implemented guarantees or promises of a release date.
     and `python-v0.1.0` stay untouched. Both protected `crates-io` and `pypi`
     environments require owner approval, no admin bypass and Tag rule `v*` (no
     branch rule), bound to the corresponding Trusted Publisher.
-  - **Agent implementation for review:** the [tag-only publisher](../.github/workflows/trusted-publishing.yml)
-    verifies both artifact sets before uploads; bind `vX.Y.Z` to all
-    version metadata and the same reviewed source on main, pin
-    `rust-lang/crates-io-auth-action` by full SHA, and grant OIDC only to the
-    registry publish jobs. Prepare its qualified-artifact PyPI job bound to `pypi`,
-    with per-file PEP 740 attestations and public verification. Preserve this
-    crate's MSRV/pin; do not copy the example's toolchain or feature matrix. Build the independent approver checklist
-    and immutable-published-text review into release preparation.
+  - **Agent implementation for review (org standard, owner assignment 2026-11-22):**
+    the [caller](../.github/workflows/trusted-publishing.yml) and
+    [reusable builder](../.github/workflows/build-release.yml) qualify both artifact
+    sets, use a real annotated shared tag/main-CI gate, read-only PR/manual dry runs
+    and an independently tag-guarded nested signer with a separate immutable sidecar.
+    Registry environments and the caller filename stay fixed; crates.io precedes
+    PyPI. OIDC is limited to the nested signer and separate registry jobs. Keep the
+    MSRV/pin, packaging matrix, exact bytes and independent approver/text checks.
   - **Owner steps (settings, separately authorized):** verify protected `crates-io`
     and `pypi` environments with explicit owner approval and no administrator
     bypass; restrict BOTH deployments to shared tags `v*`, no branches. Configure
@@ -56,14 +56,15 @@ These are proposals, not implemented guarantees or promises of a release date.
   - **Proposals for review:** classify changes against each last publication and
     choose a jointly unused shared version (e.g. 0.1.1 for compatible fixes or 0.2.0
     if either surface breaks; owner decides). Verify both, then crates.io, then
-    PyPI. If one succeeds and the other fails, stop, record the incomplete release
+    PyPI (ordering adopted by the 2026-11-22 org-standard assignment). If one succeeds and the other fails, stop, record the incomplete release
     and inspect public state; no blind rerun, overwritten version or moved tag.
     Owner-authorized recovery of only missing exact bytes, or a new coordinated
-    release, needs separate review. See [migration and recovery proposals](RELEASING.md#proposal-coordinated-ordering-and-partial-release-handling).
+    release, needs separate review. See [ordering and controlled recovery](RELEASING.md#coordinated-ordering-and-partial-release-handling).
   - Follow the detailed [owner/agent setup and approver gates](RELEASING.md#trusted-publishing-migration-owner-and-agent-steps).
     The [irig106-types reference](https://github.com/TelemetryWorks/irig106-types/blob/2899b30/docs/RELEASING.md)
     and its [reviewed workflow](https://github.com/TelemetryWorks/irig106-types/blob/2899b30/.github/workflows/trusted-publishing.yml)
-    are the model, not a drop-in publisher. Its 0.1.0 publication on 2026-11-15 has
+    remain historical setup references; the amended org standard now governs the
+    pipeline. Its 0.1.0 publication on 2026-11-15 has
     [registry `trustpub_data`](https://crates.io/api/v1/crates/irig106-types/0.1.0).
     Spatial-typestate Rust 0.1.0 used a stored Cargo credential; Python 0.1.0 used a
     token without public attestations. Those historical bytes/tags stay unchanged.

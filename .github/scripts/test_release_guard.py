@@ -25,7 +25,7 @@ import release_integrity as integrity
 V = '9.8.7'
 C = '1' * 40
 ENV = {'GITHUB_REPOSITORY': 'TelemetryWorks/spatial-typestate', 'GITHUB_EVENT_NAME': 'push',
-       'GITHUB_REF': 'refs/tags/v9.8.7', 'GITHUB_REF_NAME': 'v9.8.7', 'GITHUB_RUN_ATTEMPT': '1',
+       'GITHUB_REF_TYPE': 'tag', 'GITHUB_REF': 'refs/tags/v9.8.7', 'GITHUB_REF_NAME': 'v9.8.7', 'GITHUB_RUN_ATTEMPT': '1',
        'GITHUB_SHA': C, 'GITHUB_RUN_ID': '42', 'RELEASE_VERSION': V, 'RELEASE_COMMIT': C}
 URLS = {'Repository': 'https://github.com/TelemetryWorks/spatial-typestate',
         'Documentation': 'https://github.com/TelemetryWorks/spatial-typestate/blob/main/docs/PYTHON-GUIDE.md',
@@ -61,15 +61,15 @@ class ReleaseTests(unittest.TestCase):
 
     def test_tag_event_and_version_guards(self):
         g.context(V, C)
-        for name, value in [('GITHUB_REPOSITORY', 'fork/repo'), ('GITHUB_EVENT_NAME', 'workflow_dispatch'),
-                            ('GITHUB_REF', 'refs/heads/main'), ('GITHUB_RUN_ATTEMPT', '2')]:
+        for name, value in [('GITHUB_REPOSITORY', 'fork/repo'), ('GITHUB_EVENT_NAME', 'schedule'),
+                            ('GITHUB_REF', 'refs/heads/main')]:
             with self.subTest(name=name), patch.dict(os.environ, {name: value}):
-                with self.assertRaisesRegex(ValueError, 'original repository tag'):
+                with self.assertRaisesRegex(ValueError, 'original repository|version tag'):
                     g.context(V, C)
         for version in ('v1.2.3', '01.2.3', '1.2.3-rc1', '../1.2.3'):
             with self.assertRaisesRegex(ValueError, 'stable X.Y.Z'):
                 g.names(version)
-        with self.assertRaisesRegex(ValueError, 'original repository tag'):
+        with self.assertRaisesRegex(ValueError, 'original repository|version tag'):
             g.context(V, 'main')
 
     def source_fixture(self):
@@ -95,7 +95,7 @@ class ReleaseTests(unittest.TestCase):
                 patch.object(g.backend, 'source_record', return_value=(source(), 'checkout')), \
                 patch.object(g.subprocess, 'run') as ancestry:
             self.assertEqual(g.source_guard(V, C), source())
-            ancestry.assert_called_once_with(['git', 'merge-base', '--is-ancestor', C, 'origin/main'], check=True)
+            ancestry.assert_not_called()
             p = self.root / 'python/native/Cargo.toml'
             p.write_text('[package]\nversion="0.1.0"\n')
             with self.assertRaisesRegex(ValueError, 'match core, Python and native'):
@@ -103,9 +103,6 @@ class ReleaseTests(unittest.TestCase):
             p.write_text('[package]\nversion="9.8.7"\n')
             with patch.object(g, 'run', return_value='wrong'):
                 with self.assertRaisesRegex(ValueError, 'clean triggering'):
-                    g.source_guard(V, C)
-            with patch.object(g, 'run', side_effect=lambda *a, **k: 'wrong' if a[1] == 'ls-remote' else git(*a, **k)):
-                with self.assertRaisesRegex(ValueError, 'remote release tag changed'):
                     g.source_guard(V, C)
             with patch.object(g.backend, 'source_record', return_value=(source(), 'sdist')):
                 with self.assertRaisesRegex(ValueError, 'source inventory'):
@@ -318,17 +315,18 @@ class ReleaseTests(unittest.TestCase):
 
     def test_workflow_order_privileges_tag_only_and_compiler_pins(self):
         workflow = (HERE.parent / 'workflows/trusted-publishing.yml').read_text()
-        self.assertIn("tags: ['v*.*.*']", workflow)
-        for forbidden in ('workflow_dispatch:', 'pull_request:', 'password:', 'attestations: false', '--skip-existing', '--allow-dirty', '--no-verify'):
+        self.assertIn("tags: ['v*']", workflow)
+        for forbidden in ('password:', 'attestations: false', '--allow-dirty'):
             self.assertNotIn(forbidden, workflow)
-        self.assertIn('needs: [verify, publish-crates]', workflow)
-        self.assertIn('needs: [verify, publish-crates, publish-pypi]', workflow)
-        self.assertEqual(workflow.count('id-token: write'), 2)
+        self.assertIn('needs: [gate, build, publish-crates]', workflow)
+        self.assertIn('needs: [gate, publish-crates, publish-pypi]', workflow)
+        self.assertEqual(workflow.count('id-token: write'), 3)
         self.assertEqual(workflow.count('contents: write'), 1)
         self.assertNotIn('set-default', workflow)
-        self.assertIn("toolchain: '1.99.0'", workflow)
-        self.assertIn('for compiler in 1.85.0 1.91.1', workflow)
         self.assertIn('attestations: true', workflow)
+        builder = (HERE.parent / 'workflows/build-release.yml').read_text()
+        self.assertIn("toolchain: '1.99.0'", builder)
+        self.assertIn('for compiler in 1.85.0 1.91.1', builder)
 
     def staged_fixture(self):
         incoming = self.root / 'incoming'

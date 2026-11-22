@@ -12,6 +12,9 @@ PROJECT = 'spatial-typestate'
 REPOSITORY = 'TelemetryWorks/spatial-typestate'
 BUILDER = REPOSITORY + '/.github/workflows/build-release.yml'
 SUMS = 'SHA256SUMS'
+PROBE_RECORD_SHA256 = '097737358bbfa8cc3380bb4399587262c83c3f94bdbb4e4f6cb74459441c1406'
+PROBE_RECORD = 'permission-probe.record.json'
+PROBE_TRUST = 'permission-probe.trusted-root.jsonl'
 
 PROBE_FILE = 'permission-probe.txt'
 PROBE_SBOM = 'permission-probe.cdx.json'
@@ -63,8 +66,8 @@ def check_payload(root, version):
     return python, payload, sidecars
 
 
-def signature_policy(commit, source_ref):
-    return ['--repo', REPOSITORY, '--signer-workflow', BUILDER,
+def signature_policy(commit, source_ref, signer=BUILDER):
+    return ['--repo', REPOSITORY, '--signer-workflow', signer,
             '--source-ref', source_ref, '--source-digest', commit, '--deny-self-hosted-runners']
 
 
@@ -89,23 +92,31 @@ def verify_signatures(root, version, commit, python, payload, sidecars):
                    signature_policy(commit, 'refs/tags/v' + version))
 
 
-def verify_permissions(root, commit, source_ref):
-    event = os.environ.get('GITHUB_EVENT_NAME')
-    ref_ok = ((event == 'pull_request' and re.fullmatch(r'refs/pull/[1-9]\d*/merge', source_ref, flags=re.ASCII))
-              or (event == 'workflow_dispatch' and source_ref.startswith('refs/heads/')))
-    if (os.environ.get('GITHUB_REPOSITORY') != REPOSITORY or not ref_ok
-            or os.environ.get('GITHUB_REF_TYPE') != 'branch'
-            or commit != os.environ.get('GITHUB_SHA') or source_ref != os.environ.get('GITHUB_REF')
-            or not re.fullmatch(r'[a-f0-9]{40}', commit)):
-        raise ValueError('permission probe requires the original repository PR or branch dry run')
-    expected = {PROBE_FILE, PROBE_SBOM, *PROBE_BUNDLES}
-    if {p.name for p in root.iterdir()} != expected or any(p.is_symlink() or not p.is_file() for p in root.iterdir()):
+def verify_permissions(root):
+    # Trust only the committed, digest-pinned record, never the current PR identity.
+    raw = (root / PROBE_RECORD).read_bytes()
+    if hashlib.sha256(raw).hexdigest() != PROBE_RECORD_SHA256:
+        raise ValueError('permission fixture record digest mismatch')
+    record = json.loads(raw)
+    expected = {PROBE_FILE, PROBE_SBOM, PROBE_TRUST, *PROBE_BUNDLES}
+    if (set(record['files']) != expected or {p.name for p in root.iterdir()} != expected | {PROBE_RECORD}
+            or any(p.is_symlink() or not p.is_file() for p in root.iterdir())):
         raise ValueError('unexpected permission fixture files')
+    for name, digest in record['files'].items():
+        if hashlib.sha256((root / name).read_bytes()).hexdigest() != digest:
+            raise ValueError('permission fixture file digest mismatch')
     if (root / PROBE_FILE).read_bytes() != PROBE_CONTENT or (root / PROBE_SBOM).read_bytes() != PROBE_BOM:
         raise ValueError('permission fixture must be fixed non-release content')
-    verify_bundles(root, {PROBE_FILE, PROBE_SBOM}, [PROBE_FILE], PROBE_BUNDLES, PROBE_SBOM,
-                   signature_policy(commit, source_ref))
-    print('PASS real provenance and SBOM verification with the publish-pypi token permissions; no staging/upload')
+    if (record['repository'] != REPOSITORY
+            or record['signer_workflow'] != REPOSITORY + '/.github/workflows/trusted-publishing.yml'
+            or record['source_ref'] != 'refs/heads/ci/pypi-fixture-seed-20261122'
+            or not re.fullmatch(r'[a-f0-9]{40}', record['source_sha'])):
+        raise ValueError('unexpected permission fixture signing identity')
+    policy = signature_policy(record['source_sha'], record['source_ref'], record['signer_workflow'])
+    # Supplying the pinned trust root disables GH CLI's online trust-root refresh.
+    policy += ['--custom-trusted-root', str(root / PROBE_TRUST)]
+    verify_bundles(root, {PROBE_FILE, PROBE_SBOM}, [PROBE_FILE], PROBE_BUNDLES, PROBE_SBOM, policy)
+    print('PASS offline committed provenance and SBOM verification; no token, signing, staging or upload')
 
 
 def stage(root, output, version, commit):
@@ -128,7 +139,7 @@ def main():
     if args.mode == 'stage':
         stage(Path('target/release-artifacts'), Path('pypi-dist'), os.environ['RELEASE_VERSION'], os.environ['GITHUB_SHA'])
     else:
-        verify_permissions(Path('target/permission-probe'), os.environ['GITHUB_SHA'], os.environ['GITHUB_REF'])
+        verify_permissions(Path('.github/release-fixtures/permission-probe'))
 
 
 if __name__ == '__main__':

@@ -320,11 +320,11 @@ class ReleaseTests(unittest.TestCase):
             self.assertNotIn(forbidden, workflow)
         self.assertIn('needs: [gate, build, publish-crates]', workflow)
         self.assertIn('needs: [gate, publish-crates, publish-pypi]', workflow)
-        self.assertEqual(workflow.count('id-token: write'), 4)
+        self.assertEqual(workflow.count('id-token: write'), 3)
         self.assertEqual(workflow.count('contents: write'), 1)
         self.assertNotIn('set-default', workflow)
         self.assertIn('attestations: true', workflow)
-        builder = (HERE.parent / 'workflows/build-release.yml').read_text()
+        builder = (HERE.parent / 'workflows/qualify-release.yml').read_text()
         self.assertIn("toolchain: '1.99.0'", builder)
         self.assertIn('for compiler in 1.85.0 1.91.1', builder)
 

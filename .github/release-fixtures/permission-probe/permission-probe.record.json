@@ -1,0 +1,16 @@
+{
+  "files": {
+    "permission-probe.cdx.json": "4c6627cbcd68f456fbd538aad252c334b73bf704eb01369150d67b42aabb7f57",
+    "permission-probe.intoto.jsonl": "d267f9faf3af44258912960ba6d23ed6010506c9ac20bdc7ffd551b173d2bbb5",
+    "permission-probe.sbom.sigstore.jsonl": "5447d2c2a7d325afff8cb2c39a5c18254f429aa6d9789ece856b89d5737c4e45",
+    "permission-probe.trusted-root.jsonl": "65ca537f6ed8a47fd0e560c421baa1f6c1efb8b25fc200d8c5c02c0e92eb2b9c",
+    "permission-probe.txt": "b7d9b39e3f409de82315b9153500eeec01151566a14f8632e23701e9ed89a134"
+  },
+  "gh_version": "gh version 2.104.0 (2026-11-12)",
+  "repository": "TelemetryWorks/spatial-typestate",
+  "run_id": "45061133325",
+  "schema": 1,
+  "signer_workflow": "TelemetryWorks/spatial-typestate/.github/workflows/trusted-publishing.yml",
+  "source_ref": "refs/heads/ci/pypi-fixture-seed-20261122",
+  "source_sha": "bf8faabc011092a5b2e0f7595aa2168fdcaa4380"
+}

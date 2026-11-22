@@ -27,11 +27,11 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
-- Exercise the PyPI pre-upload GH verifier under publisher-identical token
-  permissions before any release: a no-checkout dry-run job consumes a separately
-  attested, fixed non-release fixture through the same standalone implementation.
-  Actual package signing/staging remains tag-only; no registry, environment,
-  version or historical artifact is changed.
+- Verify the PyPI pre-upload provenance/SBOM path offline on every PR using a
+  committed, digest-pinned synthetic fixture signed once by a manual branch
+  dispatch. PR jobs never sign or hold OIDC permissions. Separate read-only
+  qualification from the independently tag-gated release-signing wrapper;
+  preserve the release builder identity and existing qualification.
 
 - Adopt the org-standard PyPI release pipeline: immutable reusable-builder payload
   and signing sidecar, independent tag-push guards, read-only PR/manual Publish

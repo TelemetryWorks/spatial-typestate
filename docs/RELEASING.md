@@ -311,6 +311,12 @@ creates no tag or upload. It does not repair historical 0.1.0 provenance.
   [checksum fixture](../.github/release-fixtures/spatial-typestate-0.1.0.sha256)
   (`fc6b60a9...`, 64,458 bytes), NOT a second fresh download. This exercises the
   public byte-check path without implying 0.1.0 is attested or rebuilding it.
+  A second known-good check reads the versioned PyPI JSON API, downloads BOTH
+  published 0.1.0 wheels and the sdist from its file URLs, and compares JSON and
+  downloaded SHA256 values with the independently pinned
+  [Python checksum fixture](../.github/release-fixtures/spatial-typestate-python-0.1.0.sha256).
+  This historical download check cannot exercise PEP 740: Python 0.1.0 has no
+  public attestations. It does not claim retroactive provenance.
 
 ### Publication permissions and approval checklists
 
@@ -354,6 +360,20 @@ consumer and bounded docs.rs status. Pending after the bound or a failed build
 fails completion. The PyPI UI Provenance checks above remain an independent owner
 gate. No SLSA level, universal platforms, Python reproducibility or safety claim.
 
+The checkout-free PyPI job runs a standalone stdlib-only
+[`release_pypi.py stage`](../.github/scripts/release_pypi.py) with `python3 -I`.
+The reusable builder supplies the fixed helper as a separate immutable artifact;
+BOTH the dry run and PyPI job check its workflow-pinned SHA256 **before executing
+it**. No downloaded code is trusted merely because it accompanies a payload.
+The dry run exercises the same transport with `--help` and no signing authority.
+Only the tag-push stage mode verifies every payload signature and each Python
+SBOM binding, then creates `pypi-dist` with exactly the selected three files.
+A failed signature leaves that directory absent and fails the step, blocking the
+following official PyPI upload action. No `continue-on-error` or unconditional
+upload is allowed. The helper is tooling, not a new Release asset or SBOM subject.
+Tests pin this ordering and reject bad signatures before PyPI upload or GitHub
+Release creation/attachment; removing those calls must fail their tests.
+
 ### Online and offline verification
 
 For every downloaded crate/wheel/sdist, set `version` and `commit` to independently
@@ -392,7 +412,9 @@ Source graph attestations are not build reproducibility or code-safety proofs.
 
 The current backend/release helpers deliberately accept stable `X.Y.Z` only.
 Rust SemVer and Python prerelease spellings differ; adding a reviewed shared
-prerelease mapping is separate work, not an implicit change to version policy.
+prerelease mapping (PEP 440 versus SemVer) needs a separate reviewed change
+**before any pre-release tag is pushed**. Stable-only `X.Y.Z` is the accepted
+current scope, not an implicit mapping or pre-release approval.
 Artifact retention is 90 days; preserve the frozen payload/sidecar before expiry
 for any authorized recovery, never substitute a rebuild. A PR dry run cannot
 exercise OIDC, approval delay, registry writes or live tag-only signing. It does

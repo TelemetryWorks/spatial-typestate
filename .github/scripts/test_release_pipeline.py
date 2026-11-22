@@ -7,7 +7,6 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
-import textwrap
 import unittest
 from unittest.mock import patch
 
@@ -357,6 +356,61 @@ class PipelineTests(unittest.TestCase):
                 p.release_assets(self.directory, V, C)
             commands.assert_not_called()
 
+    def test_bad_signature_blocks_release_create_and_asset_upload(self):
+        self.signed()
+        release = self.asset_fixture()
+        final = {**release, 'draft': False}
+        mutations = []
+        def commands(*args):
+            if args[:3] == ('gh', 'attestation', 'verify'):
+                raise subprocess.CalledProcessError(1, args, stderr='bad signature')
+            mutations.append(args)
+        with patch.object(p, 'remote_tag'), patch.object(p, 'command', side_effect=commands), \
+                patch.object(p, 'notes', return_value=('Reviewed title', 'Reviewed body\n')), \
+                patch.object(p, 'latest', return_value=True), patch.object(p, 'verify_assets', return_value={'SHA256SUMS'}), \
+                patch.object(p, 'find_release', side_effect=[None, release, release, final]):
+            with self.assertRaises(subprocess.CalledProcessError):
+                p.release_assets(self.directory, V, C)
+        self.assertEqual(mutations, [], 'bad signature must block release create/upload/edit')
+
+    def test_latest_ignores_higher_drafts_and_github_prerelease_flags(self):
+        stable = {'tag_name': 'v9.8.6', 'draft': False, 'prerelease': False}
+        # Stable-looking tags ensure each flag, not the spelling filter, is tested.
+        for excluded in ({'tag_name': 'v100.0.0', 'draft': True, 'prerelease': False},
+                         {'tag_name': 'v99.0.0', 'draft': False, 'prerelease': True}):
+            with self.subTest(excluded=excluded), patch.object(p, 'pages', return_value=[stable, excluded]):
+                self.assertTrue(p.latest(V))
+                self.assertFalse(p.latest('9.8.5'))
+
+    def test_cli_publication_modes_require_actual_tag_push_before_any_side_effect(self):
+        directory = self.root / 'target/release-artifacts'
+        directory.parent.mkdir()
+        self.directory.rename(directory)
+        published = {'draft': False, 'name': 'Reviewed title', 'body': 'Reviewed body\n'}
+        import release_integrity
+        for mode in ('publish-crate', 'assets', 'verify'):
+            for event in ('pull_request', 'workflow_dispatch'):
+                with self.subTest(mode=mode, event=event), ExitStack() as stack:
+                    stack.enter_context(patch.dict(os.environ, {'GITHUB_EVENT_NAME': event}))
+                    stack.enter_context(patch.object(sys, 'argv', ['release_pipeline.py', mode]))
+                    stack.enter_context(patch.object(g, 'ROOT', self.root))
+                    signatures = stack.enter_context(patch.object(p, 'signatures', return_value=self.record))
+                    remote = stack.enter_context(patch.object(p, 'remote_tag'))
+                    commands = stack.enter_context(patch.object(p, 'command'))
+                    stack.enter_context(patch.object(p, 'notes', return_value=('Reviewed title', 'Reviewed body\n')))
+                    stack.enter_context(patch.object(p, 'find_release', return_value=published))
+                    stack.enter_context(patch.object(p, 'verify_assets', return_value=set()))
+                    stack.enter_context(patch.object(p, 'docs_rs'))
+                    stack.enter_context(patch.object(g, 'public_json', return_value=None))
+                    stack.enter_context(patch.object(g, 'crate_public'))
+                    stack.enter_context(patch.object(g, 'pypi_public'))
+                    stack.enter_context(patch.object(release_integrity, 'verify'))
+                    with self.assertRaisesRegex(ValueError, 'independent original-repository tag-push'):
+                        p.main()
+                    signatures.assert_not_called()
+                    remote.assert_not_called()
+                    commands.assert_not_called()
+
     def test_final_verification_uses_fresh_registries_and_integrity_before_docsrs(self):
         with ExitStack() as stack:
             mocks = {name: stack.enter_context(patch.object(p, name)) for name in ('remote_tag', 'verify_assets', 'docs_rs')}
@@ -376,7 +430,7 @@ class PipelineTests(unittest.TestCase):
                 p.verify(self.directory, V, C)
 
     def test_cli_dispatch_and_check_mode_are_readonly(self):
-        modes = {'gate': 'gate', 'known-good': 'known_good', 'check': 'payload', 'signatures': 'signatures',
+        modes = {'gate': 'gate', 'known-good': 'known_good', 'known-good-python': 'known_good_python', 'check': 'payload', 'signatures': 'signatures',
                  'compare': 'compare_crate', 'publish-crate': 'publish_crate', 'assets': 'release_assets', 'verify': 'verify'}
         with ExitStack() as stack:
             mocks = {name: stack.enter_context(patch.object(p, name)) for name in modes.values()}
@@ -386,39 +440,6 @@ class PipelineTests(unittest.TestCase):
                 with patch.object(sys, 'argv', ['release_pipeline.py', mode]):
                     p.main()
                 mocks[name].assert_called_once()
-
-    def test_no_checkout_pypi_staging_enforces_real_inline_script_before_upload(self):
-        workflow = (Path(__file__).resolve().parents[1] / 'workflows/trusted-publishing.yml').read_text()
-        script = textwrap.dedent(workflow.split("python3 - <<'CHECK'\n", 1)[1].split('          CHECK', 1)[0])
-        target = self.root / 'target/release-artifacts'
-        target.parent.mkdir()
-        self.directory.rename(target)
-        self.directory = target
-        self.signed()
-        result = subprocess.run([sys.executable, '-I', '-c', script], cwd=self.root, capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        expected = {f'spatial_typestate-{V}-cp311-abi3-manylinux_2_28_x86_64.whl',
-                    f'spatial_typestate-{V}-cp311-abi3-win_amd64.whl', f'spatial_typestate-{V}.tar.gz'}
-        self.assertEqual({x.name for x in (self.root / 'pypi-dist').iterdir()}, expected)
-        for mutation, error in [('file', 'checksum mismatch'), ('sum', 'invalid checksum manifest'),
-                                ('version', 'invalid version'), ('extra', 'unexpected or missing')]:
-            with self.subTest(mutation=mutation):
-                archive = target / g.names(V)[0]
-                raw, sums = archive.read_bytes(), (target / g.SUMS).read_bytes()
-                if mutation == 'file':
-                    archive.write_bytes(b'different')
-                elif mutation == 'sum':
-                    (target / g.SUMS).write_bytes(sums + sums.splitlines(keepends=True)[0])
-                elif mutation == 'extra':
-                    (target / 'extra').write_text('bad')
-                env = dict(os.environ, RELEASE_VERSION='../bad' if mutation == 'version' else V)
-                result = subprocess.run([sys.executable, '-I', '-c', script], cwd=self.root,
-                                        env=env, capture_output=True, text=True)
-                self.assertNotEqual(result.returncode, 0)
-                self.assertIn(error, result.stderr)
-                archive.write_bytes(raw)
-                (target / g.SUMS).write_bytes(sums)
-                (target / 'extra').unlink(missing_ok=True)
 
     def test_workflow_boundary_no_checkout_in_pypi_and_independent_guards(self):
         root = Path(__file__).resolve().parents[2]

@@ -11,6 +11,7 @@ import sys
 import tempfile
 import time
 import tomllib
+import urllib.parse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import release_guard as g
@@ -18,6 +19,12 @@ import release_guard as g
 BUILDER = '.github/workflows/build-release.yml'
 KNOWN_SHA = 'fc6b60a9a7f3aa44122e51473cbe52026ae6330826b15401610489ca0b355abf'
 KNOWN_URL = 'https://static.crates.io/crates/spatial-typestate/spatial-typestate-0.1.0.crate'
+KNOWN_PYTHON = {
+    'spatial_typestate-0.1.0-cp311-abi3-manylinux_2_28_x86_64.whl': 'e591cc87071cdc7db9e1ff162d11d661f1e6854ab1c6cfbf96473cde7e57ebd5',
+    'spatial_typestate-0.1.0-cp311-abi3-win_amd64.whl': 'b59ead8787b870d28f0aba2b7bd8264a993e2dfa93ca3fa9d3a5d249254c12c8',
+    'spatial_typestate-0.1.0.tar.gz': 'd94f841d8ab4368de4994b071f9d035fe5260feba2e50157200a9467d51e9448',
+}
+KNOWN_PYPI_URL = 'https://pypi.org/pypi/spatial-typestate/0.1.0/json'
 PREDICATE = 'https://cyclonedx.org/bom'
 
 
@@ -177,6 +184,29 @@ def known_good():
     print('PASS published spatial-typestate 0.1.0 against independent pinned checksum fixture')
 
 
+def known_good_python():
+    fixture = g.ROOT / '.github/release-fixtures/spatial-typestate-python-0.1.0.sha256'
+    pinned = ''.join(f'{sha}  {name}\n' for name, sha in sorted(KNOWN_PYTHON.items()))
+    if fixture.read_text(encoding='ascii') != pinned:
+        raise ValueError('trusted Python known-good fixture changed')
+    data = g.public_json(KNOWN_PYPI_URL)
+    urls = {item['filename']: item for item in data['urls']}
+    if (data['info']['name'] != g.PROJECT or data['info']['version'] != '0.1.0'
+            or len(urls) != len(data['urls']) or set(urls) != set(KNOWN_PYTHON)):
+        raise ValueError('Python known-good public identity/file set mismatch')
+    for name, expected in KNOWN_PYTHON.items():
+        item = urls[name]
+        if item['yanked'] or item['digests']['sha256'] != expected:
+            raise ValueError('Python known-good JSON digest/yank mismatch')
+        if urllib.parse.urlsplit(item['url']).hostname != 'files.pythonhosted.org':
+            raise ValueError('Python known-good download host mismatch')
+        raw = g.public(item['url'])
+        if hashlib.sha256(raw).hexdigest() != expected:
+            raise ValueError('Python known-good downloaded bytes mismatch')
+    print('PASS published Python 0.1.0 two wheels and sdist against independent pinned digests; '
+          'PEP 740 NOT exercised: historical 0.1.0 has no public attestations')
+
+
 def publish_crate(directory, version, commit):
     require_publish()
     record = signatures(directory, version, commit)
@@ -286,7 +316,7 @@ def verify(directory, version, commit):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('mode', choices=['gate', 'check', 'signatures', 'compare', 'known-good', 'publish-crate', 'assets', 'verify'])
+    parser.add_argument('mode', choices=['gate', 'check', 'signatures', 'compare', 'known-good', 'known-good-python', 'publish-crate', 'assets', 'verify'])
     parser.add_argument('--directory', choices=[g.RELEASE_DIRECTORY], default=g.RELEASE_DIRECTORY)
     parser.add_argument('--compiler', default=os.environ.get('BUILD_RUST_VERSION', '1.99.0'))
     args = parser.parse_args()
@@ -296,6 +326,9 @@ def main():
         return
     if args.mode == 'known-good':
         known_good()
+        return
+    if args.mode == 'known-good-python':
+        known_good_python()
         return
     version = os.environ['RELEASE_VERSION']
     commit = os.environ['GITHUB_SHA']

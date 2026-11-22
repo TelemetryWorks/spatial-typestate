@@ -1,257 +1,66 @@
-name: Trusted publishing
+name: Create committed verification fixture once
 
-# Org standard d1d2e18, PyPI variant. PR/manual runs build and check, never sign/publish.
+# Coordinator option (b): one explicitly dispatched branch run; no PR/tag trigger.
 on:
-  push:
-    tags: ['v*']
-  pull_request:
-    paths:
-      - .github/workflows/trusted-publishing.yml
-      - .github/workflows/build-release.yml
-      - .github/scripts/release*.py
-      - .github/scripts/test_release*.py
-      - .github/release-fixtures/**
-      - .github/security/requirements-attestations.txt
-      - docs/RELEASING.md
   workflow_dispatch:
 
-permissions:
-  contents: read
-
-concurrency:
-  group: trusted-publishing-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
-env:
-  CARGO_BUILD_JOBS: '2'
-  RUSTUP_TOOLCHAIN: '1.99.0'
-  SPATIAL_EXPECT_COMMIT: ${{ github.sha }}
-  SPATIAL_DENY_WARNINGS: '1'
-
-defaults:
-  run:
-    shell: bash
+permissions: {}
 
 jobs:
-  gate:
-    name: Release gate
+  fixture:
+    if: github.repository == 'TelemetryWorks/spatial-typestate' && github.event_name == 'workflow_dispatch' && github.ref_type == 'branch'
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
-      contents: read
-      actions: read
-    outputs:
-      version: ${{ steps.gate.outputs.version }}
-      publish: ${{ steps.gate.outputs.publish }}
-      crates: ${{ steps.gate.outputs.crates }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Lockstep metadata, remote annotated tag, exact main CI and dated notes
-        id: gate
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 -I .github/scripts/release_pipeline.py gate
-
-  build:
-    name: Build
-    needs: gate
-    permissions:
-      contents: read
       id-token: write
       attestations: write
-    uses: ./.github/workflows/build-release.yml # zizmor: ignore[self-repository] local immutable caller revision
-    with:
-      version: ${{ needs.gate.outputs.version }}
-      publish: ${{ needs.gate.outputs.publish == 'true' }}
-
-  publish-path-check:
-    name: Publish path (dry run)
-    needs: [gate, build]
-    if: needs.gate.outputs.publish != 'true'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    permissions:
-      contents: read
-    env:
-      RELEASE_VERSION: ${{ needs.gate.outputs.version }}
-      BUILD_RUST_VERSION: ${{ needs.build.outputs.rust-version }}
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          pattern: release-${{ needs.gate.outputs.version }}*
-          merge-multiple: true
-          path: target/release-artifacts
-      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
-        with:
-          toolchain: ${{ needs.build.outputs.rust-version }}
-      - name: Strict unsigned checksums and same-toolchain archive reproduction
-        run: python3 -I .github/scripts/release_pipeline.py compare
-      - name: Exercise public download against the pinned published 0.1.0 fixture
-        run: python3 -I .github/scripts/release_pipeline.py known-good
-      - name: Check published Python 0.1.0 wheels and sdist (no historical PEP 740)
-        run: python3 -I .github/scripts/release_pipeline.py known-good-python
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: pypi-preupload-verifier
-          path: ${{ runner.temp }}/pypi-verifier
-      - name: Exercise pinned standalone verifier transport without signing or uploading
+      - name: Create fixed non-release subjects without checkout
         run: |
-          printf '%s  %s\n' '3caaf5442fda4b9987784e6b3081840771c7c67354c67dd1fbb66f9582171574' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
-          python3 -I "$RUNNER_TEMP/pypi-verifier/release_pypi.py" --help
-
-  publish-crates:
-    name: Publish to crates.io
-    needs: [gate, build]
-    if: >-
-      needs.gate.outputs.publish == 'true' &&
-      github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    environment: crates-io
-    permissions:
-      contents: read
-      id-token: write
-    env:
-      RELEASE_VERSION: ${{ needs.gate.outputs.version }}
-      BUILD_RUST_VERSION: ${{ needs.build.outputs.rust-version }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+          mkdir -p "$RUNNER_TEMP/permission-probe"
+          printf '%s\n' 'TelemetryWorks token-permissions probe only; NOT a release artifact.' > "$RUNNER_TEMP/permission-probe/permission-probe.txt"
+          printf '%s\n' '{"bomFormat":"CycloneDX","specVersion":"1.5","serialNumber":"urn:uuid:00000000-0000-4000-8000-000000000042","version":1,"components":[]}' > "$RUNNER_TEMP/permission-probe/permission-probe.cdx.json"
+      - id: provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        env:
+          NODE_OPTIONS: --max-http-header-size=32768
         with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+          subject-path: |
+            ${{ runner.temp }}/permission-probe/permission-probe.txt
+            ${{ runner.temp }}/permission-probe/permission-probe.cdx.json
+      - id: sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        env:
+          NODE_OPTIONS: --max-http-header-size=32768
         with:
-          pattern: release-${{ needs.gate.outputs.version }}*
-          merge-multiple: true
-          path: target/release-artifacts
-      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
-        with:
-          toolchain: ${{ needs.build.outputs.rust-version }}
-      - name: Check frozen signatures and reproduce without compiling or build scripts
+          subject-path: ${{ runner.temp }}/permission-probe/permission-probe.txt
+          sbom-path: ${{ runner.temp }}/permission-probe/permission-probe.cdx.json
+      - name: Retain bundles and public offline trust root with source identity
         env:
           GH_TOKEN: ${{ github.token }}
+          PROVENANCE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM: ${{ steps.sbom.outputs.bundle-path }}
         run: |
-          python3 -I .github/scripts/release_guard.py source
-          python3 -I .github/scripts/release_pipeline.py signatures
-          python3 -I .github/scripts/release_pipeline.py compare
-      - id: auth
-        uses: rust-lang/crates-io-auth-action@3268eb413133e2960fa4ae0e963ca76380c54cd9 # v1.0.6
-      - name: Upload only if absent; always compare served crate/index/source identity
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
-          GH_TOKEN: ${{ github.token }}
-        run: python3 -I .github/scripts/release_pipeline.py publish-crate
-
-  publish-pypi:
-    name: Publish to PyPI
-    needs: [gate, build, publish-crates]
-    if: >-
-      needs.gate.outputs.publish == 'true' &&
-      github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    environment: pypi
-    permissions:
-      id-token: write
-    env:
-      RELEASE_VERSION: ${{ needs.gate.outputs.version }}
-    steps:
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+          cp "$PROVENANCE" "$RUNNER_TEMP/permission-probe/permission-probe.intoto.jsonl"
+          cp "$SBOM" "$RUNNER_TEMP/permission-probe/permission-probe.sbom.sigstore.jsonl"
+          gh attestation trusted-root > "$RUNNER_TEMP/permission-probe/permission-probe.trusted-root.jsonl"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, subprocess
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'permission-probe'
+          record = {'schema': 1, 'repository': os.environ['GITHUB_REPOSITORY'],
+                    'signer_workflow': os.environ['GITHUB_REPOSITORY'] + '/.github/workflows/trusted-publishing.yml',
+                    'source_ref': os.environ['GITHUB_REF'], 'source_sha': os.environ['GITHUB_SHA'],
+                    'run_id': os.environ['GITHUB_RUN_ID'],
+                    'gh_version': subprocess.check_output(['gh', '--version'], text=True).splitlines()[0],
+                    'files': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.iterdir())}}
+          (root / 'permission-probe.record.json').write_text(json.dumps(record, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          pattern: release-${{ needs.gate.outputs.version }}*
-          merge-multiple: true
-          path: target/release-artifacts
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: pypi-preupload-verifier
-          path: ${{ runner.temp }}/pypi-verifier
-      - name: Verify pinned isolated helper, then all signatures before staging PyPI files
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          printf '%s  %s\n' '3caaf5442fda4b9987784e6b3081840771c7c67354c67dd1fbb66f9582171574' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
-          python3 -I "$RUNNER_TEMP/pypi-verifier/release_pypi.py" stage
-      - name: Upload verified wheels and sdist with OIDC and per-file PEP 740 proofs
-        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
-        with:
-          packages-dir: pypi-dist/
-          attestations: true
-          skip-existing: true
-
-  github-release:
-    name: GitHub release
-    needs: [gate, publish-crates, publish-pypi]
-    if: >-
-      needs.gate.outputs.publish == 'true' &&
-      github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    permissions:
-      contents: write
-    env:
-      RELEASE_VERSION: ${{ needs.gate.outputs.version }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          pattern: release-${{ needs.gate.outputs.version }}*
-          merge-multiple: true
-          path: target/release-artifacts
-      - name: Verify signatures; resume a draft or compare a published release without replacement
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python3 -I .github/scripts/release_pipeline.py assets
-
-  verify:
-    name: Verify publication
-    needs: [gate, github-release]
-    if: >-
-      needs.gate.outputs.publish == 'true' &&
-      github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    permissions:
-      contents: read
-    env:
-      RELEASE_VERSION: ${{ needs.gate.outputs.version }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          persist-credentials: false
-      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          pattern: release-${{ needs.gate.outputs.version }}*
-          merge-multiple: true
-          path: target/release-artifacts
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
-        with:
-          python-version: '3.11'
-      - name: Hash-locked public attestation verifier
-        run: |
-          python -m pip install --require-hashes --only-binary=:all: -r .github/security/requirements-attestations.txt
-      - name: Fresh registry bytes, PEP 740 identity and metadata, release signatures, docs.rs success
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: python -I .github/scripts/release_pipeline.py verify
-      - name: Install the fresh public manylinux wheel outside checkout and exercise the suite
-        run: |
-          python -m venv "$RUNNER_TEMP/public-consumer"
-          "$RUNNER_TEMP/public-consumer/bin/python" -m pip --isolated install --no-deps --only-binary=:all: --no-cache-dir "spatial-typestate==$RELEASE_VERSION"
-          cd "$RUNNER_TEMP"
-          "$RUNNER_TEMP/public-consumer/bin/python" -I -m unittest discover -s "$GITHUB_WORKSPACE/python/tests" -v
-          "$RUNNER_TEMP/public-consumer/bin/python" -I "$GITHUB_WORKSPACE/python/examples/lab_workflow.py" --demonstrate-errors
+          name: committed-permission-fixture
+          path: ${{ runner.temp }}/permission-probe/
+          if-no-files-found: error
+          retention-days: 90

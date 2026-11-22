@@ -31,6 +31,14 @@ class PermissionProbeTests(unittest.TestCase):
         self.addCleanup(self.env.stop)
         self.sbom = json.dumps([{'verificationResult': {'statement': {'predicate': json.loads(q.PROBE_BOM)}}}])
 
+    def test_fixture_satisfies_the_pinned_attest_actions_cyclonedx_detection(self):
+        # actions/attest@1e69f48 src/sbom.ts requires ALL three fields.
+        bom = json.loads(q.PROBE_BOM)
+        self.assertEqual(bom['bomFormat'], 'CycloneDX')
+        self.assertEqual(bom['specVersion'], '1.5')
+        self.assertRegex(bom['serialNumber'], r'^urn:uuid:[a-f0-9-]{36}$')
+        self.assertEqual(bom['components'], [])
+
     def test_probe_runs_real_shared_provenance_and_sbom_path_without_staging(self):
         with patch.object(q.subprocess, 'run') as provenance, \
                 patch.object(q.subprocess, 'check_output', return_value=self.sbom) as sbom, \

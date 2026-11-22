@@ -105,7 +105,7 @@ jobs:
           path: ${{ runner.temp }}/pypi-verifier
       - name: Exercise pinned standalone verifier transport without signing or uploading
         run: |
-          printf '%s  %s\n' 'ac99251e5520f3d4657975a3a1f98e8ecada44837b1aa75f9e7ab6b6e5ddfd85' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
+          printf '%s  %s\n' '4db89fa561c904bbc565cc6716fb3953d347632b13445caacaf5e0e7eafbde68' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
           python3 -I "$RUNNER_TEMP/pypi-verifier/release_pypi.py" --help
 
   publish-permissions-check:
@@ -136,7 +136,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh --version
-          printf '%s  %s\n' 'ac99251e5520f3d4657975a3a1f98e8ecada44837b1aa75f9e7ab6b6e5ddfd85' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
+          printf '%s  %s\n' '4db89fa561c904bbc565cc6716fb3953d347632b13445caacaf5e0e7eafbde68' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
           python3 -I "$RUNNER_TEMP/pypi-verifier/release_pypi.py" verify-permissions
 
 
@@ -211,7 +211,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          printf '%s  %s\n' 'ac99251e5520f3d4657975a3a1f98e8ecada44837b1aa75f9e7ab6b6e5ddfd85' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
+          printf '%s  %s\n' '4db89fa561c904bbc565cc6716fb3953d347632b13445caacaf5e0e7eafbde68' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
           python3 -I "$RUNNER_TEMP/pypi-verifier/release_pypi.py" stage
       - name: Upload verified wheels and sdist with OIDC and per-file PEP 740 proofs
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3

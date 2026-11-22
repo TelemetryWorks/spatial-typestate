@@ -17,7 +17,7 @@ PROBE_FILE = 'permission-probe.txt'
 PROBE_SBOM = 'permission-probe.cdx.json'
 PROBE_BUNDLES = ('permission-probe.intoto.jsonl', 'permission-probe.sbom.sigstore.jsonl')
 PROBE_CONTENT = b'TelemetryWorks token-permissions probe only; NOT a release artifact.\n'
-PROBE_BOM = b'{"bomFormat":"CycloneDX","specVersion":"1.5","version":1,"components":[]}\n'
+PROBE_BOM = b'{"bomFormat":"CycloneDX","specVersion":"1.5","serialNumber":"urn:uuid:00000000-0000-4000-8000-000000000042","version":1,"components":[]}\n'
 
 
 def require_publish(version, commit):

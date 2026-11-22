@@ -283,7 +283,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/permission-probe"
           printf '%s\n' 'TelemetryWorks token-permissions probe only; NOT a release artifact.' > "$RUNNER_TEMP/permission-probe/permission-probe.txt"
-          printf '%s\n' '{"bomFormat":"CycloneDX","specVersion":"1.5","version":1,"components":[]}' > "$RUNNER_TEMP/permission-probe/permission-probe.cdx.json"
+          printf '%s\n' '{"bomFormat":"CycloneDX","specVersion":"1.5","serialNumber":"urn:uuid:00000000-0000-4000-8000-000000000042","version":1,"components":[]}' > "$RUNNER_TEMP/permission-probe/permission-probe.cdx.json"
       - id: provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         env:

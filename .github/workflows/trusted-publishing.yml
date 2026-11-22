@@ -104,7 +104,7 @@ jobs:
           path: ${{ runner.temp }}/pypi-verifier
       - name: Exercise pinned standalone verifier transport without signing or uploading
         run: |
-          printf '%s  %s\n' 'dca356e7ab555f3fe2598c067474779cf68d4ae8674c9230bdd8da9b9c79fd85' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
+          printf '%s  %s\n' '3caaf5442fda4b9987784e6b3081840771c7c67354c67dd1fbb66f9582171574' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
           python3 -I "$RUNNER_TEMP/pypi-verifier/release_pypi.py" --help
 
   publish-crates:
@@ -178,7 +178,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          printf '%s  %s\n' 'dca356e7ab555f3fe2598c067474779cf68d4ae8674c9230bdd8da9b9c79fd85' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
+          printf '%s  %s\n' '3caaf5442fda4b9987784e6b3081840771c7c67354c67dd1fbb66f9582171574' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
           python3 -I "$RUNNER_TEMP/pypi-verifier/release_pypi.py" stage
       - name: Upload verified wheels and sdist with OIDC and per-file PEP 740 proofs
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3

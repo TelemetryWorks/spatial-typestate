@@ -15,7 +15,7 @@ SUMS = 'SHA256SUMS'
 
 
 def require_publish(version, commit):
-    if (not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', version)
+    if (not re.fullmatch(r'(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)', version, flags=re.ASCII)
             or not re.fullmatch(r'[a-f0-9]{40}', commit)
             or os.environ.get('GITHUB_SHA') != commit
             or os.environ.get('GITHUB_REPOSITORY') != REPOSITORY
@@ -41,7 +41,7 @@ def check_payload(root, version):
     python, payload, sidecars = files(version)
     expected = {}
     for line in (root / SUMS).read_text(encoding='ascii').splitlines():
-        match = re.fullmatch(r'([0-9a-f]{64})  ([A-Za-z0-9_.-]+)', line)
+        match = re.fullmatch(r'([0-9a-f]{64}) {2}([A-Za-z0-9_.-]+)', line)
         if not match or match[2] in expected or match[2] == SUMS:
             raise ValueError('invalid checksum manifest')
         expected[match[2]] = match[1]

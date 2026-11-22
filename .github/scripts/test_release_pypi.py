@@ -68,11 +68,13 @@ class PypiStagingTests(unittest.TestCase):
                     if failure == 'sbom' and Path(args[3]).name == subject:
                         raise subprocess.CalledProcessError(1, args, stderr='bad signature')
                     return self.sbom
+                def publish_steps():
+                    q.stage(self.payload, self.output, V, C)
+                    uploader(self.output)
                 with patch.object(q.subprocess, 'run', side_effect=provenance), \
                         patch.object(q.subprocess, 'check_output', side_effect=sbom):
                     with self.assertRaises(subprocess.CalledProcessError):
-                        q.stage(self.payload, self.output, V, C)
-                        uploader(self.output)
+                        publish_steps()
                 uploader.assert_not_called()
                 self.assertFalse(self.output.exists())
 
@@ -128,6 +130,12 @@ class PypiStagingTests(unittest.TestCase):
                 self.assertFalse(self.output.exists())
         with self.assertRaisesRegex(ValueError, 'version tag push'):
             q.require_publish('../bad', C)
+
+    def test_version_digits_remain_ascii_only(self):
+        for version in ('1٠.2.3', '1.2٠.3', '1.2.3٠'):
+            with self.subTest(version=version), patch.dict(os.environ, {'GITHUB_REF': 'refs/tags/v' + version}):
+                with self.assertRaisesRegex(ValueError, 'version tag push'):
+                    q.require_publish(version, C)
 
     def test_isolated_script_has_no_checkout_import_dependency_and_cli_uses_fixed_paths(self):
         script = Path(q.__file__).resolve()

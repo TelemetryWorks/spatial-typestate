@@ -40,7 +40,7 @@ class PipelineTests(unittest.TestCase):
             target = self.root / 'target'
             target.mkdir()
             safe = target / 'safe'
-            self.assertEqual(g.output_directory(safe), safe)
+            self.assertEqual(g.output_directory(safe), safe.resolve())
             for path in (self.root / 'outside', target, target / '../outside'):
                 with self.subTest(path=path), self.assertRaisesRegex(ValueError, 'within repository target'):
                     g.output_directory(path)

@@ -35,6 +35,8 @@ SOURCE = 'source'
 VERSION = 'version'
 COMMIT = 'commit'
 HASH = 'sha256'
+RELEASE_DIRECTORY = 'target/release-artifacts'
+CONSUMER_DIRECTORY = 'target/windows-consumer'
 PUBLIC = {'pypi.org', 'files.pythonhosted.org', 'crates.io', 'static.crates.io', 'index.crates.io', 'docs.rs'}
 
 
@@ -423,16 +425,16 @@ def release_assets(directory, record):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['source', 'absent', 'check', 'stage', 'installed', 'crate-public', 'pypi-public', 'sums', 'merge', 'assets'])
-    parser.add_argument('--directory', choices=['target/release-artifacts', 'target/windows-consumer'],
-                        default='target/release-artifacts')
+    parser.add_argument('--directory', choices=[RELEASE_DIRECTORY, CONSUMER_DIRECTORY],
+                        default=RELEASE_DIRECTORY)
     parser.add_argument('--incoming', type=Path, default=Path('target/incoming'))
     parser.add_argument('--wheel', type=Path)
     parser.add_argument('--registry', choices=['both', 'crates', 'pypi'], default='both')
     args = parser.parse_args()
     # Select fixed paths, never concatenate a CLI-supplied path into a write sink.
-    directory = ROOT / 'target/release-artifacts'
-    if args.directory == 'target/windows-consumer':
-        directory = ROOT / 'target/windows-consumer'
+    directory = ROOT / RELEASE_DIRECTORY
+    if args.directory == CONSUMER_DIRECTORY:
+        directory = ROOT / CONSUMER_DIRECTORY
     directory = output_directory(directory)
     version = os.environ.get('RELEASE_VERSION', os.environ['GITHUB_REF_NAME'].removeprefix('v'))
     commit = os.environ.get('RELEASE_COMMIT', os.environ['GITHUB_SHA'])

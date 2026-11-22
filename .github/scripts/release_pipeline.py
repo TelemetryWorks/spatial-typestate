@@ -287,10 +287,10 @@ def verify(directory, version, commit):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['gate', 'check', 'signatures', 'compare', 'known-good', 'publish-crate', 'assets', 'verify'])
-    parser.add_argument('--directory', choices=['target/release-artifacts'], default='target/release-artifacts')
+    parser.add_argument('--directory', choices=[g.RELEASE_DIRECTORY], default=g.RELEASE_DIRECTORY)
     parser.add_argument('--compiler', default=os.environ.get('BUILD_RUST_VERSION', '1.99.0'))
     args = parser.parse_args()
-    directory = g.output_directory(g.ROOT / 'target/release-artifacts')
+    directory = g.output_directory(g.ROOT / g.RELEASE_DIRECTORY)
     if args.mode == 'gate':
         gate()
         return

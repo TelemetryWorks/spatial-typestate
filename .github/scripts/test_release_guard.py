@@ -324,7 +324,7 @@ class ReleaseTests(unittest.TestCase):
         self.assertEqual(workflow.count('contents: write'), 1)
         self.assertNotIn('set-default', workflow)
         self.assertIn('attestations: true', workflow)
-        builder = (HERE.parent / 'workflows/build-release.yml').read_text()
+        builder = (HERE.parent / 'workflows/qualify-release.yml').read_text()
         self.assertIn("toolchain: '1.99.0'", builder)
         self.assertIn('for compiler in 1.85.0 1.91.1', builder)
 

@@ -1,0 +1,1 @@
+TelemetryWorks token-permissions probe only; NOT a release artifact.

@@ -155,7 +155,7 @@ class PypiStagingTests(unittest.TestCase):
     def test_workflow_authenticates_helper_before_execution_and_upload_cannot_bypass_failure(self):
         root = Path(__file__).resolve().parents[2]
         workflow = (root / '.github/workflows/trusted-publishing.yml').read_text()
-        builder = (root / '.github/workflows/build-release.yml').read_text()
+        builder = (root / '.github/workflows/qualify-release.yml').read_text()
         digest = hashlib.sha256(Path(q.__file__).read_bytes()).hexdigest()
         self.assertEqual(workflow.count("'" + digest + "'"), 2)
         job = workflow.split('\n  publish-pypi:\n')[1].split('\n  github-release:\n')[0]

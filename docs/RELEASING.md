@@ -97,8 +97,8 @@ requirements, not settings configured by this PR.
    a manual dispatch even from a tag cannot. Every privileged checkout uses
    `github.sha`, with credentials disabled. Keep registry names/environments fixed.
 3. Pin actions to full SHAs. Qualifiers have only contents read. Only the nested
-   signer gets attestation/OIDC writes; the caller delegates those permissions
-   without giving them to nested build jobs. Registry jobs get their separate
+   release signer gets attestation/OIDC writes; only the independently tag-gated
+   caller delegates those permissions. PR qualification has a separate read-only call graph. Registry jobs get their separate
    minimal OIDC permissions and environment approvals, with no stored credential.
 4. Preserve per-file PEP 740, public metadata/bytes, signature, installed-consumer
    and docs.rs gates. Use controlled existing-file recovery only as described below;
@@ -257,7 +257,8 @@ The [caller](../.github/workflows/trusted-publishing.yml) follows the
 [org standard at d1d2e18][org-standard], PyPI variant. Pushes of `v*` tags are the
 only signing/publication authority. `pull_request` changes to release tooling and
 `workflow_dispatch` run the **same full qualification** and **Publish path (dry run)**,
-without signing, environment deployment or registry writes. Dispatching from a
+without signing, OIDC grants, environment deployment or registry writes. Every PR
+verifies a committed synthetic fixture offline, as described below. Dispatching from a
 `v*` tag is still unsigned/read-only. Default runners are Ubuntu 24.04; Windows
 qualification remains on Windows. The retired `publish-0.1.0.yml` is left alone:
 never enable, copy, edit or call it.
@@ -296,7 +297,7 @@ creates no tag or upload. It does not repair historical 0.1.0 provenance.
   `release-manifest.json` and LF `SHA256SUMS` in immutable `release-<version>`.
   CycloneDX 1.5 source-graph SBOMs (cargo-cyclonedx 0.5.9, locked/two workers)
   describe packaged core and native graphs, not complete binary/compiler contents.
-- Nested `sign` alone has signing permissions, additionally checking actual
+- Nested `sign` alone signs release payloads, additionally checking actual
   push/tag/ref context. It signs only the builder's own fixed artifact, not
   caller-selected payloads. Immutable `release-<version>-attestations` contains
   `spatial-typestate-<version>.crates.intoto.jsonl` plus crate/Python SBOM bundles.
@@ -325,7 +326,9 @@ creates no tag or upload. It does not repair historical 0.1.0 provenance.
 | `gate` | contents read, actions read | none |
 | Nested qualification/collect | contents read | none |
 | Nested `sign` (caller `build` delegates) | contents read, id-token write, attestations write | independent real-tag guard |
-| `publish-path-check` | contents read | none; unsigned dry run |
+| `publish-path-check` | contents read | none; unsigned package dry run |
+| `build-dry-run` / reusable `qualify-release.yml` | contents read ONLY | none; no signing jobs in this call graph |
+| Offline release verification fixture (every PR) | contents read ONLY for checkout | none; verification runs with networking disabled |
 | `publish-crates` | contents read, id-token write | crates-io; owner required reviewer |
 | `publish-pypi` | id-token write ONLY; no source checkout | pypi; owner required reviewer |
 | `github-release` | contents write ONLY | none; needs BOTH registries |
@@ -373,6 +376,46 @@ following official PyPI upload action. No `continue-on-error` or unconditional
 upload is allowed. The helper is tooling, not a new Release asset or SBOM subject.
 Tests pin this ordering and reject bad signatures before PyPI upload or GitHub
 Release creation/attachment; removing those calls must fail their tests.
+
+### Offline pre-release verification proof
+
+Every PR runs **Offline release verification fixture** with only `contents: read`
+for its credential-free checkout. It runs `release_pypi.py verify-permissions`
+inside `sudo unshare --net`, with no network access. The release-tooling Publish
+path also runs this check. Both use the SAME `verify_bundles` implementation as
+`publish-pypi`'s pre-upload staging, including provenance signatures, expected
+repository/signer/source identity, subject hashes, and the CycloneDX predicate.
+No PR job signs or holds `id-token: write`; no unsigned-PR exception exists.
+Read-only qualification is in `qualify-release.yml`; only an independently guarded
+real tag push can enter the `build-release.yml` signing wrapper.
+
+The committed [synthetic fixture](../.github/release-fixtures/permission-probe/)
+was signed ONCE by manual branch dispatch
+[45061133325](https://github.com/TelemetryWorks/spatial-typestate/actions/runs/45061133325).
+Its recorded signing source is `refs/heads/ci/pypi-fixture-seed-20261122`, SHA
+`bf8faabc011092a5b2e0f7595aa2168fdcaa4380`, signer
+`TelemetryWorks/spatial-typestate/.github/workflows/trusted-publishing.yml`.
+That dedicated seed branch has only a manual trigger, no checkout and only
+`id-token: write` plus `attestations: write`; no contents grant. It is not a release
+workflow and must not be reused for signing more fixtures without review.
+
+The committed record pins every subject, bundle and offline public trust root by
+SHA256; the verifier independently pins the record's digest. Verification uses
+the RECORDED signer/ref/SHA, never the current PR identity. The fixture is a fixed
+text file and an empty synthetic CycloneDX BOM, NOT a release artifact. It never
+enters release payloads, sidecars or GitHub Release assets. Real release staging
+still requires the actual tag push and `build-release.yml` signer identity.
+
+The earlier PR-signing experiment (run 45058171021) is superseded, not a permitted
+future path. Its setup log showed Metadata read only: `id-token: write` adds no
+GITHUB_TOKEN API scope. The committed-bundle check now verifies without network or
+API token access at all; `publish-pypi` retains its OIDC-only grant for actual
+Trusted Publishing. No publisher contents grant is needed for local bundle
+verification. This tests GH CLI bundle verification, not PyPI PEP 740 upload or
+permanent compatibility with changed CLI/trust-root policies. A future fixture or
+trust-root update needs reviewed replacement hashes, not silently refreshed files.
+Before a real release tag, require a fresh read-only branch dry run and every
+mandatory public/Integrity API gate; offline success alone is not publication proof.
 
 ### Online and offline verification
 

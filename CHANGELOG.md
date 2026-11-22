@@ -27,6 +27,12 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
+- Verify the PyPI pre-upload provenance/SBOM path offline on every PR using a
+  committed, digest-pinned synthetic fixture signed once by a manual branch
+  dispatch. PR jobs never sign or hold OIDC permissions. Separate read-only
+  qualification from the independently tag-gated release-signing wrapper;
+  preserve the release builder identity and existing qualification.
+
 - Adopt the org-standard PyPI release pipeline: immutable reusable-builder payload
   and signing sidecar, independent tag-push guards, read-only PR/manual Publish
   path dry run with the trusted published 0.1.0 checksum, crates.io-first OIDC,

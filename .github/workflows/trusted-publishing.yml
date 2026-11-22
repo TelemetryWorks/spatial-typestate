@@ -1,6 +1,7 @@
 name: Trusted publishing
 
-# Org standard d1d2e18, PyPI variant. PR/manual runs build and check, never sign/publish.
+# Org standard d1d2e18, PyPI variant. Dry runs never sign release artifacts or publish.
+# PRs verify a committed synthetic fixture offline; no PR job signs or requests OIDC.
 on:
   push:
     tags: ['v*']
@@ -8,6 +9,8 @@ on:
     paths:
       - .github/workflows/trusted-publishing.yml
       - .github/workflows/build-release.yml
+      - .github/workflows/qualify-release.yml
+      - .github/workflows/verify-release-fixture.yml
       - .github/scripts/release*.py
       - .github/scripts/test_release*.py
       - .github/release-fixtures/**
@@ -58,6 +61,9 @@ jobs:
   build:
     name: Build
     needs: gate
+    if: >-
+      needs.gate.outputs.publish == 'true' &&
+      github.event_name == 'push' && github.ref_type == 'tag' && startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: read
       id-token: write
@@ -67,9 +73,19 @@ jobs:
       version: ${{ needs.gate.outputs.version }}
       publish: ${{ needs.gate.outputs.publish == 'true' }}
 
+  build-dry-run:
+    name: Qualify unsigned dry run
+    needs: gate
+    if: needs.gate.outputs.publish != 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/qualify-release.yml # zizmor: ignore[self-repository] local immutable caller revision
+    with:
+      version: ${{ needs.gate.outputs.version }}
+
   publish-path-check:
     name: Publish path (dry run)
-    needs: [gate, build]
+    needs: [gate, build-dry-run]
     if: needs.gate.outputs.publish != 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 20
@@ -77,7 +93,7 @@ jobs:
       contents: read
     env:
       RELEASE_VERSION: ${{ needs.gate.outputs.version }}
-      BUILD_RUST_VERSION: ${{ needs.build.outputs.rust-version }}
+      BUILD_RUST_VERSION: ${{ needs.build-dry-run.outputs.rust-version }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -91,7 +107,7 @@ jobs:
           path: target/release-artifacts
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
         with:
-          toolchain: ${{ needs.build.outputs.rust-version }}
+          toolchain: ${{ needs.build-dry-run.outputs.rust-version }}
       - name: Strict unsigned checksums and same-toolchain archive reproduction
         run: python3 -I .github/scripts/release_pipeline.py compare
       - name: Exercise public download against the pinned published 0.1.0 fixture
@@ -104,8 +120,10 @@ jobs:
           path: ${{ runner.temp }}/pypi-verifier
       - name: Exercise pinned standalone verifier transport without signing or uploading
         run: |
-          printf '%s  %s\n' '3caaf5442fda4b9987784e6b3081840771c7c67354c67dd1fbb66f9582171574' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
+          printf '%s  %s\n' 'b555eda754f3fc0da4b306878e53ba9d130683e0b8347157e1ac1fcb5b63f95b' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
           python3 -I "$RUNNER_TEMP/pypi-verifier/release_pypi.py" --help
+      - name: Verify committed fixture offline through the publication verifier
+        run: sudo unshare --net -- python3 -I .github/scripts/release_pypi.py verify-permissions
 
   publish-crates:
     name: Publish to crates.io
@@ -178,7 +196,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          printf '%s  %s\n' '3caaf5442fda4b9987784e6b3081840771c7c67354c67dd1fbb66f9582171574' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
+          printf '%s  %s\n' 'b555eda754f3fc0da4b306878e53ba9d130683e0b8347157e1ac1fcb5b63f95b' "$RUNNER_TEMP/pypi-verifier/release_pypi.py" | sha256sum --check --strict
           python3 -I "$RUNNER_TEMP/pypi-verifier/release_pypi.py" stage
       - name: Upload verified wheels and sdist with OIDC and per-file PEP 740 proofs
         uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3

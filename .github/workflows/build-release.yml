@@ -263,6 +263,57 @@ jobs:
           retention-days: 90
 
 
+  permission-fixture:
+    name: Sign non-release token-permissions fixture
+    # Explicit exception for fixed synthetic data, NEVER a release artifact.
+    if: >-
+      !inputs.publish && github.repository == 'TelemetryWorks/spatial-typestate' &&
+      ((github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository &&
+        github.event.pull_request.user.login != 'dependabot[bot]' && github.actor != 'dependabot[bot]') ||
+       (github.event_name == 'workflow_dispatch' && github.ref_type == 'branch'))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      # No checkout or repository code runs with these signing permissions.
+      - name: Generate fixed non-release permission fixture
+        run: |
+          mkdir -p "$RUNNER_TEMP/permission-probe"
+          printf '%s\n' 'TelemetryWorks token-permissions probe only; NOT a release artifact.' > "$RUNNER_TEMP/permission-probe/permission-probe.txt"
+          printf '%s\n' '{"bomFormat":"CycloneDX","specVersion":"1.5","version":1,"components":[]}' > "$RUNNER_TEMP/permission-probe/permission-probe.cdx.json"
+      - id: provenance
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        env:
+          NODE_OPTIONS: --max-http-header-size=32768
+        with:
+          subject-path: |
+            ${{ runner.temp }}/permission-probe/permission-probe.txt
+            ${{ runner.temp }}/permission-probe/permission-probe.cdx.json
+      - id: sbom
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        env:
+          NODE_OPTIONS: --max-http-header-size=32768
+        with:
+          subject-path: ${{ runner.temp }}/permission-probe/permission-probe.txt
+          sbom-path: ${{ runner.temp }}/permission-probe/permission-probe.cdx.json
+      - name: Keep fixture bundles separate from all release payloads and sidecars
+        env:
+          PROVENANCE: ${{ steps.provenance.outputs.bundle-path }}
+          SBOM: ${{ steps.sbom.outputs.bundle-path }}
+        run: |
+          cp "$PROVENANCE" "$RUNNER_TEMP/permission-probe/permission-probe.intoto.jsonl"
+          cp "$SBOM" "$RUNNER_TEMP/permission-probe/permission-probe.sbom.sigstore.jsonl"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: token-permission-fixture
+          path: ${{ runner.temp }}/permission-probe/
+          if-no-files-found: error
+          retention-days: 90
+
+
   sign:
     name: Sign this builder's frozen artifacts
     needs: collect

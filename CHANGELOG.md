@@ -27,6 +27,12 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
+- Exercise the PyPI pre-upload GH verifier under publisher-identical token
+  permissions before any release: a no-checkout dry-run job consumes a separately
+  attested, fixed non-release fixture through the same standalone implementation.
+  Actual package signing/staging remains tag-only; no registry, environment,
+  version or historical artifact is changed.
+
 - Adopt the org-standard PyPI release pipeline: immutable reusable-builder payload
   and signing sidecar, independent tag-push guards, read-only PR/manual Publish
   path dry run with the trusted published 0.1.0 checksum, crates.io-first OIDC,

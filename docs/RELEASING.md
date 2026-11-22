@@ -257,7 +257,8 @@ The [caller](../.github/workflows/trusted-publishing.yml) follows the
 [org standard at d1d2e18][org-standard], PyPI variant. Pushes of `v*` tags are the
 only signing/publication authority. `pull_request` changes to release tooling and
 `workflow_dispatch` run the **same full qualification** and **Publish path (dry run)**,
-without signing, environment deployment or registry writes. Dispatching from a
+without release-artifact signing, environment deployment or registry writes. A separate
+fixed synthetic fixture is attested solely for the token-permission check below. Dispatching from a
 `v*` tag is still unsigned/read-only. Default runners are Ubuntu 24.04; Windows
 qualification remains on Windows. The retired `publish-0.1.0.yml` is left alone:
 never enable, copy, edit or call it.
@@ -373,6 +374,40 @@ following official PyPI upload action. No `continue-on-error` or unconditional
 upload is allowed. The helper is tooling, not a new Release asset or SBOM subject.
 Tests pin this ordering and reject bad signatures before PyPI upload or GitHub
 Release creation/attachment; removing those calls must fail their tests.
+
+### Pre-release token-permission proof
+
+The checkout-free **PyPI token permissions (dry run)** job has exactly the same
+`GITHUB_TOKEN` permission declaration as `publish-pypi` (initially `id-token: write`
+only), no deployment environment and no registry action. It sets `GH_TOKEN` in the
+same way and runs the SAME standalone helper's shared provenance/SBOM verification
+implementation with real `gh attestation verify --bundle` commands. It records the
+runner's actual GH CLI version. It never requests an OIDC token or creates an
+upload directory.
+
+There is no signed historical spatial-typestate 0.1.0 fixture. The reusable
+builder therefore signs only a separate, fixed `permission-probe.txt` plus empty
+synthetic CycloneDX fixture, using a no-checkout job with pinned actions and no
+repository-code execution. The fixture is NOT a crate, wheel, sdist or release
+SBOM, and is never included in release payloads, release sidecars or Release assets.
+Its fixture signer is still `build-release.yml`. This deliberately scoped exception
+to unsigned package dry runs does not enable signing actual release artifacts from
+PRs. Probe verification constrains the actual PR/branch ref and triggering commit;
+release staging still requires the actual version tag push and tag identity.
+
+Both fixture signing and its consumer run only for original-repository human
+same-origin PRs or branch dispatches. Fork/Dependabot PRs and tag dispatches skip
+this proof; a skipped check is NOT evidence of sufficient permissions. Before
+pushing any real release tag, run the manual branch dry run at the reviewed release
+commit and require the explicit permission check to pass, along with qualification.
+Do not discover a token-permission failure after Rust has already published.
+
+Observed token-permission result and the validating run are recorded in this PR's
+validation record once the real hosted check completes. No local personal-token
+verification or mocked CLI success can substitute for that hosted evidence. If
+additional read permission proves necessary, change BOTH probe and publisher to
+the same minimum grants, repeat the real check and document the result before a
+release tag. This implementation changes no registry/environment settings.
 
 ### Online and offline verification
 

@@ -157,7 +157,7 @@ class PypiStagingTests(unittest.TestCase):
         workflow = (root / '.github/workflows/trusted-publishing.yml').read_text()
         builder = (root / '.github/workflows/build-release.yml').read_text()
         digest = hashlib.sha256(Path(q.__file__).read_bytes()).hexdigest()
-        self.assertEqual(workflow.count("'" + digest + "'"), 2)
+        self.assertEqual(workflow.count("'" + digest + "'"), 3)
         job = workflow.split('\n  publish-pypi:\n')[1].split('\n  github-release:\n')[0]
         self.assertNotIn('actions/checkout', job)
         self.assertNotIn('contents:', job)

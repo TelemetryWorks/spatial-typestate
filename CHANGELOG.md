@@ -27,6 +27,13 @@ the development history below also includes changes between unpublished commits.
 
 ### Packaging
 
+- Adopt the org-standard PyPI release pipeline: immutable reusable-builder payload
+  and signing sidecar, independent tag-push guards, read-only PR/manual Publish
+  path dry run with the trusted published 0.1.0 checksum, crates.io-first OIDC,
+  controlled existing-file verification and no-replacement GitHub Release assets.
+  Preserve Rust/Python qualification, explicit compiler/pin/MSRV and historical
+  0.1.0. This changes no version, tag, registry setting or published artifact.
+
 - Refresh the five PyO3 0.29.3 notice directories and locked Python licence
   inventory from checksum-verified Cargo sources. Notice bytes, licence
   expressions and runtime/build-only scopes are unchanged; the existing strict

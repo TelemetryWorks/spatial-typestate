@@ -87,13 +87,13 @@ jobs:
           cargo +1.99.0 package --locked --no-verify --jobs 2
           cmp "target/verified-crate/spatial-typestate-$RELEASE_VERSION.crate" "target/package/spatial-typestate-$RELEASE_VERSION.crate"
       - name: Root dependency policy
-        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        uses: EmbarkStudios/cargo-deny-action@17aeb3c839e42274e2b8adf721c8c65edfdc74dd # v2.1.3
         with:
           manifest-path: Cargo.toml
           rust-version: '1.99.0'
           arguments: --all-features --locked --config .github/deny.toml
       - name: Native dependency policy
-        uses: EmbarkStudios/cargo-deny-action@3c6349835b2b7b196a839186cb8b78e02f7b5f25 # v2.1.1
+        uses: EmbarkStudios/cargo-deny-action@17aeb3c839e42274e2b8adf721c8c65edfdc74dd # v2.1.3
         with:
           manifest-path: python/native/Cargo.toml
           rust-version: '1.99.0'

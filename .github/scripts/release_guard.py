@@ -249,8 +249,7 @@ def consumer_assets(root):
     tests = root / 'python/tests'
     shutil.copytree(ROOT / 'python/tests', tests)
     examples = root / 'python/examples'
-    examples.mkdir()
-    shutil.copyfile(ROOT / 'python/examples/lab_workflow.py', examples / 'lab_workflow.py')
+    shutil.copytree(ROOT / 'python/examples', examples)
     docs = root / 'docs'
     docs.mkdir()
     shutil.copyfile(ROOT / 'docs/PYTHON-GUIDE.md', docs / 'PYTHON-GUIDE.md')
@@ -424,11 +423,17 @@ def release_assets(directory, record):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['source', 'absent', 'check', 'stage', 'installed', 'crate-public', 'pypi-public', 'sums', 'merge', 'assets'])
-    parser.add_argument('--directory', type=output_directory, default='target/release-artifacts')
+    parser.add_argument('--directory', choices=['target/release-artifacts', 'target/windows-consumer'],
+                        default='target/release-artifacts')
     parser.add_argument('--incoming', type=Path, default=Path('target/incoming'))
     parser.add_argument('--wheel', type=Path)
     parser.add_argument('--registry', choices=['both', 'crates', 'pypi'], default='both')
     args = parser.parse_args()
+    # Select fixed paths, never concatenate a CLI-supplied path into a write sink.
+    directory = ROOT / 'target/release-artifacts'
+    if args.directory == 'target/windows-consumer':
+        directory = ROOT / 'target/windows-consumer'
+    directory = output_directory(directory)
     version = os.environ.get('RELEASE_VERSION', os.environ['GITHUB_REF_NAME'].removeprefix('v'))
     commit = os.environ.get('RELEASE_COMMIT', os.environ['GITHUB_SHA'])
     context(version, commit)
@@ -439,21 +444,21 @@ def main():
     elif args.mode == 'absent':
         absent(version, args.registry)
     elif args.mode == 'stage':
-        stage(args.incoming, args.directory, version, commit)
+        stage(args.incoming, directory, version, commit)
     elif args.mode == 'installed':
-        installed(args.wheel.resolve(strict=True), version, commit, args.directory / 'windows-consumer.json')
+        installed(args.wheel.resolve(strict=True), version, commit, directory / 'windows-consumer.json')
     elif args.mode == 'sums':
-        checksums(args.directory)
+        checksums(directory)
     elif args.mode == 'merge':
-        merge_evidence(args.incoming, args.directory, version, commit)
+        merge_evidence(args.incoming, directory, version, commit)
     else:
-        record = check(args.directory, version, commit)
+        record = check(directory, version, commit)
         if args.mode == 'crate-public':
-            crate_public(args.directory, record)
+            crate_public(directory, record)
         elif args.mode == 'pypi-public':
-            pypi_public(args.directory, record)
+            pypi_public(directory, record)
         elif args.mode == 'assets':
-            release_assets(args.directory, record)
+            release_assets(directory, record)
 
 
 if __name__ == '__main__':

@@ -287,9 +287,10 @@ def verify(directory, version, commit):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('mode', choices=['gate', 'check', 'signatures', 'compare', 'known-good', 'publish-crate', 'assets', 'verify'])
-    parser.add_argument('--directory', type=g.output_directory, default='target/release-artifacts')
+    parser.add_argument('--directory', choices=['target/release-artifacts'], default='target/release-artifacts')
     parser.add_argument('--compiler', default=os.environ.get('BUILD_RUST_VERSION', '1.99.0'))
     args = parser.parse_args()
+    directory = g.output_directory(g.ROOT / 'target/release-artifacts')
     if args.mode == 'gate':
         gate()
         return
@@ -300,18 +301,18 @@ def main():
     commit = os.environ['GITHUB_SHA']
     g.context(version, commit)
     if args.mode == 'check':
-        payload(args.directory, version, commit, signed=publishing())
+        payload(directory, version, commit, signed=publishing())
     elif args.mode == 'signatures':
         require_publish()
-        signatures(args.directory, version, commit)
+        signatures(directory, version, commit)
     elif args.mode == 'compare':
-        compare_crate(args.directory, version, commit, args.compiler)
+        compare_crate(directory, version, commit, args.compiler)
     elif args.mode == 'publish-crate':
-        publish_crate(args.directory, version, commit)
+        publish_crate(directory, version, commit)
     elif args.mode == 'assets':
-        release_assets(args.directory, version, commit)
+        release_assets(directory, version, commit)
     else:
-        verify(args.directory, version, commit)
+        verify(directory, version, commit)
 
 
 if __name__ == '__main__':

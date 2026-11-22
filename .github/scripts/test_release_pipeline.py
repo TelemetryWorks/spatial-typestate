@@ -63,7 +63,31 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual((tests.parents[1] / 'docs/PYTHON-GUIDE.md').read_bytes(),
                          (g.ROOT / 'docs/PYTHON-GUIDE.md').read_bytes())
         self.assertEqual(lab.read_bytes(), (g.ROOT / 'python/examples/lab_workflow.py').read_bytes())
+        expected = {x.relative_to(g.ROOT / 'python/examples') for x in (g.ROOT / 'python/examples').rglob('*') if x.is_file()}
+        actual = {x.relative_to(self.root / 'python/examples') for x in (self.root / 'python/examples').rglob('*') if x.is_file()}
+        self.assertEqual(actual, expected)
+        self.assertTrue((self.root / 'python/examples/data/synthetic_sensor_100hz.csv').is_file())
         self.assertFalse((self.root / 'python/spatial_typestate').exists())
+
+    def test_clis_reject_arbitrary_output_paths_before_any_handler(self):
+        for module in (g, p):
+            for path in ('/tmp/outside', '../outside', 'target/arbitrary'):
+                with self.subTest(module=module.__name__, path=path), \
+                        patch.object(sys, 'argv', ['release.py', 'check', '--directory', path]), \
+                        patch.object(g, 'check') as check, patch.object(p, 'payload') as payload:
+                    with self.assertRaises(SystemExit) as error:
+                        module.main()
+                    self.assertEqual(error.exception.code, 2)
+                    check.assert_not_called()
+                    payload.assert_not_called()
+
+    def test_windows_consumer_cli_selects_only_its_fixed_output_directory(self):
+        wheel = self.root / 'fixture.whl'
+        wheel.write_bytes(b'fixture')
+        argv = ['release_guard.py', 'installed', '--wheel', str(wheel), '--directory', 'target/windows-consumer']
+        with patch.object(sys, 'argv', argv), patch.object(g, 'installed') as installed:
+            g.main()
+        self.assertEqual(installed.call_args.args[3], g.ROOT.resolve() / 'target/windows-consumer/windows-consumer.json')
 
     def test_dispatch_from_tag_and_forged_flag_have_no_publish_authority(self):
         p.require_publish()

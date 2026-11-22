@@ -97,7 +97,7 @@ requirements, not settings configured by this PR.
    a manual dispatch even from a tag cannot. Every privileged checkout uses
    `github.sha`, with credentials disabled. Keep registry names/environments fixed.
 3. Pin actions to full SHAs. Qualifiers have only contents read. Only the nested
-   signer gets attestation/OIDC writes; the caller delegates those permissions
+   release signer and fixed non-release fixture signer get attestation/OIDC writes; the caller delegates those permissions
    without giving them to nested build jobs. Registry jobs get their separate
    minimal OIDC permissions and environment approvals, with no stored credential.
 4. Preserve per-file PEP 740, public metadata/bytes, signature, installed-consumer
@@ -297,7 +297,7 @@ creates no tag or upload. It does not repair historical 0.1.0 provenance.
   `release-manifest.json` and LF `SHA256SUMS` in immutable `release-<version>`.
   CycloneDX 1.5 source-graph SBOMs (cargo-cyclonedx 0.5.9, locked/two workers)
   describe packaged core and native graphs, not complete binary/compiler contents.
-- Nested `sign` alone has signing permissions, additionally checking actual
+- Nested `sign` alone signs release payloads, additionally checking actual
   push/tag/ref context. It signs only the builder's own fixed artifact, not
   caller-selected payloads. Immutable `release-<version>-attestations` contains
   `spatial-typestate-<version>.crates.intoto.jsonl` plus crate/Python SBOM bundles.
@@ -326,7 +326,9 @@ creates no tag or upload. It does not repair historical 0.1.0 provenance.
 | `gate` | contents read, actions read | none |
 | Nested qualification/collect | contents read | none |
 | Nested `sign` (caller `build` delegates) | contents read, id-token write, attestations write | independent real-tag guard |
-| `publish-path-check` | contents read | none; unsigned dry run |
+| `publish-path-check` | contents read | none; unsigned package dry run |
+| Nested `permission-fixture` | contents read, id-token write, attestations write | none; fixed synthetic data, same-origin human PR/branch dispatch only |
+| `publish-permissions-check` | id-token write ONLY, implicit metadata read; no OIDC request | none; real bundle verification only |
 | `publish-crates` | contents read, id-token write | crates-io; owner required reviewer |
 | `publish-pypi` | id-token write ONLY; no source checkout | pypi; owner required reviewer |
 | `github-release` | contents write ONLY | none; needs BOTH registries |
@@ -402,12 +404,30 @@ pushing any real release tag, run the manual branch dry run at the reviewed rele
 commit and require the explicit permission check to pass, along with qualification.
 Do not discover a token-permission failure after Rust has already published.
 
-Observed token-permission result and the validating run are recorded in this PR's
-validation record once the real hosted check completes. No local personal-token
-verification or mocked CLI success can substitute for that hosted evidence. If
-additional read permission proves necessary, change BOTH probe and publisher to
-the same minimum grants, repeat the real check and document the result before a
-release tag. This implementation changes no registry/environment settings.
+**Observed result, 2026-11-22: no `contents: read` grant is needed for the tested
+local-bundle verification path.**
+[Run 45058171021](https://github.com/TelemetryWorks/spatial-typestate/actions/runs/45058171021)
+at PR head `b8c29bd23e5324ea2df58d9cb12568666f5611f1` passed the real
+**PyPI token permissions (dry run)** job, as well as full qualification and Publish
+path. The runner used GH CLI **2.104.0** (2026-11-12), Ubuntu 24.04 image
+`20261116.133.1`. The job's setup log lists only **Metadata: read** under
+GITHUB_TOKEN Permissions: no Contents or Attestations grant. The job declaration
+has `id-token: write`, exactly like `publish-pypi`; the verifier did not request
+OIDC. Its pinned helper verified both provenance subjects and the CycloneDX
+subject/predicate from real same-run bundles with expected repository, reusable
+signer, `refs/pull/42/merge` and merge SHA
+`311d9e61d9adef1298d65bb9f375aa6a4f22ff85`. No contents permission was added to
+the publisher, no personal token was used by that job, and no staging or upload
+occurred. The initial fixture lacked the signer's required `serialNumber`; fixing
+that synthetic format was independent of permissions and changed no real SBOM.
+
+This result establishes the observed public-repository GH CLI/bundle path, not a
+permanent guarantee for changed CLI/server policies, private repositories, PEP 740
+or tag publication. Keep the live check and require a fresh branch dry-run pass
+before a real release tag. Additional read permission, if ever required, must be
+added to BOTH probe and publisher and demonstrated by the real check before a
+tag. Local personal-token verification or mocked CLI success is not a substitute.
+No registry/environment settings were changed.
 
 ### Online and offline verification
 
